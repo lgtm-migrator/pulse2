@@ -150,20 +150,21 @@ def get_package_summary(package_id):
 def delete_from_pending(pid = "", jidrelay = []):
     return PkgsDatabase().delete_from_pending(pid, jidrelay)
 
+
 #jfkjfk pkgs_search_share
-def pkgs_search_share(objsearch):
+def xmlrpc_pkgs_search_share(objsearch):
     resultat_sharing=[]
     logger.debug(" search %s "
-                 % json.dumps(objsearch,indent=4))
+                % json.dumps(objsearch,indent=4))
     ordre = PkgsDatabase().pkgs_Orderrules()
     logger.debug(" search %s " % ordre)
     odr = [int(x[0]) for x in ordre]
-
+    logger.debug("odr  %s" % odr)
     # global sharing
     if objsearch['login'] == 'root':
         # global sharing yes
         # all local sharing yes
-        pass
+        return PkgsDatabase().pkgs_sharing_admin_profil()
     else:
         for _ in range(1): logger.debug("--------------------global----------------------")
         # evalute if global partage
@@ -199,7 +200,7 @@ def pkgs_search_share(objsearch):
                 logger.debug("search sharing local %s" % (result))
             elif id_algo == 2:
                 logger.debug(" algos id is %s [%s]" % (id_algo, algo[2]))
-
+                
                 break;
     return resultat_sharing
 
