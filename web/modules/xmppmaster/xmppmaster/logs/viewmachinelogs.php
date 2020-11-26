@@ -193,28 +193,36 @@ $deploymachine = xmlrpc_get_deployxmpponmachine($cmd_id);
     }
 
     $datawol = xmlrpc_getlinelogswolcmd($cmd_id,$uuid );
-    //$resultinfo=(isset($info['objectdeploy'][0]['result'])?json_decode($info['objectdeploy'][0]['result']):Null);
-    $resultinfo = json_decode($info['objectdeploy'][0]['result']);
+    $resultinfo=(isset($info['objectdeploy'][0]['result'])?json_decode($info['objectdeploy'][0]['result']):Null);
     unset($info['objectdeploy'][0]['result']);
-    $infoslist = $resultinfo->infoslist;
-    unset($resultinfo->infoslist);
-    $descriptorslist = $resultinfo->descriptorslist;
-    unset($resultinfo->descriptorslist);
-    $otherinfos = $resultinfo->otherinfos;
-    $ipmaster = $otherinfos[0]->ipmaster;
-    $iprelay =  $otherinfos[0]->iprelay;
-    $ipmachine = $otherinfos[0]->ipmachine;
-    unset($resultinfo->otherinfos);
 
-    $ipmachine = $otherinfos[0]->ipmachine;
+    $infoslist = null;
+    $descriptorslist = null;
+    $otherinfos = null;
+    $ipmaster = null;
+    $iprelay = null;
+    $ipmachine = null;
+    if($resultinfo){
+      $infoslist = $resultinfo->infoslist;
+      unset($resultinfo->infoslist);
+      $descriptorslist = $resultinfo->descriptorslist;
+      unset($resultinfo->descriptorslist);
+      $otherinfos = $resultinfo->otherinfos;
+      $ipmaster = $otherinfos[0]->ipmaster;
+      $iprelay =  $otherinfos[0]->iprelay;
+      $ipmachine = $otherinfos[0]->ipmachine;
+      unset($resultinfo->otherinfos);
+  }
+
+    $ipmachine = ($otherinfos) ? $otherinfos[0]->ipmachine : null;
     $macstr = "";
-    $macList = getMachinesMac($otherinfos[0]->uuid)[strtoupper($otherinfos[0]->uuid)];
+    $macList = ($otherinfos) ? getMachinesMac($otherinfos[0]->uuid)[strtoupper($otherinfos[0]->uuid)] : null;
 
-    foreach($macList as $mac)
-    {
-      $macstr .= $mac;
-      if(sizeof($macList) > 1 && $mac != end($macList))
-        $macstr .= " || ";
+    if($macList){
+      // remove empty values
+      // keep only uniq values
+      // then join result with ' || '
+      $macstr = join(" || ", array_values(array_filter(array_unique($macList))));
     }
 //     if ( isset($resultinfo->title)){
 //         echo "User : $resultinfo->user "."PACKAGE ". $resultinfo->title."<br>";
@@ -341,10 +349,15 @@ $deploymachine = xmlrpc_get_deployxmpponmachine($cmd_id);
                             echo "</td>";
 
                             echo "<td>";
-                                echo ($otherinfos[0]->ipmachine != "") ? $otherinfos[0]->ipmachine : $deploymachine['target_ipaddr'];
+                                echo (isset($otherinfos[0]->ipmachine) && $otherinfos[0]->ipmachine != "") ? $otherinfos[0]->ipmachine : $deploymachine['target_ipaddr'];
                             echo "</td>";
                             echo "<td>";
-                                echo ($macstr != "") ? $macstr : $deploymachine['target_macaddr'];
+                                if($macstr == "" && isset($deploymachine['target_macaddr']))
+                                {
+                                  $macList = explode("||", $deploymachine['target_macaddr']);
+                                  $macstr = join(" || ", array_values(array_filter(array_unique($macList))));
+                                }
+                                  echo $macstr;
                             echo "</td>";
                         echo "</tr>";
                     echo "</tbody>";
@@ -444,7 +457,7 @@ $deploymachine = xmlrpc_get_deployxmpponmachine($cmd_id);
             if ( !$boolterminate && !isset($_POST['bStop'])){
                 if (!isset($_SESSION[$info['objectdeploy'][0]['sessionid']])){
                     $f = new ValidatingForm();
-                    $f->add(new HiddenTpl("id"), array("value" => $ID, "hide" => True));
+                    $f->add(new HiddenTpl("id"), array("value" => $_GET['cmd_id'], "hide" => True));
                     $f->addButton("bStop","Stop Deploy");
                     $f->display();
                 }
@@ -580,7 +593,7 @@ $deploymachine = xmlrpc_get_deployxmpponmachine($cmd_id);
                 echo "<tbody>";
 
         foreach($infodeploy['log'] as $line){
-            $scalardate = get_object_vars($info['objectdeploy'][0]['start'])['scalar'];
+            $scalardate = get_object_vars($line['date'])['scalar'];
             $formateddate = substr($scalardate, 0,4).'-'.substr($scalardate, 4,2).'-'.substr($scalardate, 6,2).' '.substr($scalardate, 9);
             //$startsteparray= get_object_vars( $line['date']);
             //$datestartstep = date("Y-m-d H:i:s", $startsteparray['timestamp']);

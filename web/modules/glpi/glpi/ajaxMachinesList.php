@@ -33,11 +33,27 @@ global $config;
 .selectable{
 	cursor:pointer;
 }
+
+li.displayg a {
+    padding: 3px 0px 5px 20px;
+    margin: 0 0px 0 0px;
+    background-image: url("img/common/icn_show.gif");
+    background-repeat: no-repeat;
+    line-height: 18px;
+    text-decoration: none;
+    color: #FFF;
+    filter: grayscale(50%);
+    -webkit-filter: grayscale(50%);
+    -moz-filter: grayscale(50%);
+    opacity:0.5;
+}
 </style>
 <?php
 
 $location = (isset($_GET['location'])) ? $_GET['location'] : "";
 $filter = (isset($_GET['filter'])) ? $_GET['filter'] : "";
+$field = (isset($_GET['field'])) ? $_GET['field'] : "";
+$contains = (isset($_GET['contains'])) ? $_GET['contains'] : "";
 
 $start = (isset($_GET['start'])) ? $_GET['start'] : 0;
 $maxperpage = (isset($_GET['maxperpage'])) ? $_GET['maxperpage'] : $config['maxperpage'];
@@ -46,9 +62,13 @@ $end = (isset($_GET['end'])) ? $_GET['end'] : $maxperpage - 1;
 $ctx = [];
 $ctx['location'] = $location;
 $ctx['filter'] = $filter;
+$ctx['field'] = $field;
+$ctx['contains'] = $contains;
+
 $ctx['start'] = $start;
 $ctx['end'] = $end;
 $ctx['maxperpage'] = $maxperpage;
+
 if (isset($_SESSION['computerpresence'])  && $_SESSION['computerpresence'] != "all_computer" )
     $ctx['computerpresence'] = $_SESSION['computerpresence'];
 
@@ -56,8 +76,8 @@ $machines = xmlrpc_get_machines_list($start, $maxperpage, $ctx);
 
 $count = $machines["count"];
 $datas = $machines["data"];
+$xmppdatas = $machines['xmppdata'];
 
-//$presences = xmlrpc_getPresenceuuids($datas["uuid"]);
 $presencesClass = [];
 $params = [];
 
@@ -73,7 +93,8 @@ $logAction = new ActionItem(_("detaildeploy"),"viewlogs","logfile","computer", "
 $mscAction = new ActionItem(_("Software deployment"),"msctabs","install","computer", "base", "computers");
 
 if (in_array("xmppmaster", $_SESSION["supportModList"])) {
-	$vncClientAction = new ActionPopupItem(_("Remote control"), "vnc_client", "guaca", "computer", "base", "computers");
+  $monitoring = new ActionItem(_("Monitoring"),"monitoringview","monit","computers", "xmppmaster", "xmppmaster");
+  $vncClientAction = new ActionPopupItem(_("Remote control"), "vnc_client", "guaca", "computer", "base", "computers");
   $mscNoAction = new EmptyActionItem1(_("Software deployment"),"msctabs","installg","computer", "base", "computers");
 
   $inventconsole   = new ActionItem(_("xmppconsole"),"consolecomputerxmpp","console","computers", "xmppmaster", "xmppmaster");
@@ -85,6 +106,8 @@ if (in_array("xmppmaster", $_SESSION["supportModList"])) {
   $editremoteconfiguration    = new ActionItem(_("Edit config files"),"listfichierconf","config","computers", "xmppmaster", "xmppmaster");
   $editnoremoteconfiguration  = new EmptyActionItem1(_("Edit config files"),"remoteeditorconfiguration","configg","computers", "xmppmaster", "xmppmaster");
   $inventxmppbrowsing = new ActionItem(_("files browsing"),"xmppfilesbrowsing","folder","computers", "xmppmaster", "xmppmaster");
+	$fileviewer = new ActionItem(_("files viewer"),"fileviewer","display","computers", "xmppmaster", "xmppmaster");
+	$filenoviewer = new EmptyActionItem1(_("files viewer"),"fileviewer","displayg","computers","xmppmaster", "xmppmaster");
 }else{
   $vncClientAction = new ActionPopupItem(_("Remote control"), "vnc_client", "vncclient", "computer", "base", "computers");
 }
@@ -98,6 +121,7 @@ $DeployQuickxmpp->setWidth(600);
 // with check presence xmpp
 $vncClientActiongriser = new EmptyActionItem1(_("Remote control"), "vnc_client", "guacag", "computer", "base", "computers");
 
+$actionMonitoring = array();
 $actionInventory = array();
 $action_logs_msc = array();
 $action_deploy_msc = array();
@@ -109,11 +133,36 @@ $actionxmppquickdeoloy = array();
 $cssClasses = array();
 $actioneditremoteconfiguration = array();
 $actionxmppbrowsing = array();
+$actionfilebrowser = array();
 $actionxmppbrowsingne = array();
 
 $raw = 0;
+// Do not modify directly $datas['cn'] it is reused later for $params
+// And tabs in detail page will be broken
+$cn = [];
+
 foreach($datas['uuid'] as $uuid)
 {
+	if(isset($xmppdatas['UUID'.$uuid])){
+		$cnstr = '<span ';
+		$cnstr .= 'title="';
+		$cnstr .= "jid : \t ". $xmppdatas['UUID'.$uuid]['jid']."\n";
+		$cnstr .= "classutil : \t ". $xmppdatas['UUID'.$uuid]['classutil']."\n";
+		$cnstr .= "ad_ou_user : \t ". $xmppdatas['UUID'.$uuid]['ad_ou_user']."\n";
+		$cnstr .= "ad_ou_machine : \t ". $xmppdatas['UUID'.$uuid]['ad_ou_machine']."\n";
+		$cnstr .= "need_reconf : \t ". $xmppdatas['UUID'.$uuid]['need_reconf']."\n";
+		$cnstr .= "keysyncthing : \t ". $xmppdatas['UUID'.$uuid]['keysyncthing']."\n";
+		$cnstr .= "groupdeploy : \t ". $xmppdatas['UUID'.$uuid]['groupdeploy']."\n";
+		$cnstr .= "subnetxmpp : \t ". $xmppdatas['UUID'.$uuid]['subnetxmpp']."\n";
+		$cnstr .= "ip_xmpp : \t ". $xmppdatas['UUID'.$uuid]['ip_xmpp']."\n";
+		$cnstr .= "ippublic : \t ". $xmppdatas['UUID'.$uuid]['ippublic']."\n";
+		$cnstr .= "kiosk_presence : \t ". $xmppdatas['UUID'.$uuid]['kiosk_presence']."\n";
+		$cnstr .= '"';
+		$cnstr .= '>'.$datas['cn'][$raw].'</span>';
+		$cn[] = $cnstr;
+	}
+	else
+		$cn[] = $datas['cn'][$raw];
 	$presencesClass[] = ($datas['presence'][$raw] == 1) ? "machineNamepresente" : "machineName";
 
 	if (in_array("inventory", $_SESSION["supportModList"])) {
@@ -127,10 +176,12 @@ foreach($datas['uuid'] as $uuid)
 			$actionxmppquickdeoloy[]=$DeployQuickxmpp;
 			$action_deploy_msc[] = $mscAction;
 			$action_logs_msc[]   = $logAction;
+			$actionMonitoring[] = $monitoring;
 			if ( $datas['presence'][$raw] ){
 				if (isExpertMode()){
 					$actionConsole[] = $inventconsole;
 					$actionxmppbrowsing[] = $inventxmppbrowsing;
+					$actionfilebrowser[] = $fileviewer;
 					$actioneditremoteconfiguration[] = $editremoteconfiguration;
 				}
 				else{
@@ -141,6 +192,7 @@ foreach($datas['uuid'] as $uuid)
 				if (isExpertMode()){
 					$actionConsole[] = $inventnoconsole;
 					$actionxmppbrowsing[] = $inventnoxmppbrowsing;
+					$actionfilebrowser[] = $filenoviewer;
 					$actioneditremoteconfiguration[] = $editnoremoteconfiguration;
 				}
 				else{
@@ -222,7 +274,7 @@ foreach($datas['uuid'] as $uuid)
 	$raw++;
 }
 
-$n = new OptimizedListInfos($datas["cn"], _T("Computer Name", "glpi"));
+$n = new OptimizedListInfos($cn, _T("Computer Name", "glpi"));
 $n->setParamInfo($params); // [params]
 if(array_key_exists("description", $datas))
   $n->addExtraInfo($datas["description"], _T("Description", "glpi"));
@@ -261,6 +313,7 @@ if(array_key_exists("reg", $datas))
 
 if (in_array("xmppmaster", $_SESSION["supportModList"])){
   $n->addActionItemArray($actionInventory);
+  $n->addActionItemArray($actionMonitoring);
 }
 
 if (in_array("extticket", $_SESSION["supportModList"])) {
@@ -292,6 +345,7 @@ if (in_array("xmppmaster", $_SESSION["supportModList"]) ){
   if (isExpertMode()){
     $n->addActionItemArray($actionConsole);
     $n->addActionItemArray($actionxmppbrowsing);
+		$n->addActionItemArray($actionfilebrowser);
     if (!(isset($_GET['logview']) &&  $_GET['logview'] == "viewlogs")){
       $n->addActionItemArray($actioneditremoteconfiguration);
     }

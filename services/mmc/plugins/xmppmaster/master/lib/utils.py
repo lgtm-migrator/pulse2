@@ -46,7 +46,7 @@ import uuid
 import time
 from datetime import datetime
 import imp
-import requests 
+import requests
 from Crypto import Random
 from Crypto.Cipher import AES
 import urllib2
@@ -92,7 +92,7 @@ def dump_parameter(para=True, out=True, timeprocess = True):
             start = time.time()
             func_name = decorated_function.__name__
             log = logging.getLogger(func_name)
-            
+
             filepath = os.path.basename(__file__)
             # get function params (args and kwargs)
             if para:
@@ -226,33 +226,6 @@ def utc2local (utc):
     offset = datetime.fromtimestamp (epoch) - datetime.utcfromtimestamp (epoch)
     return utc + offset
 
-
-def getRandomName(nb, pref=""):
-    a = "abcdefghijklnmopqrstuvwxyz0123456789"
-    d = pref
-    for t in range(nb):
-        d = d + a[random.randint(0, 35)]
-    return d
-
-def data_struct_message(action, data = {}, ret=0, base64 = False, sessionid = None):
-    if sessionid == None or sessionid == "" or not isinstance(sessionid, basestring):
-        sessionid = action.strip().replace(" ", "")
-    return { 'action' : action,
-             'data' : data,
-             'ret' : 0,
-             "base64" : False,
-             "sessionid" : getRandomName(4,sessionid)}
-
-def add_method(cls):
-    """ decorateur a utiliser pour ajouter une methode a un object """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            return func(*args, **kwargs)
-        setattr(cls, func.__name__, wrapper)
-        # Note we are not binding func, but wrapper which accepts self but does exactly the same as func
-        return func # returning func means func can still be used normally
-    return decorator
 
 def getRandomName(nb, pref=""):
     a = "abcdefghijklnmopqrstuvwxyz0123456789"
@@ -838,41 +811,6 @@ def pluginmastersessionaction(sessionaction, timeminute=10):
     return decorator
 
 
-def searchippublic(site=1):
-    if site == 1:
-        try:
-            page = urllib.urlopen("http://ifconfig.co/json").read()
-            objip = json.loads(page)
-            if is_valid_ipv4(objip['ip']):
-                return objip['ip']
-            else:
-                return searchippublic(3)
-        except BaseException:
-            return searchippublic(2)
-    elif site == 2:
-        try:
-            page = urllib.urlopen("http://www.monip.org/").read()
-            ip = page.split("IP : ")[1].split("<br>")[0]
-            if is_valid_ipv4(ip):
-                return ip
-            else:
-                return searchippublic(3)
-        except Exception:
-            return searchippublic(3)
-    elif site == 3:
-        try:
-            ip = urllib.urlopen("http://ip.42.pl/raw").read()
-            if is_valid_ipv4(ip):
-                return ip
-            else:
-                return searchippublic(4)
-        except Exception:
-            searchippublic(4)
-    elif site == 4:
-        return find_ip()
-    return None
-
-
 def find_ip():
     candidates = []
     for test_ip in ['192.0.2.0', "192.51.100.0", "203.0.113.0"]:
@@ -1053,10 +991,21 @@ def md5folder(directory):
             hash.update(md5(os.path.join(root, basename)))
     return hash.hexdigest()
 
+
+def Setdirectorytempinfo():
+    """
+    create directory
+    """
+    dirtempinfo = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "INFOSTMP")
+    if not os.path.exists(dirtempinfo):
+        os.makedirs(dirtempinfo, mode=0700)
+    return dirtempinfo
+
+
 class geolocalisation_agent:
-    def __init__(self, 
-                 typeuser = "public", 
-                 geolocalisation=True, 
+    def __init__(self,
+                 typeuser = "public",
+                 geolocalisation=True,
                  ip_public=None,
                  strlistgeoserveur=""):
         self.determination = False
@@ -1073,11 +1022,11 @@ class geolocalisation_agent:
             self.localisation=self.getdatafilegeolocalisation()
 
     def getgeolocalisationobject(self):
-        if self.localisation is none:
+        if self.localisation is None:
             return {}
         return self.localisation
 
-    def getdatafilegeolocalisation(self):    
+    def getdatafilegeolocalisation(self):
         if self.geoinfoexist():
             try:
                 with open(self.filegeolocalisation) as json_data:
@@ -1147,7 +1096,6 @@ class geolocalisation_agent:
                 logger.warning("use old determination ip_public")
             if self.localisation is  None:
                 if self.geoinfoexist():
-                    logger.warning("coucou")
                     dd=self.getdatafilegeolocalisation()
                     logger.warning("%s"%dd)
                     if  self.localisation is  not None:
@@ -1163,7 +1111,7 @@ class geolocalisation_agent:
             return r.json()
         except:
             return None
-    
+
     @staticmethod
     def call_simple_page_urllib(url):
         try:
