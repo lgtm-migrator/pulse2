@@ -43,6 +43,15 @@ from pulse2.database.pkgs.orm.pakages import Packages
 from pulse2.database.pkgs.orm.extensions import Extensions
 from pulse2.database.pkgs.orm.dependencies import Dependencies
 from pulse2.database.pkgs.orm.syncthingsync import Syncthingsync
+
+
+from pulse2.database.pkgs.orm.pkgs_rules_algos import Pkgs_rules_algos
+from pulse2.database.pkgs.orm.pkgs_rules_global import Pkgs_rules_global
+from pulse2.database.pkgs.orm.pkgs_rules_local import Pkgs_rules_local
+from pulse2.database.pkgs.orm.pkgs_shares_ars import Pkgs_shares_ars
+from pulse2.database.pkgs.orm.pkgs_shares_ars_web import Pkgs_shares_ars_web
+from pulse2.database.pkgs.orm.pkgs_shares import Pkgs_shares
+
 from pulse2.database.pkgs.orm.package_pending_exclusions import Package_pending_exclusions
 from mmc.database.database_helper import DatabaseHelper
 from pulse2.database.xmppmaster import XmppMasterDatabase
@@ -125,9 +134,52 @@ class PkgsDatabase(DatabaseHelper):
                 self.metadata,
                 autoload = True
             )
+
             #package_pending_exclusions
             self.package_pending_exclusions = Table(
                 "package_pending_exclusions",
+                self.metadata,
+                autoload = True
+            )
+
+            #pkgs_shares_ars_web
+            self.pkgs_shares_ars_web = Table(
+                "pkgs_shares_ars_web",
+                self.metadata,
+                autoload = True
+            )
+
+            #pkgs_shares_ars
+            self.pkgs_shares_ars = Table(
+                "pkgs_shares_ars",
+                self.metadata,
+                autoload = True
+            )
+
+            #pkgs_shares
+            self.pkgs_shares = Table(
+                "pkgs_shares",
+                self.metadata,
+                autoload = True
+            )
+
+            #pkgs_rules_algos
+            self.pkgs_rules_algos = Table(
+                "pkgs_rules_algos",
+                self.metadata,
+                autoload = True
+            )
+
+            #pkgs_rules_global
+            self.pkgs_rules_global = Table(
+                "pkgs_rules_global",
+                self.metadata,
+                autoload = True
+            )
+
+            #pkgs_rules_local
+            self.pkgs_rules_local = Table(
+                "pkgs_rules_local",
                 self.metadata,
                 autoload = True
             )
@@ -146,6 +198,13 @@ class PkgsDatabase(DatabaseHelper):
         mapper(Dependencies, self.dependencies)
         mapper(Syncthingsync, self.syncthingsync)
         mapper(Package_pending_exclusions, self.package_pending_exclusions)
+        mapper(Pkgs_shares, self.pkgs_shares)
+        mapper(Pkgs_shares_ars, self.pkgs_shares_ars)
+        mapper(Pkgs_shares_ars_web, self.pkgs_shares_ars_web)
+        mapper(Pkgs_rules_algos, self.pkgs_rules_algos)
+        mapper(Pkgs_rules_global, self.pkgs_rules_global)
+        mapper(Pkgs_rules_local, self.pkgs_rules_local)
+
     ####################################
 
     @DatabaseHelper._sessionm
@@ -530,3 +589,281 @@ class PkgsDatabase(DatabaseHelper):
         query = query.delete(synchronize_session='fetch')
         session.commit()
         session.flush()
+
+    # =====================================================================
+    # pkgs FUNCTIONS manage share
+    # =====================================================================
+
+    @DatabaseHelper._sessionm
+    def SetPkgs_shares( self, session,
+                        name, comments,
+                        enabled, type,
+                        uri, ars_name,
+                        ars_id, share_path):
+        """
+            fild table : id,name,comments,enabled,type,uri,ars_name,ars_id,share_path
+        """
+        try:
+            new_Pkgs_shares = Pkgs_shares()
+            new_Pkgs_shares.name = name
+            new_Pkgs_shares.comments = comments
+            new_Pkgs_shares.enabled = enabled
+            new_Pkgs_shares.type = type
+            new_Pkgs_shares.uri = uri
+            new_Pkgs_shares.ars_name = ars_name
+            new_Pkgs_shares.ars_id = ars_id
+            new_Pkgs_shares.share_path = share_path
+            session.add(new_Pkgs_shares)
+            session.commit()
+            session.flush()
+            return new_Pkgs_shares.id
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return None
+
+    @DatabaseHelper._sessionm
+    def SetPkgs_shares_ars(self, session,
+                           id, hostname,
+                           jid, pkgs_shares_id):
+        """
+            fild table :  id,hostname,jid,pkgs_shares_id
+            warning id is not auto increment
+        """
+        try:
+            new_Pkgs_shares_ars = Pkgs_shares_ars()
+            new_Pkgs_shares_ars.id = id
+            new_Pkgs_shares_ars.hostname =  hostname
+            new_Pkgs_shares_ars.jid =  jid
+            new_Pkgs_shares_ars.pkgs_shares_id =  pkgs_shares_id
+            session.add(new_Pkgs_shares_ars)
+            session.commit()
+            session.flush()
+            return new_Pkgs_shares_ars.id
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return None
+
+    @DatabaseHelper._sessionm
+    def SetPkgs_shares_ars_web(self, session,
+                               pkgs_share_id,
+                               ars_share_id, packages_id,
+                               status, finger_print, size,
+                               edition_date):
+        """
+            fild table : id,ars_share_id,packages_id,status,finger_print,size,date_edition
+        """
+        try:
+            new_Pkgs_shares_ars_web = Pkgs_shares_ars_web()
+            new_Pkgs_shares_ars_web.ars_share_id =  ars_share_id
+            new_Pkgs_shares_ars_web.packages_id = packages_id
+            new_Pkgs_shares_ars_web.status =  status
+            new_Pkgs_shares_ars_web.finger_print =  finger_print
+            new_Pkgs_shares_ars_web.size = size
+            new_Pkgs_shares_ars_web.date_edition =  date_edition
+            session.add(new_Pkgs_shares_ars_web)
+            session.commit()
+            session.flush()
+            return new_Pkgs_shares_ars_web.id
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return None
+
+    @DatabaseHelper._sessionm
+    def SetPkgs_rules_algos(self, session,
+                            id, name,
+                            description, level):
+        """
+            fild table : id,name,description,level
+        """
+        try:
+            new_Pkgs_rules_algos = Pkgs_rules_algos()
+            new_Pkgs_rules_algos.ars_share_id =  ars_share_id
+            new_Pkgs_rules_algos.packages_id = packages_id
+            new_Pkgs_rules_algos.status =  status
+            session.add(new_Pkgs_rules_algos)
+            session.commit()
+            session.flush()
+            return new_Pkgs_rules_algos.id
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return None
+
+    @DatabaseHelper._sessionm
+    def SetPkgs_rules_global(self, session,
+                             pkgs_rules_algos_id,
+                             pkgs_shares_id,
+                             order,suject):
+        """
+            fild table : id,pkgs_rules_algos_id,pkgs_shares_id,order,suject
+        """
+        try:
+            new_Pkgs_rules_global = Pkgs_rules_global()
+            new_Pkgs_rules_global.ars_share_id = ars_share_id
+            new_Pkgs_rules_global.packages_id = packages_id
+            new_Pkgs_rules_global.status = status
+            new_Pkgs_rules_global.finger_print = finger_print
+            session.add(new_Pkgs_rules_global)
+            session.commit()
+            session.flush()
+            return new_Pkgs_rules_global.id
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return None
+
+    @DatabaseHelper._sessionm
+    def SetPkgs_rules_local(self, session,
+                            pkgs_rules_algos_id,
+                            pkgs_shares_id,
+                            order,suject):
+        """
+            fild table : id,pkgs_rules_algos_id,pkgs_shares_id,order,suject
+        """
+        try:
+            new_Pkgs_rules_local = Pkgs_rules_local()
+            new_Pkgs_rules_local.ars_share_id = ars_share_id
+            new_Pkgs_rules_local.packages_id = packages_id
+            new_Pkgs_rules_local.status = status
+            new_Pkgs_rules_local.finger_print = finger_print
+            session.add(new_Pkgs_rules_local)
+            session.commit()
+            session.flush()
+            return new_Pkgs_rules_local.id
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return None
+
+    @DatabaseHelper._sessionm
+    def pkgs_Orderrules(self, session):
+        sql = """SELECT
+                    *
+                FROM
+                    pkgs.pkgs_rules_algos
+                ORDER BY level;"""
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        a = [list(x) for x in result]
+        return a
+
+    @DatabaseHelper._sessionm
+    def pkgs_sharing_rule_search(self, session, loginname, type="local"):
+        if type == "global":
+            sql ="""SELECT
+                        pkgs.pkgs_shares.id as id_sharing,
+                        pkgs.pkgs_shares.name as name,
+                        pkgs.pkgs_shares.comments as comments,
+                        pkgs.pkgs_shares.enabled as enabled,
+                        pkgs.pkgs_shares.type as type,
+                        pkgs.pkgs_shares.uri as uri,
+                        pkgs.pkgs_shares.ars_name as ars_name,
+                        pkgs.pkgs_shares.ars_id as ars_id,
+                        pkgs.pkgs_shares.share_path as share_path,
+                        pkgs.pkgs_rules_global.id as id_rule,
+                        pkgs.pkgs_rules_global.pkgs_rules_algos_id as algos_id,
+                        pkgs.pkgs_rules_global.order as orderrule,
+                        pkgs.pkgs_rules_global.suject as suject
+                    FROM
+                        pkgs.pkgs_shares
+                            INNER JOIN
+                        pkgs.pkgs_rules_global
+                            ON pkgs.pkgs_rules_global.pkgs_shares_id = pkgs.pkgs_shares.id
+                    WHERE
+                        pkgs.pkgs_shares.type = 'global'
+                            AND '%s' REGEXP (pkgs.pkgs_rules_global.suject)
+                            AND pkgs.pkgs_shares.enabled = 1
+                    ORDER BY pkgs.pkgs_rules_global.order
+                    LIMIT 1;""" % (loginname)
+        else:
+            sql ="""SELECT
+                        pkgs.pkgs_shares.id as id_sharing,
+                        pkgs.pkgs_shares.name as name,
+                        pkgs.pkgs_shares.comments as comments,
+                        pkgs.pkgs_shares.enabled as enabled,
+                        pkgs.pkgs_shares.type as type,
+                        pkgs.pkgs_shares.uri as uri,
+                        pkgs.pkgs_shares.ars_name as ars_name,
+                        pkgs.pkgs_shares.ars_id as ars_id,
+                        pkgs.pkgs_shares.share_path as share_path,
+                        pkgs.pkgs_rules_local.id as id_rule,
+                        pkgs.pkgs_rules_local.pkgs_rules_algos_id as algos_id,
+                        pkgs.pkgs_rules_local.order as order_rule,
+                        pkgs.pkgs_rules_local.suject as suject
+                    FROM
+                        pkgs.pkgs_shares
+                            INNER JOIN
+                        pkgs.pkgs_rules_local
+                            ON pkgs.pkgs_rules_local.pkgs_shares_id = pkgs.pkgs_shares.id
+                    WHERE
+                        pkgs.pkgs_shares.type = 'local'
+                            AND '%s' REGEXP (pkgs.pkgs_rules_local.suject)
+                            AND pkgs.pkgs_shares.enabled = 1
+                    ORDER BY pkgs.pkgs_rules_local.order;""" % (loginname)
+        logging.getLogger().debug(str(sql))
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        ret = []
+        if result:
+            # create dict partage
+            for y in result:
+                resuldict={}
+                resuldict['id_sharing']=y[0]
+                resuldict['name']=y[1]
+                resuldict['comments']=y[2]
+                resuldict['type']=y[4]
+                resuldict['uri']=y[5]
+                resuldict['ars_name']=y[6]
+                resuldict['ars_id']=y[7]
+                resuldict['share_path']=y[8]
+                # information from table pkgs_rules_local or pkgs_rules_global
+                resuldict['id_rule']=y[9]
+                resuldict['algos_id']=y[10]
+                resuldict['order_rule']=y[11]
+                resuldict['regexp']=y[12]
+                ret.append(resuldict)
+        return ret
+
+    #### Pkgs agent ####
+    @DatabaseHelper._sessionm
+    def get_shares(self, session):
+        query = session.query(Pkgs_shares).all()
+        ret = [elem.toH() for elem in query]
+        return ret
+
+    @DatabaseHelper._sessionm
+    def pkgs_sharing_admin_profil(self, session):
+        """ renvoi tout les partages """
+        sql ="""SELECT 
+                    pkgs.pkgs_shares.id AS id_sharing,
+                    pkgs.pkgs_shares.name AS name,
+                    pkgs.pkgs_shares.comments AS comments,
+                    pkgs.pkgs_shares.enabled AS enabled,
+                    pkgs.pkgs_shares.type AS type,
+                    pkgs.pkgs_shares.uri AS uri,
+                    pkgs.pkgs_shares.ars_name AS ars_name,
+                    pkgs.pkgs_shares.ars_id AS ars_id,
+                    pkgs.pkgs_shares.share_path AS share_path
+                FROM
+                    pkgs.pkgs_shares
+                WHERE
+                     pkgs.pkgs_shares.enabled = 1;"""
+        logging.getLogger().debug(str(sql))
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        ret = []
+        if result:
+            # create dict partage
+            for y in result:
+                resuldict={}
+                resuldict['id_sharing']=y[0]
+                resuldict['name']=y[1]
+                resuldict['comments']=y[2]
+                resuldict['type']=y[4]
+                resuldict['uri']=y[5]
+                resuldict['ars_name']=y[6]
+                resuldict['ars_id']=y[7]
+                resuldict['share_path']=y[8]
+                ret.append(resuldict)
+        return ret
+
