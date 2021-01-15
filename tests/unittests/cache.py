@@ -19,7 +19,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with MMC.  If not, see <http://www.gnu.org/licenses/>.
-#
+##
 """
 Test module for the Pulse 2 cache
 """
