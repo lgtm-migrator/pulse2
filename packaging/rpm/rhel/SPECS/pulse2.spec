@@ -25,8 +25,8 @@
 
 %define use_git                1
 %define git                    SHA
-%define real_version           4.6.4
-%define mmc_version            4.6.4
+%define real_version           4.6.6
+%define mmc_version            4.6.6
 
 Summary:	Management Console
 Name:		pulse2
@@ -462,17 +462,19 @@ if ! getent passwd | grep -q "^pulsetransfert:"; then
 fi
 
 %files -n python-mmc-xmppmaster
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/xmppmaster.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/inventoryconf.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/resultinventory.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/assessor_agent.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/loadautoupdate.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/loadlogsrotation.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/loadpluginlistversion.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/loadpluginschedulerlistversion.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/loadshowregistration.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/registeryagent.ini
-%attr(0640,root,root) %config(noreplace) %{_sysconfdir}/mmc/plugins/loadreconf.ini
+%{_sysconfdir}/mmc/plugins/xmppmaster.ini
+%{_sysconfdir}/mmc/plugins/inventoryconf.ini
+%{_sysconfdir}/mmc/plugins/resultinventory.ini
+%{_sysconfdir}/mmc/plugins/assessor_agent.ini
+%{_sysconfdir}/mmc/plugins/loadautoupdate.ini
+%{_sysconfdir}/mmc/plugins/loadlogsrotation.ini
+%{_sysconfdir}/mmc/plugins/loadpluginlistversion.ini
+%{_sysconfdir}/mmc/plugins/loadpluginschedulerlistversion.ini
+%{_sysconfdir}/mmc/plugins/loadshowregistration.ini
+%{_sysconfdir}/mmc/plugins/registeryagent.ini
+%{_sysconfdir}/mmc/plugins/loadreconf.ini
+%{_sysconfdir}/mmc/plugins/wakeonlangroup.ini
+%{_sysconfdir}/mmc/plugins/wakeonlan.ini
 %python2_sitelib/mmc/plugins/xmppmaster
 %python2_sitelib/pulse2/database/xmppmaster
 
@@ -1242,6 +1244,7 @@ cp -fv %buildroot%_datadir/mmc/conf/apache/pulse.conf %buildroot%_sysconfdir/htt
 mkdir -p %buildroot%_var/lib/pulse2/file-transfer
 
 cp services/contrib/glpi-92.sql %buildroot%_datadir/doc/mmc/contrib/
+cp services/contrib/glpi-94.sql %buildroot%_datadir/doc/mmc/contrib/
 
 rm -f %buildroot%python2_sitelib/pulse2/apis/clients/mirror.py
 mv %buildroot%python2_sitelib/pulse2/apis/clients/mirror1.py %buildroot%python2_sitelib/pulse2/apis/clients/mirror.py

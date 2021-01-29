@@ -256,8 +256,8 @@ if (isset($_POST['bconfirm'])){
 
         $methodtransfer = new SelectItem('methodetransfert');
         // Allowed methods are pullcurl, pushrsync, pullrsync, pullscp
-        $methodtransfer->setElements([ 'pushrsync', 'pullrsync', 'pulldirect']);
-        $methodtransfer->setElementsVal([ 'pushrsync', 'pullrsync', 'pulldirect']);
+        $methodtransfer->setElements(['pushrsync', 'pullrsync', 'pulldirect']);
+        $methodtransfer->setElementsVal(['pushrsync', 'pullrsync', 'pulldirect']);
         $f->add(new TrFormElement(_T('Transfer method','pkgs'),$methodtransfer,['trid'=>'trTransfermethod']),['value'=>'']);
 
 
@@ -354,6 +354,10 @@ if (isset($_POST['bconfirm'])){
 
 <script type="text/javascript">
     jQuery(function() { // load this piece of code when page is loaded
+        // Limit the text length for label
+        jQuery("input[name='label']").attr("maxlength", 60);
+        jQuery("#container_input_description").prepend("<div style='color:red;'><?php echo _T("Accentuated and special characters are not allowed", "pkgs");?></div>");
+
         jQuery('.label span a').each(function() {
             jQuery(this).attr('href', 'http://www.google.com/#q=file.exe+silent+install');
             jQuery(this).attr('target', '_blank');

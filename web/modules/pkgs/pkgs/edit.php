@@ -493,4 +493,9 @@ $f->display();
 
 ?>
 
+<script>
+jQuery(function(){
+  jQuery("input[name='label']").attr("maxlength", 60);
+  jQuery("#container_input_description").prepend("<div style='color:red;'><?php echo _T("Accentuated and special characters are not allowed", "pkgs");?></div>");
+})
 </script>
