@@ -590,4 +590,8 @@ function xmlrpc_get_content($path){
 function xmlrpc_write_content($path, $datas){
   return xmlCall("xmppmaster.write_content", [$path, $datas, "w"]);
 }
+
+function xmlrpc_get_count_success_rate_for_dashboard(){
+  return xmlCall("xmppmaster.get_count_success_rate_for_dashboard", []);
+}
 ?>
