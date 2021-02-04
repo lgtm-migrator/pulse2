@@ -1,5 +1,5 @@
 --
--- (c) 2021 Siveo, http://www.siveo.net/
+-- (c) 2020 Siveo, http://www.siveo.net/
 --
 --
 -- This file is part of Pulse 2, http://www.siveo.net/
@@ -20,69 +20,24 @@
 -- MA 02110-1301, USA.
 
 START TRANSACTION;
-USE xmppmaster;
 
-DELIMITER //
-CREATE OR REPLACE PROCEDURE countSuccessRateLastSixWeeks(
-  OUT week1 float,
-  OUT week2 float,
-  OUT week3 float,
-  OUT week4 float,
-  OUT week5 float,
-  OUT week6 float
-)
-begin
+USE `xmppmaster`;
 
-  -- week - 1
-  set @total = 0;
-  set @partial = 0;
+CREATE TABLE IF NOT EXISTS stats_hosts(
+  stats_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  nb_hosts INT NOT NULL
+);
 
-  select @total:=count(id) from deploy where startcmd >= (NOW()-INTERVAL 1 WEEK);
-  select @partial:=count(id) from deploy where state="DEPLOYMENT SUCCESS" and startcmd >= (NOW()-INTERVAL 1 WEEK);
-  select if(@total >0, (@partial/@total)*100, 0) into week1;
-
-  -- week - 2
-  set @total = 0;
-  set @partial = 0;
-
-  select @total:=count(id) from deploy where startcmd < (NOW()-INTERVAL 1 WEEK) and startcmd >= (NOW()-INTERVAL 2 WEEK);
-  select @partial:=count(id) from deploy where state="DEPLOYMENT SUCCESS" and startcmd < (NOW()-INTERVAL 1 WEEK) and startcmd >= (NOW()-INTERVAL 2 WEEK);
-  select if(@total >0, (@partial/@total)*100, 0) into week2;
-
-  -- week - 3
-  set @total = 0;
-  set @partial = 0;
-
-  select @total:=count(id) from deploy where startcmd < (NOW()-INTERVAL 2 WEEK) and startcmd >= (NOW()-INTERVAL 3 WEEK);
-  select @partial:=count(id) from deploy where state="DEPLOYMENT SUCCESS" and startcmd < (NOW()-INTERVAL 2 WEEK) and startcmd >= (NOW()-INTERVAL 3 WEEK);
-  select if(@total >0, (@partial/@total)*100, 0) into week3;
-
-  -- week - 4
-  set @total = 0;
-  set @partial = 0;
-
-  select @total:=count(id) from deploy where startcmd < (NOW()-INTERVAL 3 WEEK) and startcmd >= (NOW()-INTERVAL 4 WEEK);
-  select @partial:=count(id) from deploy where state="DEPLOYMENT SUCCESS" and startcmd < (NOW()-INTERVAL 3 WEEK) and startcmd >= (NOW()-INTERVAL 4 WEEK);
-  select if(@total >0, (@partial/@total)*100, 0) into week4;
-
-  -- week - 5
-  set @total = 0;
-  set @partial = 0;
-
-  select @total:=count(id) from deploy where startcmd < (NOW()-INTERVAL 4 WEEK) and startcmd >= (NOW()-INTERVAL 5 WEEK);
-  select @partial:=count(id) from deploy where state="DEPLOYMENT SUCCESS" and startcmd < (NOW()-INTERVAL 4 WEEK) and startcmd >= (NOW()-INTERVAL 5 WEEK);
-  select if(@total >0, (@partial/@total)*100, 0) into week5;
-
-  -- week - 6
-  set @total = 0;
-  set @partial = 0;
-
-  select @total:=count(id) from deploy where startcmd < (NOW()-INTERVAL 5 WEEK) and startcmd >= (NOW()-INTERVAL 6 WEEK);
-  select @partial:=count(id) from deploy where state="DEPLOYMENT SUCCESS" and startcmd < (NOW()-INTERVAL 5 WEEK) and startcmd >= (NOW()-INTERVAL 6 WEEK);
-  select if(@total >0, (@partial/@total)*100, 0) into week6;
-
-end;
-//
+DELIMITER $$
+DROP EVENT IF EXISTS update_stats_hosts;
+CREATE EVENT IF NOT EXISTS update_stats_hosts
+    ON SCHEDULE
+        EVERY 1 MONTH
+        STARTS '2021-01-15 00:00:00'
+    DO BEGIN
+        INSERT INTO `stats_hosts` (`nb_hosts`)
+        SELECT COUNT(*) FROM `machines` WHERE `agenttype` = 'machine';
+    END$$
 DELIMITER ;
 
 UPDATE version SET Number = 56;
