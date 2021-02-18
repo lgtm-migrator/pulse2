@@ -65,10 +65,6 @@ class Package:
             self.logger.error("The file conf.json is missing")
             self.to_summary("error", "The file conf.json is missing")
             flag = False
-        if "MD5SUMS" not in self.files:
-            self.logger.error("The file MD5SUMS is missing")
-            self.to_summary("error", "The file MD5SUMS is missing")
-            flag = False
         if "xmppdeploy.json" not in self.files:
             self.logger.error("The file xmppdeploy.json is missing")
             self.to_summary("error", "The file xmppdeploy.json is missing")
@@ -195,13 +191,15 @@ class PackageParser:
             plist = os.listdir(self.get_package_folder())
 
             for package in plist:
-                files_list = os.listdir(os.path.join(self.get_package_folder(), package))
-                tmp = Package(path=os.path.join(self.get_package_folder(), package),
-                              uuid=package,
-                              files=files_list)
+                # Blacklist some names
+                if package not in ['.stfolder', '.stignore']:
+                    files_list = os.listdir(os.path.join(self.get_package_folder(), package))
+                    tmp = Package(path=os.path.join(self.get_package_folder(), package),
+                        uuid=package,
+                        files=files_list)
 
-                self.packages_list.append(tmp)
-                self.logger.info("\t %s", package)
+                    self.packages_list.append(tmp)
+                    self.logger.info("\t %s", package)
 
 
             self.logger.info("=== Test the packages ===")
