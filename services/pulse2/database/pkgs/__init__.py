@@ -53,6 +53,12 @@ from pulse2.database.pkgs.orm.pkgs_shares_ars_web import Pkgs_shares_ars_web
 from pulse2.database.pkgs.orm.pkgs_shares import Pkgs_shares
 
 from pulse2.database.pkgs.orm.package_pending_exclusions import Package_pending_exclusions
+from pulse2.database.pkgs.orm.pkgs_rules_algos import Pkgs_rules_algos
+from pulse2.database.pkgs.orm.pkgs_rules_global import Pkgs_rules_global
+from pulse2.database.pkgs.orm.pkgs_rules_local import Pkgs_rules_local
+from pulse2.database.pkgs.orm.pkgs_shares_ars import Pkgs_shares_ars
+from pulse2.database.pkgs.orm.pkgs_shares_ars_web import Pkgs_shares_ars_web
+from pulse2.database.pkgs.orm.pkgs_shares import Pkgs_shares
 from mmc.database.database_helper import DatabaseHelper
 from pulse2.database.xmppmaster import XmppMasterDatabase
 # Pulse 2 stuff
@@ -141,7 +147,6 @@ class PkgsDatabase(DatabaseHelper):
                 self.metadata,
                 autoload = True
             )
-
             #pkgs_shares_ars_web
             self.pkgs_shares_ars_web = Table(
                 "pkgs_shares_ars_web",
@@ -183,7 +188,6 @@ class PkgsDatabase(DatabaseHelper):
                 self.metadata,
                 autoload = True
             )
-
         except NoSuchTableError, e:
             self.logger.error("Cant load the Pkgs database : table '%s' does not exists"%(str(e.args[0])))
             return False
@@ -590,25 +594,23 @@ class PkgsDatabase(DatabaseHelper):
         session.commit()
         session.flush()
 
-    # =====================================================================
-    # pkgs FUNCTIONS manage share
-    # =====================================================================
-
     @DatabaseHelper._sessionm
-    def SetPkgs_shares( self, session,
-                        name, comments,
-                        enabled, type,
-                        uri, ars_name,
-                        ars_id, share_path):
-        """
-            fild table : id,name,comments,enabled,type,uri,ars_name,ars_id,share_path
-        """
+    def SetPkgs_shares(self,
+                       session,
+                       name,
+                       comments,
+                       enabled,
+                       shareType,
+                       uri,
+                       ars_name,
+                       ars_id,
+                       share_path):
         try:
             new_Pkgs_shares = Pkgs_shares()
             new_Pkgs_shares.name = name
             new_Pkgs_shares.comments = comments
             new_Pkgs_shares.enabled = enabled
-            new_Pkgs_shares.type = type
+            new_Pkgs_shares.type = shareType
             new_Pkgs_shares.uri = uri
             new_Pkgs_shares.ars_name = ars_name
             new_Pkgs_shares.ars_id = ars_id
@@ -622,16 +624,15 @@ class PkgsDatabase(DatabaseHelper):
             return None
 
     @DatabaseHelper._sessionm
-    def SetPkgs_shares_ars(self, session,
-                           id, hostname,
-                           jid, pkgs_shares_id):
-        """
-            fild table :  id,hostname,jid,pkgs_shares_id
-            warning id is not auto increment
-        """
+    def SetPkgs_shares_ars(self,
+                           session,
+                           shareId,
+                           hostname,
+                           jid, 
+                           pkgs_shares_id):
         try:
             new_Pkgs_shares_ars = Pkgs_shares_ars()
-            new_Pkgs_shares_ars.id = id
+            new_Pkgs_shares_ars.id = shareId
             new_Pkgs_shares_ars.hostname =  hostname
             new_Pkgs_shares_ars.jid =  jid
             new_Pkgs_shares_ars.pkgs_shares_id =  pkgs_shares_id
@@ -644,14 +645,15 @@ class PkgsDatabase(DatabaseHelper):
             return None
 
     @DatabaseHelper._sessionm
-    def SetPkgs_shares_ars_web(self, session,
+    def SetPkgs_shares_ars_web(self,
+                               session,
                                pkgs_share_id,
-                               ars_share_id, packages_id,
-                               status, finger_print, size,
+                               ars_share_id,
+                               packages_id,
+                               status,
+                               finger_print,
+                               size,
                                edition_date):
-        """
-            fild table : id,ars_share_id,packages_id,status,finger_print,size,date_edition
-        """
         try:
             new_Pkgs_shares_ars_web = Pkgs_shares_ars_web()
             new_Pkgs_shares_ars_web.ars_share_id =  ars_share_id
@@ -669,12 +671,11 @@ class PkgsDatabase(DatabaseHelper):
             return None
 
     @DatabaseHelper._sessionm
-    def SetPkgs_rules_algos(self, session,
-                            id, name,
-                            description, level):
-        """
-            fild table : id,name,description,level
-        """
+    def SetPkgs_rules_algos(self,
+                            session,
+                            name,
+                            description,
+                            level):
         try:
             new_Pkgs_rules_algos = Pkgs_rules_algos()
             new_Pkgs_rules_algos.ars_share_id =  ars_share_id
@@ -689,13 +690,12 @@ class PkgsDatabase(DatabaseHelper):
             return None
 
     @DatabaseHelper._sessionm
-    def SetPkgs_rules_global(self, session,
+    def SetPkgs_rules_global(self,
+                             session,
                              pkgs_rules_algos_id,
                              pkgs_shares_id,
-                             order,suject):
-        """
-            fild table : id,pkgs_rules_algos_id,pkgs_shares_id,order,suject
-        """
+                             order,
+                             suject):
         try:
             new_Pkgs_rules_global = Pkgs_rules_global()
             new_Pkgs_rules_global.ars_share_id = ars_share_id
@@ -711,13 +711,12 @@ class PkgsDatabase(DatabaseHelper):
             return None
 
     @DatabaseHelper._sessionm
-    def SetPkgs_rules_local(self, session,
+    def SetPkgs_rules_local(self,
+                            session,
                             pkgs_rules_algos_id,
                             pkgs_shares_id,
-                            order,suject):
-        """
-            fild table : id,pkgs_rules_algos_id,pkgs_shares_id,order,suject
-        """
+                            order,
+                            suject):
         try:
             new_Pkgs_rules_local = Pkgs_rules_local()
             new_Pkgs_rules_local.ars_share_id = ars_share_id
@@ -734,6 +733,13 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def pkgs_Orderrules(self, session):
+        """
+        This function is used to obtain the pkgs_rules_algos
+        Args:
+            session: The SQLAlchemy session
+        Returns:
+            it returns the pkgs_rules_algos ordered by level
+        """
         sql = """SELECT
                     *
                 FROM
@@ -853,7 +859,6 @@ class PkgsDatabase(DatabaseHelper):
         session.flush()
         ret = []
         if result:
-            # create dict partage
             for y in result:
                 resuldict={}
                 resuldict['id_sharing']=y[0]
@@ -866,4 +871,3 @@ class PkgsDatabase(DatabaseHelper):
                 resuldict['share_path']=y[8]
                 ret.append(resuldict)
         return ret
-
