@@ -475,6 +475,17 @@ class PkgsDatabase(DatabaseHelper):
             return []
 
     @DatabaseHelper._sessionm
+    def pkgs_register_synchro_package_multisharing(self, session, package, typesynchro ="create"):
+        list_idars = XmppMasterDatabase().get_List_Mutual_ARS_from_cluster_of_one_idars(package['shareobject']['ars_id'])
+        list_server_relay = XmppMasterDatabase().getRelayServerfromid(list_idars[0])
+        #list id server relay
+        for relaydata in list_server_relay:
+            #exclude local package server
+            if relaydata['jid'].startswith("rspulse@pulse/"):
+                continue
+            self.setSyncthingsync(package['id'], relaydata['jid'], typesynchro , watching = 'yes')
+
+    @DatabaseHelper._sessionm
     def pkgs_regiter_synchro_package(self, session, uuidpackage, typesynchro ):
         #list id server relay
         list_server_relay = self.get_List_jid_ServerRelay_enable(enabled=1)
@@ -628,7 +639,7 @@ class PkgsDatabase(DatabaseHelper):
                            session,
                            shareId,
                            hostname,
-                           jid, 
+                           jid,
                            pkgs_shares_id):
         try:
             new_Pkgs_shares_ars = Pkgs_shares_ars()
@@ -839,7 +850,7 @@ class PkgsDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def pkgs_sharing_admin_profil(self, session):
         """ renvoi tout les partages """
-        sql ="""SELECT 
+        sql ="""SELECT
                     pkgs.pkgs_shares.id AS id_sharing,
                     pkgs.pkgs_shares.name AS name,
                     pkgs.pkgs_shares.comments AS comments,

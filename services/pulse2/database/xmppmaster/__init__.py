@@ -877,6 +877,70 @@ class XmppMasterDatabase(DatabaseHelper):
         return [x for x in result]
 
     @DatabaseHelper._sessionm
+    def getRelayServerfromid(self, session, ids):
+        listrelayserver=[]
+        if isinstance(ids, basestring):
+            ids=ids.split(',')
+        elif isinstance(ids, int):
+            ids=[ids]
+
+        try:
+            relayservers = session.query(RelayServer).filter(RelayServer.id.in_(ids))
+            relayservers = relayservers.all()
+            session.commit()
+            session.flush()
+            for relayserver in relayservers:
+                res = { 'id': relayserver.id,
+                        'urlguacamole': relayserver.urlguacamole,
+                        'subnet': relayserver.subnet,
+                        'nameserver' : relayserver.nameserver,
+                        'ipserver': relayserver.ipserver,
+                        'ipconnection' : relayserver.ipconnection,
+                        'port': relayserver.port,
+                        'portconnection': relayserver.portconnection,
+                        'mask': relayserver.mask,
+                        'jid': relayserver.jid,
+                        'longitude': relayserver.longitude,
+                        'latitude': relayserver.latitude,
+                        'enabled': relayserver.enabled,
+                        'switchonoff': relayserver.switchonoff,
+                        'mandatory': relayserver.mandatory,
+                        'classutil': relayserver.classutil,
+                        'groupdeploy': relayserver.groupdeploy,
+                        'package_server_ip': relayserver.package_server_ip,
+                        'package_server_port': relayserver.package_server_port,
+                        'moderelayserver': relayserver.moderelayserver
+                    }
+                listrelayserver.append(res)
+            return listrelayserver
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            traceback.print_exc(file=sys.stdout)
+            return listrelayserver
+
+    @DatabaseHelper._sessionm
+    def get_List_Mutual_ARS_from_cluster_of_one_idars(self, session, idars):
+        """
+            cette function renvoi la liste des ars contenue dans 1 cluster
+            On recherche les ars mutuel a 1 ars dans 1 cluster
+        """
+        sql = """SELECT
+                    id_ars
+                 FROM
+                     xmppmaster.has_cluster_ars
+                 WHERE
+                    id_cluster IN (SELECT
+                            id_cluster
+                        FROM
+                            xmppmaster.has_cluster_ars
+                        WHERE
+                            id_ars = %d);""" % (idars)
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        return [x[0] for x in result]
+
+    @DatabaseHelper._sessionm
     def getRelayServer(self, session, enable = None ):
         listrelayserver = []
         if enable is not None:
@@ -8378,12 +8442,12 @@ where agenttype="machine" and groupdeploy in (
 
         Args:
             session: the SQLAlchemy session
-            clusterid: the id of the used cluster 
+            clusterid: the id of the used cluster
             enabled: Tell if we used enabled ars only
                      If None we do not use enabled in the SQL request
         Returns:
             It returns informations from the ars of a cluster
-            like jid, name, classutil, enabled, etc. 
+            like jid, name, classutil, enabled, etc.
         """
         setsearch = clusterid
         if isinstance(clusterid, list):
