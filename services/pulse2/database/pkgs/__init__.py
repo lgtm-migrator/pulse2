@@ -486,9 +486,9 @@ class PkgsDatabase(DatabaseHelper):
             self.setSyncthingsync(package['id'], relaydata['jid'], typesynchro , watching = 'yes')
 
     @DatabaseHelper._sessionm
-    def pkgs_regiter_synchro_package(self, session, uuidpackage, typesynchro ):
+    def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro ):
         #list id server relay
-        list_server_relay = self.get_List_jid_ServerRelay_enable(enabled=1)
+        list_server_relay = XmppMasterDatabase().get_List_jid_ServerRelay_enable(enabled=1)
         for jid in list_server_relay:
             #exclude local package server
             if jid[0].startswith("rspulse@pulse/"):
@@ -523,17 +523,6 @@ class PkgsDatabase(DatabaseHelper):
         for packageuid in pendinglist:
             result_list.append(packageuid.uuidpackage)
         return result_list
-
-
-    @DatabaseHelper._sessionm
-    def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro ):
-        #list id server relay
-        list_server_relay = XmppMasterDatabase().get_List_jid_ServerRelay_enable(enabled=1)
-        for jid in list_server_relay:
-            #exclude local package server
-            if jid[0].startswith("rspulse@pulse/"):
-                continue
-            self.setSyncthingsync(uuidpackage, jid[0], typesynchro , watching = 'yes')
 
     @DatabaseHelper._sessionm
     def clear_old_pending_synchro_package(self, session, timeseconde=35):
