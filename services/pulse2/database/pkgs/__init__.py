@@ -979,6 +979,11 @@ class PkgsDatabase(DatabaseHelper):
                 ret.append(resuldict)
         return ret
 
+    def get_shares(self, session):
+        query = session.query(Pkgs_shares).all()
+        ret = [elem.toH() for elem in query]
+        return ret
+
     @DatabaseHelper._sessionm
     def pkgs_sharing_admin_profil(self, session):
         """ renvoi tout les partages """

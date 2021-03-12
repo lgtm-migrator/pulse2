@@ -159,8 +159,8 @@ def pkgs_search_share(objsearch):
     resultat_sharing=[]
     ordre = PkgsDatabase().pkgs_Orderrules()
 
-    odr = [int(x[0]) for x in ordre]
-    logger.debug("order algo for search share %s " % ordre)
+    #odr = [int(x[0]) for x in ordre]
+    #logger.debug("order algo for search share %s " % ordre)
     wrapper = {
     "config": {},
     "datas": []
@@ -1226,7 +1226,6 @@ def activateAppstreamFlow(id, package_name, package_label, duration):
     updateAppstreamPackages()
     return True
 
-
 def getDownloadAppstreamPackages():
     """
     This methods give new appstream packages who are not
@@ -1802,3 +1801,6 @@ esac""" %(basename(self.file), basename(self.file))
             return self.getRpmCommand()
         else:
             return self.logger.info("I don't know what to do with %s (%s)" % (self.file, file_data[self.file]))
+
+def get_all_packages(login, start=-1, end=-1, filter=""):
+    return PkgsDatabase().get_all_packages(login, start, end, filter)
