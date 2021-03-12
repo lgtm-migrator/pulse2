@@ -1509,15 +1509,17 @@ def remove_xmpp_package(package_uuid):
 
     # If the package exists, delete it and return true
     pathpackagename = os.path.join(_path_package(), package_uuid)
-    if os.path.exists(pathpackagename):
-        shutil.rmtree(pathpackagename)
+    namereel = os.path.abspath(os.path.realpath(pathpackagename))
+
+    if os.path.exists(namereel):
+        shutil.rmtree(namereel)
         # Delete the package from the bdd
         pkgmanage().remove_package(package_uuid)
+        if os.path.islink(pathpackagename):
+            os.unlink(pathpackagename)
         return True
     else :
         return False
-
-
 
 def get_xmpp_package(package_uuid):
     """
