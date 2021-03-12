@@ -64,13 +64,20 @@ class Pkgs_rules_local(object):
         else:
             return ""
 
+    def getPermission(self):
+        if self.permission is not None:
+            return self.permision
+        else:
+            return ""
+
     def to_array(self):
         return {
             'id': self.getId(),
             'pkgs_rules_algos_id': self.getRules_algos_id(),
             'pkgs_shares_id': self.getShares_id(),
             'order': self.getOrder(),
-            'suject': self.getSuject()}
+            'suject': self.getSuject(),
+            'permission': self.getPermission()}
 
     def toH(self):
         return {
@@ -78,4 +85,5 @@ class Pkgs_rules_local(object):
             'pkgs_rules_algos_id': self.pkgs_rules_algos_id,
             'pkgs_shares_id': self.pkgs_shares_id,
             'order': self.order,
-            'suject': self.suject}
+            'suject': self.suject,
+            'permision' : self.permission}
