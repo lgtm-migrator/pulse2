@@ -268,9 +268,6 @@ $f->add(new HiddenTpl("edition_date"), array("value" => date("Y-m-d H:i:s"), "hi
 $f->add(new HiddenTpl("creator"), array("value" => $package["creator"], "hide" => True));
 $f->add(new HiddenTpl("creation_date"), array("value" => $package["creation_date"], "hide" => True));
 
-echo '<pre>';
-//print_r($package);
-echo '</pre>';
 $getShares  = xmlrpc_pkgs_search_share(['login'=>$_SESSION['login']]);
 $shares =[];
 foreach($getShares['datas'] as $share){
@@ -279,9 +276,6 @@ foreach($getShares['datas'] as $share){
   }
 }
 $json = json_decode(get_xmpp_package($_GET['packageUuid']),true);
-echo '<pre>';
-//print_r($json["info"]["Dependency"]);
-echo '</pre>';
 
 if(isset($getShares["config"]["centralizedmultiplesharing"]) && $getShares["config"]["centralizedmultiplesharing"] == true){
   $f->add(new HiddenTpl("previous_localisation_server"), array("value" => $package["previous_localisation_server"], "hide" => True));
