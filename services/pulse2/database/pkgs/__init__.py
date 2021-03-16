@@ -717,6 +717,8 @@ class PkgsDatabase(DatabaseHelper):
             new_Pkgs_shares.ars_name = ars_name
             new_Pkgs_shares.ars_id = ars_id
             new_Pkgs_shares.share_path = share_path
+            new_Pkgs_shares.usedquotas = usedquotas
+            new_Pkgs_shares.quotas = quotas
             session.add(new_Pkgs_shares)
             session.commit()
             session.flush()
@@ -918,7 +920,6 @@ class PkgsDatabase(DatabaseHelper):
                                  algoid,
                                  enabled=1,
                                  typepartage=None):
-
         sql ="""SELECT
                     pkgs.pkgs_shares.id AS id_sharing,
                     pkgs.pkgs_shares.name AS name,
@@ -933,7 +934,9 @@ class PkgsDatabase(DatabaseHelper):
                     pkgs.pkgs_rules_local.pkgs_rules_algos_id AS algos_id,
                     pkgs.pkgs_rules_local.order AS order_rule,
                     pkgs.pkgs_rules_local.suject AS suject,
-                    pkgs.pkgs_rules_local.permission AS permission
+                    pkgs.pkgs_rules_local.permission AS permission,
+                    pkgs.pkgs_shares.quotas AS quotas,
+                    pkgs.pkgs_shares.usedquotas AS usedquotas
                 FROM
                     pkgs.pkgs_shares
                         INNER JOIN
@@ -953,7 +956,6 @@ class PkgsDatabase(DatabaseHelper):
                   ORDER BY pkgs.pkgs_rules_local.order;""" % (sql,
                                                               whereclause,
                                                               typeclause)
-        logging.getLogger().debug(str(sql))
         result = session.execute(sql)
         session.commit()
         session.flush()
@@ -976,12 +978,13 @@ class PkgsDatabase(DatabaseHelper):
                 resuldict['order_rule']=y[11]
                 resuldict['regexp']=y[12]
                 resuldict['permission']=y[13]
+                resuldict['quotas']=y[14]
+                resuldict['usedquotas']=y[15]
+                if resuldict['type'] == 'global':
+                    resuldict['nbpackage']=self.nb_package_in_sharing(share_id=None)
+                else:
+                     resuldict['nbpackage']=self.nb_package_in_sharing(share_id=resuldict['id_sharing'])
                 ret.append(resuldict)
-        return ret
-
-    def get_shares(self, session):
-        query = session.query(Pkgs_shares).all()
-        ret = [elem.toH() for elem in query]
         return ret
 
     @DatabaseHelper._sessionm
@@ -996,12 +999,13 @@ class PkgsDatabase(DatabaseHelper):
                     pkgs.pkgs_shares.uri AS uri,
                     pkgs.pkgs_shares.ars_name AS ars_name,
                     pkgs.pkgs_shares.ars_id AS ars_id,
-                    pkgs.pkgs_shares.share_path AS share_path
+                    pkgs.pkgs_shares.share_path AS share_path,
+                    pkgs.pkgs_shares.quotas AS quotas,
+                    pkgs.pkgs_shares.usedquotas AS usedquotas
                 FROM
                     pkgs.pkgs_shares
                 WHERE
                      pkgs.pkgs_shares.enabled = 1;"""
-        logging.getLogger().debug(str(sql))
         result = session.execute(sql)
         session.commit()
         session.flush()
@@ -1019,8 +1023,43 @@ class PkgsDatabase(DatabaseHelper):
                 resuldict['ars_id']=y[7]
                 resuldict['share_path']=y[8]
                 resuldict['permission']="rw"
+                resuldict['quotas']=y[9]
+                resuldict['usedquotas']=y[10]
                 ret.append(resuldict)
+                if resuldict['type'] == 'global':
+                    resuldict['nbpackage']=self.nb_package_in_sharing(share_id=None)
+                else:
+                    resuldict['nbpackage']=self.nb_package_in_sharing(share_id=resuldict['id_sharing'])
+        logging.getLogger().debug(ret)
         return ret
+
+    def get_shares(self, session):
+        query = session.query(Pkgs_shares).all()
+        ret = [elem.toH() for elem in query]
+        return ret
+
+    @DatabaseHelper._sessionm
+    def nb_package_in_sharing(self, session, share_id=None):
+
+        sql ="""SELECT
+                    COUNT(*)
+                FROM
+                    pkgs.packages
+                WHERE
+                    packages.pkgs_share_id is NULL;"""
+        logging.getLogger().debug(str(sql))
+        if share_id is not None:
+            sql ="""SELECT
+                        COUNT(*)
+                    FROM
+                        pkgs.packages
+                    WHERE
+                        packages.pkgs_share_id = %s;"""%(share_id)
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        return [x for x in result][0][0]
+        return 0
 
     @DatabaseHelper._sessionm
     def pkgs_get_sharing_list_login(self, session, loginname):
@@ -1048,7 +1087,6 @@ class PkgsDatabase(DatabaseHelper):
                         '%s' REGEXP (pkgs.pkgs_rules_local.suject)
                         AND pkgs.pkgs_shares.enabled = 1
                 ORDER BY pkgs.pkgs_rules_local.order;""" % (loginname)
-        logging.getLogger().debug(str(sql))
         result = session.execute(sql)
         session.commit()
         session.flush()

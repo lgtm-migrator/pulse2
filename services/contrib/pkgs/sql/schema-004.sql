@@ -167,6 +167,14 @@ ADD COLUMN `edition_status` INT NULL DEFAULT 1 AFTER `pkgs_share_id`;
 ALTER TABLE `pkgs`.`packages` 
 ADD COLUMN `conf_json` TEXT NULL AFTER `edition_status`;
 
+-- -----------------------------------------------------
+-- add field `table pkgs_shares`.manage quotas
+-- -----------------------------------------------------
+
+ALTER TABLE `pkgs`.`pkgs_shares` 
+ADD COLUMN `usedquotas` INT NULL DEFAULT 0 AFTER `share_path`,
+ADD COLUMN `quotas` INT NULL DEFAULT 0 AFTER `usedquotas`;
+
 UPDATE version SET Number = 4;
 
 COMMIT;
