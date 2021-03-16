@@ -268,8 +268,6 @@ def update_package_size(uuid):
     package_root = os.path.join("/", "var", "lib", "pulse2", "packages", uuid)
     size = simplecommand("du -Lah %s"%package_root)['result'][-1].split("\t")[0]
     PkgsDatabase().update_package_size(uuid, size);
-    # knokno
-    # Get
 
 def _remove_non_ascii(text):
     return unidecode(unicode(text, encoding = "utf-8"))
