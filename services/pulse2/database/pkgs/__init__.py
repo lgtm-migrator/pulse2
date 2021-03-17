@@ -825,7 +825,8 @@ class PkgsDatabase(DatabaseHelper):
                             pkgs_rules_algos_id,
                             pkgs_shares_id,
                             order,
-                            suject):
+                            suject,
+                            permission):
         try:
             new_Pkgs_rules_local = Pkgs_rules_local()
             new_Pkgs_rules_local.pkgs_rules_algos_id = pkgs_rules_algos_id
