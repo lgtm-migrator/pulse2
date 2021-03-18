@@ -779,16 +779,16 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def SetPkgs_rules_algos(self, session,
-                            id, name,
+                            name,
                             description, level):
         """
-            fild table : id,name,description,level
+            fild table : name,description,level
         """
         try:
             new_Pkgs_rules_algos = Pkgs_rules_algos()
-            new_Pkgs_rules_algos.ars_share_id =  ars_share_id
-            new_Pkgs_rules_algos.packages_id = packages_id
-            new_Pkgs_rules_algos.status =  status
+            new_Pkgs_rules_algos.name =  name
+            new_Pkgs_rules_algos.description = description
+            new_Pkgs_rules_algos.level =  level
             session.add(new_Pkgs_rules_algos)
             session.commit()
             session.flush()
