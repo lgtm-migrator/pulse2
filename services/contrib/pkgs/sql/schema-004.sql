@@ -108,7 +108,11 @@ CREATE TABLE IF NOT EXISTS `pkgs`.`pkgs_rules_global` (
   `pkgs_rules_algos_id` INT NOT NULL,
   `pkgs_shares_id` INT NOT NULL,
   `order` INT NULL DEFAULT 0,
+<<<<<<< HEAD
   `suject` VARCHAR(255) NOT NULL,
+=======
+  `subject` VARCHAR(255) NOT NULL,
+>>>>>>> origin/newpkgs
   `permission` varchar(5) DEFAULT 'rw',
   PRIMARY KEY (`id`, `pkgs_rules_algos_id`),
   INDEX `fk_pkgs_rules_global_pkgs_rules_algos1_idx` (`pkgs_rules_algos_id` ASC),

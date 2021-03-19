@@ -152,19 +152,19 @@ def delete_from_pending(pid = "", jidrelay = []):
 
 def pkgs_search_share(objsearch):
     """
-        Cette fonction recupere les partages et permitions suivant les regle definies.
-        parameter is dict filter {login : xxx, profil :xxx}
+        This function is used to retrieve the shares and the permissions
+            following the defined rules.
+        Args:
+            objsearch:
+            # TODO: Fix documentation 
+        Results:
+            It returns the the shares and the permissions following the defined rules.
 
     """
-    resultat_sharing=[]
-    ordre = PkgsDatabase().pkgs_Orderrules()
+    sharing_result = []
+    order_rules = PkgsDatabase().pkgs_Orderrules()
 
-    #odr = [int(x[0]) for x in ordre]
-    #logger.debug("order algo for search share %s " % ordre)
-    wrapper = {
-    "config": {},
-    "datas": []
-    }
+    wrapper = {"config": {}, "datas": []}
     wrapper["config"]["centralizedmultiplesharing"] = PkgsConfig("pkgs").centralizedmultiplesharing
     wrapper["config"]["movepackage"] = PkgsConfig("pkgs").movepackage
 
@@ -172,36 +172,37 @@ def pkgs_search_share(objsearch):
     if objsearch['login'] == 'root':
         # global sharing yes
         # all local sharing yes
-        logger.debug("load all package")
-        wrapper["datas"] =  PkgsDatabase().pkgs_sharing_admin_profil()
-
+        logger.debug("As we are using the root user, we can load all the packages from the list.")
+        wrapper["datas"] = PkgsDatabase().pkgs_sharing_admin_profil()
         return wrapper
     else:
-        for algo in ordre:
-            id_algo=algo[0]
+        for algo in order_rules:
+            id_algo = algo[0]
             # User Rule : 1 sharing on login user
             if id_algo == 1:
                 if 'login' in objsearch:
                     logger.debug(" algos id is %s [%s]" % (id_algo, algo[2]))
-                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['login'],id_algo)
+                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['login'], id_algo)
                     if result:
                         for t in result:
-                            re = [x['name'] for x in resultat_sharing]
-                            if t['name'] in re: continue
-                            resultat_sharing.append(t);
+                            re = [x['name'] for x in sharing_result]
+                            if t['name'] in re: 
+                                continue
+                            sharing_result.append(t);
                     logger.debug("search sharing local %s" % (result))
             elif id_algo == 2: # 1 sharing on profile userlogger.
                 if 'profil' in objsearch:
-                    debug(" algos id is %s [%s]" % (id_algo, algo[2]))
-                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['profil'], algoid = id_algo)
+                    debug("algos id is %s [%s]" % (id_algo, algo[2]))
+                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['profil'], algoid=id_algo)
                     if result:
                         for t in result:
-                            re = [x['name'] for x in resultat_sharing]
-                            if t['name'] in re: continue
-                            resultat_sharing.append(t);
+                            re = [x['name'] for x in sharing_result]
+                            if t['name'] in re: 
+                                continue
+                            sharing_result.append(t);
                     logger.debug("search sharing local %s" % (result))
 
-    wrapper["datas"] = resultat_sharing
+    wrapper["datas"] = sharing_result
     return wrapper
 
 ############### synchro syncthing package #####################
@@ -265,8 +266,13 @@ def associatePackages(pid, fs, level = 0):
     return [ boolsucess, errortransfert ]
 
 def update_package_size(uuid):
+    """
+    This function modify the size on the package in the database.
+    Args:
+        uuid: The uuid of the package
+    """
     package_root = os.path.join("/", "var", "lib", "pulse2", "packages", uuid)
-    size = simplecommand("du -Lah %s"%package_root)['result'][-1].split("\t")[0]
+    size = simplecommand("du -Lab %s" % package_root)['result'][-1].split("\t")[0]
     PkgsDatabase().update_package_size(uuid, size);
 
 def _remove_non_ascii(text):
@@ -370,7 +376,11 @@ def to_json_xmppdeploy(package):
 
         return json.dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
 
-def _preparation_directory_partage():
+def prepare_shared_folder():
+    """
+        This function creates the sharing environment.
+        It creates folders if missing.
+    """
     packages_input_dir_sharing = os.path.join("/", "var", "lib", "pulse2", "packages", "sharing")
     if not os.path.isdir(packages_input_dir_sharing):
         os.mkdir(packages_input_dir_sharing, 0755)
@@ -378,30 +388,45 @@ def _preparation_directory_partage():
     if not os.path.isdir(packages_input_dir_sharing_global):
         os.mkdir(packages_input_dir_sharing_global, 0755)
 
-def _get_partage_fron_descriptor(descriptorpackage):
+def get_share_from_descriptor(package_descriptor):
+    """
+        This function allow to prepare the system to package server.
+        It creates sharing folder if it does not exist.
+
+        Args:
+            package_descriptor: This provide informations as localisation_server.
+    """
     packages_input_dir_sharing = os.path.join("/", "var", "lib", "pulse2", "packages","sharing")
-    if not "localisation_server" in descriptorpackage:
+    if not "localisation_server" in package_descriptor:
         logging.getLogger().warning("keys localisation_server missing global sharing by default")
         return os.path.join(packages_input_dir_sharing,
                             "global",
-                             descriptorpackage['id'])
-    elif  ("localisation_server" in descriptorpackage and \
-                descriptorpackage['localisation_server'] == ""):
+                             package_descriptor['id'])
+    elif  ("localisation_server" in package_descriptor and \
+                package_descriptor['localisation_server'] == ""):
         logging.getLogger().warning("keys localisation_server non definie global sharing by default")
         return os.path.join(packages_input_dir_sharing,
                             "global",
-                            descriptorpackage['id'])
+                            package_descriptor['id'])
     else:
         logging.getLogger().debug("local package %s" % os.path.join(packages_input_dir_sharing,
-                             descriptorpackage['localisation_server'],
-                             descriptorpackage['id']))
+                             package_descriptor['localisation_server'],
+                             package_descriptor['id']))
         return  os.path.join(packages_input_dir_sharing,
-                             descriptorpackage['localisation_server'],
-                             descriptorpackage['id'])
+                             package_descriptor['localisation_server'],
+                             package_descriptor['id'])
 
 def test_ln(pathdirpackage):
-    testdirexit = os.path.isdir(pathdirpackage)
-    if testdirexit:
+    """
+        This function tests a path to know if this is a symlink or not.
+        If this is a dead symlink, it removes it.
+        Args:
+            pathdirpackage: The path to test
+        Returns:
+            It returns an array with the directory type and the real path.
+    """
+    dir_exists = os.path.isdir(pathdirpackage)
+    if dir_exists:
         if os.path.islink(pathdirpackage):
             return { "result" : True ,
                      "type" : "ln" ,
@@ -411,17 +436,19 @@ def test_ln(pathdirpackage):
                      "type" : "dir" ,
                      "realpath":  os.path.realpath(pathdirpackage) }
     elif os.path.islink(pathdirpackage):
-        # lien mort suppression du lien mort
         os.remove(pathdirpackage)
     return { "result" : False }
 
-def putPackageDetail( package, need_assign = True):
+def putPackageDetail(package, need_assign=True):
     """
-        This function is used to create or edited package
+        This function is used to create or edite a package
         Args:
-            package: package dict information
-            need_assign: True create False editor
-        Returns: It returns the new simple package list [True, package['id'], path, dict package]
+            package: a dictionnary with informations on the package
+            need_assign: If set to True, it creates the package.
+                         If set to False, it edits the package.
+        Returns: 
+            It returns the new simple package list 
+            [True, package['id'], path, dict package]
     """
     Bcreatepackage = False
     if package['id'] == "" :
@@ -431,53 +458,45 @@ def putPackageDetail( package, need_assign = True):
     if len(package['id']) != 36:
         return False
 
-    packages_id_input_dir = os.path.join("/", "var", "lib", "pulse2", "packages", package['id'] )
+    packages_id_input_dir = os.path.join("/", "var", "lib", "pulse2", "packages", package['id'])
     packages_input_dir_sharing = os.path.join("/", "var", "lib", "pulse2", "packages","sharing")
 
-    _preparation_directory_partage() # creation directory if no exist
+    prepare_shared_folder()
 
     centralizedmultiplesharing = PkgsConfig("pkgs").centralizedmultiplesharing
 
     logger.debug("centralized multiple sharing mode%s" % centralizedmultiplesharing)
 
-    ###
-    # preparation du partage
-    ###
     if centralizedmultiplesharing:
-        directorysharing = _get_partage_fron_descriptor(package)
+        directorysharing = get_share_from_descriptor(package)
 
         testresult = test_ln(packages_id_input_dir)
         if not testresult['result']:
-            # il n'y a pas de repertoire ni de lien symbolique
-            # CREATION
+            # As there is no folder nor symlink, we create it.
             os.mkdir(packages_id_input_dir, 0755)
-            # global package.
 
             result = simplecommand("mv %s %s " % (packages_id_input_dir,
-                                                    directorysharing))
+                                                  directorysharing))
             result = simplecommand("ln -s %s %s " % (directorysharing,
-                                                    packages_id_input_dir))
+                                                     packages_id_input_dir))
         else:
-            # 1 cas. le package existe
-            # Est il au bon endroit.
+            # Case 1: the folder exists.
+            # But is it at the correct location ?
             if testresult['type'] == "dir":
-                # le package est dans 1 dir /var/lib/package. il faut le mettre dans son bon repertoire
-                # il faut le mettre dans le bon partage
-                # global package.
-                # mv package to global partage
-                result = simplecommand("mv %s %s "%(packages_id_input_dir,
-                                                    directorysharing))
+                # The package is the /var/lib/package folder. We need to move it in the correct one.
+                # We need to put it in the correct share.
+                
+                result = simplecommand("mv %s %s " % (packages_id_input_dir,
+                                                      directorysharing))
                 result = simplecommand("ln -s %s %s " % (directorysharing,
-                                                        packages_id_input_dir))
+                                                         packages_id_input_dir))
             else:
-                # cette operation possible seulement si le parametre movepackage = True
-                # c'est 1 lien symbolique.
-                # est ce que le lien symbolique pointe sur le bon endroit?
+                # This operation is only possible if  the movepackage parameter is set to True
+                # This is a symlink
                 if testresult['realpath'] != directorysharing and \
                     PkgsConfig("pkgs").movepackage:
-                    # il faut mv le repertoire du package dans son bon repertoire.
-                    # le lien symbolique doit etre remplacer
-                    # mv realpath to directorysharing
+                    # we need to move the package to the correct location
+                    # and replace the symlink.
                     os.remove(packages_id_input_dir) # supppression ln symbolique
                     result = simplecommand("mv -nf %s %s " % (testresult['realpath'],
                                                               directorysharing)) # mv to new partage
@@ -1512,11 +1531,11 @@ def remove_xmpp_package(package_uuid):
 
     # If the package exists, delete it and return true
     pathpackagename = os.path.join(_path_package(), package_uuid)
-    namereel = os.path.abspath(os.path.realpath(pathpackagename))
+    realname = os.path.abspath(os.path.realpath(pathpackagename))
 
-    if os.path.exists(namereel):
-        shutil.rmtree(namereel)
-        # Delete the package from the bdd
+    if os.path.exists(realname):
+        shutil.rmtree(realname)
+        # Delete the package from the database
         pkgmanage().remove_package(package_uuid)
         if os.path.islink(pathpackagename):
             os.unlink(pathpackagename)

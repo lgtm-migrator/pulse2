@@ -34,7 +34,7 @@ from pulse2.database.pkgs import PkgsDatabase
 logger = logging.getLogger()
 
 class apimanagepackagemsc:
-    exclud_name_package=["sharing", ".stfolder", ".stignore" ]
+    exclude_name_package = ["sharing", ".stfolder", ".stignore" ]
 
     @staticmethod
     def readjsonfile(namefile):
@@ -45,49 +45,55 @@ class apimanagepackagemsc:
     @staticmethod
     def search_list_package():
         """
-            search list package in partage global is local
+            This function searches packages in the global and
+            local shares.
         """
-        packagelist=[]
-        dirpackage = '/var/lib/pulse2/packages'
-        dirglobal = os.path.join(dirpackage,"sharing", "global")
-        packagelist = [os.path.join(dirglobal, f) for f in os.listdir(dirglobal) if len(f) == 36]
-        dirlocal  = os.path.join(dirpackage, "sharing")
-        pathnamepartage = [os.path.join(dirlocal, f) for f in os.listdir(dirlocal) if f != "global"]
-        for part in pathnamepartage:
+        packagelist = []
+        dirpackage = os.path.join("/", "var", "lib", "pulse2", "packages")
+        global_package_folder = os.path.join(dirpackage, "sharing", "global")
+        packagelist = [os.path.join(global_package_folder, f)
+                for f in os.listdir(global_package_folder) if len(f) == 36]
+        local_package_folder  = os.path.join(dirpackage, "sharing")
+        share_pathname = [os.path.join(local_package_folder, f)
+                for f in os.listdir(local_package_folder) if f != "global"]
+        for part in share_pathname:
             filelist = [os.path.join(part, f) for f in os.listdir(part) if len(f) == 36]
             packagelist += filelist
         return packagelist
 
     @staticmethod
-    def package_for_deploy_from_partage():
+    def package_for_deploy_from_share():
         """
-            creation des lien symbolique dans le repertoire des packages vers les partages local et global
+            This function creates symlinks in the packages directory
+            to the target in the local/global share
         """
-        dirpackage="/var/lib/pulse2/packages"
-        for x in search_list_package():
-            print x , os.path.join(dirpackage, os.path.basename(x))
-            os.symlink(x , os.path.join(dirpackage, os.path.basename(x)))
+        dirpackage = os.path.join("/", "var", "lib", "pulse2", "packages")
+        for package in search_list_package():
+            os.symlink(package , os.path.join(dirpackage, os.path.basename(package)))
 
     @staticmethod
-    def del_link_symbolic():
-        dirpackage = '/var/lib/pulse2/packagestest'
-        packagelist = [os.path.join(dirpackage, f) for f in os.listdir(dirpackage) if len(f) == 36]
-        for fi in packagelist:
-            if os.path.islink(fi) and not os.path.exists(fi):
-                os.remove(fi)
+    def remove_symlinks():
+        """
+        This function remove symlinks
+        """
+        dirpackage = os.path.join("/", "var", "lib", "pulse2", "packages")
+        packagelist = [os.path.join(dirpackage, package) for package in os.listdir(dirpackage) if len(package) == 36]
+        for package in packagelist:
+            if os.path.islink(package) and not os.path.exists(package):
+                os.remove(package)
 
     @staticmethod
     def packagelistmsc():
         folderpackages = os.path.join("/", "var" ,"lib","pulse2","packages")
         return [ os.path.join(folderpackages,x) for x in os.listdir(folderpackages) \
             if os.path.isdir(os.path.join(folderpackages,x)) \
-                and x not in apimanagepackagemsc.exclud_name_package]
+                and x not in apimanagepackagemsc.exclude_name_package]
 
     @staticmethod
     def listfilepackage(folderpackages):
         return [ os.path.join(folderpackages,x) for x in os.listdir(folderpackages) \
             if not os.path.isdir(os.path.join(folderpackages,x)) \
-                and x not in apimanagepackagemsc.exclud_name_package]
+                and x not in apimanagepackagemsc.exclude_name_package]
 
     @staticmethod
     def packagelistmscconfjson(pending = False):
@@ -95,7 +101,7 @@ class apimanagepackagemsc:
         listfichierconf =  [ os.path.join(folderpackages,x,"conf.json") \
             for x in os.listdir(folderpackages) \
                 if os.path.isdir(os.path.join(folderpackages,x)) \
-                    and x not in apimanagepackagemsc.exclud_name_package]
+                    and x not in apimanagepackagemsc.exclude_name_package]
         listpackagependig = PkgsDatabase().list_pending_synchro_package()
         listpendingfichierconf = []
         listnotpendingfichierconf = []
@@ -244,7 +250,7 @@ class apimanagepackagemsc:
             return ((nb, result))
 
 class managepackage:
-    exclud_name_package=["sharing", ".stfolder", ".stignore" ]
+    exclude_name_package=["sharing", ".stfolder", ".stignore" ]
 
     @staticmethod
     def packagedir():
@@ -262,7 +268,7 @@ class managepackage:
         return [os.path.join(managepackage.packagedir(), x) \
             for x in os.listdir(managepackage.packagedir()) \
                 if os.path.isdir(os.path.join(managepackage.packagedir(), x)) \
-                    and x not in managepackage.exclud_name_package]
+                    and x not in managepackage.exclude_name_package]
 
     @staticmethod
     def loadjsonfile(filename):

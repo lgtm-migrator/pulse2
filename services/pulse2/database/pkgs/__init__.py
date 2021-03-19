@@ -208,9 +208,12 @@ class PkgsDatabase(DatabaseHelper):
         """
         Insert the package config into database.
         Param:
+            session: The SQLAlchemy session
             package : dict of the historical config of the package
+            pkgs_share_id:
+            edition_status:
         Returns:
-            Packages object
+            It returns the new package format
         """
 
         request = session.query(Packages).filter(Packages.uuid == package['id']).first()
@@ -295,11 +298,12 @@ class PkgsDatabase(DatabaseHelper):
         """
         Get the list of all the packages stored in database.
         Params:
-            login: str which is the user login (subject form Pkgs_rules_local)
+            session: The SQLAlchemy session
+            login: The user login. (str)
             start: int of the starting offset
             end: int of the limit
         Returns:
-            list of packages
+            It returns the list of the packages.
         """
 
         # This query works, but not additionnals filters
@@ -578,14 +582,29 @@ class PkgsDatabase(DatabaseHelper):
             return []
 
     @DatabaseHelper._sessionm
-    def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro ):
-        #list id server relay
+    def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro):
+        """
+            This function
+            Args:
+                session: the SQLAlchemy session
+                uuidpackage: the UUID of the package
+                typesynchro:
+        """
         list_server_relay = XmppMasterDatabase().get_List_jid_ServerRelay_enable(enabled=1)
         for jid in list_server_relay:
-            #exclude local package server
+            # Exclude the local package server
             if jid[0].startswith("rspulse@pulse/"):
                 continue
-            self.setSyncthingsync(uuidpackage, jid[0], typesynchro , watching = 'yes')
+            self.setSyncthingsync(uuidpackage, jid[0], typesynchro, watching='yes')
+
+    @DatabaseHelper._sessionm
+    def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro ):
+        list_server_relay = self.get_List_jid_ServerRelay_enable(enabled=1)
+        for jid in list_server_relay:
+            # Exclude local package server
+            if jid[0].startswith("rspulse@pulse/"):
+                continue
+            self.setSyncthingsync(uuidpackage, jid[0], typesynchro, watching='yes')
 
     @DatabaseHelper._sessionm
     def pkgs_register_synchro_package_multisharing(self, session, package, typesynchro ="create"):
@@ -602,7 +621,7 @@ class PkgsDatabase(DatabaseHelper):
     def pkgs_unregister_synchro_package(self, session, uuidpackage, typesynchro, jid_relayserver):
         listdata=jid_relayserver.split("@")
         if len(listdata)> 0:
-            datadata = "%s%%"%listdata[0]
+            datadata = "%s%%" % listdata[0]
             sql ="""DELETE FROM `pkgs`.`syncthingsync`
                 WHERE
                 `syncthingsync`.`uuidpackage` like '%s' AND
@@ -702,20 +721,15 @@ class PkgsDatabase(DatabaseHelper):
     # =====================================================================
 
     @DatabaseHelper._sessionm
-    def SetPkgs_shares( self, session,
-                        name, comments,
-                        enabled, type,
-                        uri, ars_name,
-                        ars_id, share_path):
-        """
-            fild table : id,name,comments,enabled,type,uri,ars_name,ars_id,share_path
-        """
+    def SetPkgs_shares(self, session, name, comments,
+                       enabled, share_type, uri, ars_name,
+                       ars_id, share_path, usedquotas, quotas):
         try:
             new_Pkgs_shares = Pkgs_shares()
             new_Pkgs_shares.name = name
             new_Pkgs_shares.comments = comments
             new_Pkgs_shares.enabled = enabled
-            new_Pkgs_shares.type = type
+            new_Pkgs_shares.type = share_type
             new_Pkgs_shares.uri = uri
             new_Pkgs_shares.ars_name = ars_name
             new_Pkgs_shares.ars_id = ars_id
@@ -779,17 +793,13 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def SetPkgs_rules_algos(self, session,
-                            name,
-                            description, level):
-        """
-            fild table : name,description,level
-        """
+                            name, description, level):
         try:
             new_Pkgs_rules_algos = Pkgs_rules_algos()
+            session.add(new_Pkgs_rules_algos)
             new_Pkgs_rules_algos.name =  name
             new_Pkgs_rules_algos.description = description
             new_Pkgs_rules_algos.level =  level
-            session.add(new_Pkgs_rules_algos)
             session.commit()
             session.flush()
             return new_Pkgs_rules_algos.id
@@ -801,16 +811,14 @@ class PkgsDatabase(DatabaseHelper):
     def SetPkgs_rules_global(self, session,
                              pkgs_rules_algos_id,
                              pkgs_shares_id,
-                             order,suject):
-        """
-            fild table : id,pkgs_rules_algos_id,pkgs_shares_id,order,suject
-        """
+                             order,
+                             subject):
         try:
             new_Pkgs_rules_global = Pkgs_rules_local()
             new_Pkgs_rules_global.pkgs_rules_algos_id = pkgs_rules_algos_id
             new_Pkgs_rules_global.pkgs_shares_id = pkgs_shares_id
             new_Pkgs_rules_global.order = order
-            new_Pkgs_rules_global.suject = suject
+            new_Pkgs_rules_global.suject = subject
             session.add(new_Pkgs_rules_global)
             session.commit()
             session.flush()
@@ -825,27 +833,30 @@ class PkgsDatabase(DatabaseHelper):
                             pkgs_rules_algos_id,
                             pkgs_shares_id,
                             order,
-                            suject,
+                            subject,
                             permission):
         try:
-            new_Pkgs_rules_local = Pkgs_rules_local()
             new_Pkgs_rules_local.pkgs_rules_algos_id = pkgs_rules_algos_id
             new_Pkgs_rules_local.pkgs_shares_id = pkgs_shares_id
             new_Pkgs_rules_local.order = order
-            new_Pkgs_rules_local.suject = suject
+            new_Pkgs_rules_local.suject = subject
             new_Pkgs_rules_local.permission = permission
             session.add(new_Pkgs_rules_local)
             session.commit()
             session.flush()
             return new_Pkgs_rules_local.id
-        except Exception, e:
+        except Exception as e:
             logging.getLogger().error(str(e))
             return None
 
     @DatabaseHelper._sessionm
     def pkgs_Orderrules(self, session):
         """
-            cette function renvoi la liste ordonnées des algos a appliquer pour trouver les partages.
+        This function is used to obtain the pkgs_rules_algos
+        Args:
+            session: The SQLAlchemy session
+        Returns:
+            It returns the pkgs_rules_algos ordered by level
         """
         sql = """SELECT
                     *
@@ -896,35 +907,14 @@ class PkgsDatabase(DatabaseHelper):
         return resultrecord
 
     @DatabaseHelper._sessionm
-    def pkgs_order_algo_list(self, session):
-        """
-            cette function renvoi la liste ordonée des algos a appliquer pour trouver les partages.
-        """
-        sql ="""SELECT
-                    *
-                FROM
-                    pkgs.pkgs_rules_algos
-                WHERE
-                    pkgs_rules_algos.level < (SELECT
-                            level
-                        FROM
-                            pkgs.pkgs_rules_algos
-                        WHERE
-                            name LIKE 'no_sharing')
-                ORDER BY level;"""
-        result = session.execute(sql)
-        session.commit()
-        session.flush()
-        return _result_dict_sql_request( ret)
-
-    @DatabaseHelper._sessionm
     def pkgs_sharing_rule_search(self,
                                  session,
                                  user_information,
                                  algoid,
                                  enabled=1,
-                                 typepartage=None):
-        sql ="""SELECT
+                                 share_type=None):
+        
+        sql ="""SELECT 
                     pkgs.pkgs_shares.id AS id_sharing,
                     pkgs.pkgs_shares.name AS name,
                     pkgs.pkgs_shares.comments AS comments,
@@ -937,7 +927,7 @@ class PkgsDatabase(DatabaseHelper):
                     pkgs.pkgs_rules_local.id AS id_rule,
                     pkgs.pkgs_rules_local.pkgs_rules_algos_id AS algos_id,
                     pkgs.pkgs_rules_local.order AS order_rule,
-                    pkgs.pkgs_rules_local.suject AS suject,
+                    pkgs.pkgs_rules_local.suject AS subject
                     pkgs.pkgs_rules_local.permission AS permission,
                     pkgs.pkgs_shares.quotas AS quotas,
                     pkgs.pkgs_shares.usedquotas AS usedquotas
@@ -949,13 +939,13 @@ class PkgsDatabase(DatabaseHelper):
 
         whereclause = """'%s' REGEXP (pkgs.pkgs_rules_local.suject)
                         AND pkgs.pkgs_shares.enabled = %s
-                        AND pkgs.pkgs_rules_local.pkgs_rules_algos_id = %s"""%(user_information,
-                                                                               enabled,
-                                                                               algoid)
+                        AND pkgs.pkgs_rules_local.pkgs_rules_algos_id = %s""" % (user_information,
+                                                                                 enabled,
+                                                                                 algoid)
         typeclause = ""
-        if typepartage is not None:
-            typeclause =""" AND pkgs.pkgs_shares.type = '%s' """%(typepartage)
-        sql = """ %s
+        if share_type is not None:
+            typeclause =""" AND pkgs.pkgs_shares.type = '%s' """ % (share_type)       
+        sql = """ %s 
                   %s %s
                   ORDER BY pkgs.pkgs_rules_local.order;""" % (sql,
                                                               whereclause,
@@ -968,32 +958,52 @@ class PkgsDatabase(DatabaseHelper):
             # create dict partage
             for y in result:
                 resuldict={}
-                resuldict['id_sharing']=y[0]
-                resuldict['name']=y[1]
-                resuldict['comments']=y[2]
-                resuldict['type']=y[4]
-                resuldict['uri']=y[5]
-                resuldict['ars_name']=y[6]
-                resuldict['ars_id']=y[7]
-                resuldict['share_path']=y[8]
-                # information from table pkgs_rules_local or pkgs_rules_global
-                resuldict['id_rule']=y[9]
-                resuldict['algos_id']=y[10]
-                resuldict['order_rule']=y[11]
-                resuldict['regexp']=y[12]
-                resuldict['permission']=y[13]
-                resuldict['quotas']=y[14]
-                resuldict['usedquotas']=y[15]
+                resuldict['id_sharing'] = y[0]
+                resuldict['name'] = y[1]
+                resuldict['comments'] = y[2]
+                resuldict['type'] = y[4]
+                resuldict['uri'] = y[5]
+                resuldict['ars_name'] = y[6]
+                resuldict['ars_id'] = y[7]
+                resuldict['share_path'] = y[8]
+                resuldict['id_rule'] = y[9]
+                resuldict['algos_id'] = y[10]
+                resuldict['order_rule'] = y[11]
+                resuldict['regexp'] = y[12]
+                resuldict['permission'] = y[13]
+                resuldict['quotas'] = y[14]
+                resuldict['usedquotas'] = y[15]
                 if resuldict['type'] == 'global':
-                    resuldict['nbpackage']=self.nb_package_in_sharing(share_id=None)
+                    resuldict['nbpackage'] = self.nb_package_in_sharing(share_id=None)
                 else:
-                     resuldict['nbpackage']=self.nb_package_in_sharing(share_id=resuldict['id_sharing'])
+                     resuldict['nbpackage'] = self.nb_package_in_sharing(share_id=resuldict['id_sharing'])
                 ret.append(resuldict)
         return ret
 
+    def get_shares(self, session):
+        """
+        This function is used to obtain the list of the shares
+        Args:
+            session: The SQLAlchemy session
+
+        Returns:
+            It returns the list of the actual shares
+        """
+        query = session.query(Pkgs_shares).all()
+        list_of_shares = [elem.toH() for elem in query]
+        return list_of_shares
+
     @DatabaseHelper._sessionm
     def pkgs_sharing_admin_profil(self, session):
-        """ renvoi tout les partages """
+        """
+            This function is used to obtain packages list
+            from the admin profile
+        Args:
+            session: The SQLAlchemy session
+
+        Returns:
+            It returns the list of the actual shares for the admin profile.
+        """
         sql ="""SELECT
                     pkgs.pkgs_shares.id AS id_sharing,
                     pkgs.pkgs_shares.name AS name,
@@ -1017,29 +1027,23 @@ class PkgsDatabase(DatabaseHelper):
         if result:
             # create dict partage
             for y in result:
-                resuldict={}
-                resuldict['id_sharing']=y[0]
-                resuldict['name']=y[1]
-                resuldict['comments']=y[2]
-                resuldict['type']=y[4]
-                resuldict['uri']=y[5]
-                resuldict['ars_name']=y[6]
-                resuldict['ars_id']=y[7]
-                resuldict['share_path']=y[8]
-                resuldict['permission']="rw"
-                resuldict['quotas']=y[9]
-                resuldict['usedquotas']=y[10]
+                resuldict = {}
+                resuldict['id_sharing'] = y[0]
+                resuldict['name'] = y[1]
+                resuldict['comments'] = y[2]
+                resuldict['type'] = y[4]
+                resuldict['uri'] = y[5]
+                resuldict['ars_name'] = y[6]
+                resuldict['ars_id'] = y[7]
+                resuldict['share_path'] = y[8]
+                resuldict['permission'] = "rw"
+                resuldict['quotas'] = y[9]
+                resuldict['usedquotas'] = y[10]
                 ret.append(resuldict)
                 if resuldict['type'] == 'global':
-                    resuldict['nbpackage']=self.nb_package_in_sharing(share_id=None)
+                    resuldict['nbpackage'] = self.nb_package_in_sharing(share_id=None)
                 else:
-                    resuldict['nbpackage']=self.nb_package_in_sharing(share_id=resuldict['id_sharing'])
-        logging.getLogger().debug(ret)
-        return ret
-
-    def get_shares(self, session):
-        query = session.query(Pkgs_shares).all()
-        ret = [elem.toH() for elem in query]
+                    resuldict['nbpackage'] = self.nb_package_in_sharing(share_id=resuldict['id_sharing'])
         return ret
 
     @DatabaseHelper._sessionm
@@ -1063,7 +1067,6 @@ class PkgsDatabase(DatabaseHelper):
         session.commit()
         session.flush()
         return [x for x in result][0][0]
-        return 0
 
     @DatabaseHelper._sessionm
     def pkgs_get_sharing_list_login(self, session, loginname):
@@ -1080,7 +1083,7 @@ class PkgsDatabase(DatabaseHelper):
                     pkgs.pkgs_rules_local.id as id_rule,
                     pkgs.pkgs_rules_local.pkgs_rules_algos_id as algos_id,
                     pkgs.pkgs_rules_local.order as order_rule,
-                    pkgs.pkgs_rules_local.suject as suject,
+                    pkgs.pkgs_rules_local.suject as subject,
                     pkgs.pkgs_rules_local.permission as permission
                 FROM
                     pkgs.pkgs_shares
