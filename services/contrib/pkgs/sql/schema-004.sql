@@ -168,7 +168,7 @@ ALTER TABLE `pkgs`.`packages`
 ADD COLUMN `conf_json` TEXT NULL AFTER `edition_status`;
 
 ALTER TABLE `pkgs`.`packages`
-ADD COLUMN `size` VARCHAR(50) NULL DEFAULT "0" AFTER `conf_json`;
+ADD COLUMN `size` INT NULL DEFAULT "0" AFTER `conf_json`;
 
 -- -----------------------------------------------------
 -- add field `table pkgs_shares`.manage quotas
