@@ -301,7 +301,7 @@ class PkgsDatabase(DatabaseHelper):
         Params:
             session: The SQLAlchemy session
             login: The user login. (str)
-            sharing_activated: bool if the sharing system is activated
+            sharing_activated: True, if the sharing system is activated
             start: int of the starting offset
             end: int of the limit
         Returns:
@@ -625,11 +625,15 @@ class PkgsDatabase(DatabaseHelper):
             return []
 
     @DatabaseHelper._sessionm
-    def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro ):
+    def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro):
         """
-        cette function permet de d'enregistrer les ars qui doivent signaler la mise a jour d'un package.
-        Cette fonction est utilisér seulement dans le mode sans partage de packageserver.
-        tout les ars packages server sont consernées.
+            This function allows to register the ARS that needs to tell the update of a package.
+            This function is only used in the "not shared" mode of the packageserver.
+            All the ARS are concerned.
+            Args:
+                session: the SQLAlchemy session
+                uuidpackage: the UUID of the package.
+                typesynchro: Tells if the package will be created or changed.
         """
         #list id server relay
         list_server_relay = XmppMasterDatabase().get_List_jid_ServerRelay_enable(enabled=1)
@@ -640,19 +644,25 @@ class PkgsDatabase(DatabaseHelper):
             self.setSyncthingsync(uuidpackage, jid[0], typesynchro , watching = 'yes')
 
     @DatabaseHelper._sessionm
-    def pkgs_register_synchro_package_multisharing(self, session, package, typesynchro ="create"):
+    def pkgs_register_synchro_package_multisharing(self, session, package, typesynchro="create"):
         """
-        cette function permet de d'enregistrer les ars qui doivent signaler la mise a jour d'un package.
-        Cette fonction est utiliser seulement dans le mode  partage de packageserver seul les ars conserne par le partage sont conserné.
+        This function allows to register the ARS that needs to tell the update of a package.
+        This function is only used in the "shared" mode of the package server.
+        Only the the ars in the share are concerned.
+
+        Args:
+            session: the SQLAlchemy session.
+            package: The package to synchronize.
+            typesynchro: Tells if the package will be created or changed.
+
         """
         list_idars = XmppMasterDatabase().get_List_Mutual_ARS_from_cluster_of_one_idars(package['shareobject']['ars_id'])
         list_server_relay = XmppMasterDatabase().getRelayServerfromid(list_idars[0])
-        #list id server relay
         for relaydata in list_server_relay:
-            #exclude local package server
+
             if relaydata['jid'].startswith("rspulse@pulse/"):
-                continue
-            self.setSyncthingsync(package['id'], relaydata['jid'], typesynchro , watching = 'yes')
+                 continue
+            self.setSyncthingsync(package['id'], relaydata['jid'], typesynchro, watching='yes')
 
     @DatabaseHelper._sessionm
     def pkgs_unregister_synchro_package(self, session, uuidpackage, typesynchro, jid_relayserver):
