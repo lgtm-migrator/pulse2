@@ -53,6 +53,7 @@ from mmc.plugins.pkgs.package_put_api import PackagePutA
 from mmc.plugins.pkgs.user_packageapi_api import UserPackageApiApi
 from mmc.plugins.pkgs.config import PkgsConfig
 from pulse2.managers.location import ComputerLocationManager
+import datetime
 import uuid
 import json
 from pulse2.version import getVersion, getRevision # pyflakes.ignore
@@ -459,6 +460,7 @@ def putPackageDetail(package, need_assign=True):
         return False
 
     # ___ try compability with old packages ___
+    strdate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if "localisation_server" not in  package:
         package['localisation_server']="global"
 
