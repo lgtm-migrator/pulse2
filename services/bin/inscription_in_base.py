@@ -428,7 +428,7 @@ if __name__ == '__main__':
 
             result = simplecommand("du -b %s" % partage)
             taillebytefolder = int(result['result'][0].split()[0])
-            fiche={ "size" : "%sb" % taillebytefolder,
+            fiche={ "size" : "%s" % taillebytefolder,
                     "label" :contenuedejson['name'],
                     "description" : contenuedejson['description'],
                     "version" : contenuedejson['version'],
@@ -497,7 +497,7 @@ if __name__ == '__main__':
                                                     "%s","%s","%s","%s","%s",
                                                     "%s","%s","%s","%s","%s",
                                                     "%s","%s","%s","%s","%s",
-                                                    %s,"%s","%s","%s");"""%(
+                                                    %s,"%s","%s",%s);"""%(
                                                     fiche['label'],
                                                     fiche['description'],
                                                     fiche['uuid'],
