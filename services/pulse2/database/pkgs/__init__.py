@@ -426,8 +426,8 @@ class PkgsDatabase(DatabaseHelper):
                 result["datas"]["uuid"].append(package[4])
                 result["datas"]["name"].append(package[1])
                 result["datas"]["description"].append(package[2])
-                result["datas"]["version"].append(package[3])   
-                result["datas"]["conf_json"].append(conf_json)                
+                result["datas"]["version"].append(package[3])
+                result["datas"]["conf_json"].append(conf_json)
                 result["datas"]["share_id"].append(package[6] if package[6] is not None else "")
                 result["datas"]["share_name"].append(package[7] if package[7] is not None else "")
                 result["datas"]["share_type"].append(package[8] if package[8] is not None else "")
@@ -626,6 +626,11 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def pkgs_register_synchro_package(self, session, uuidpackage, typesynchro ):
+        """
+        cette function permet de d'enregistrer les ars qui doivent signaler la mise a jour d'un package.
+        Cette fonction est utilisér seulement dans le mode sans partage de packageserver.
+        tout les ars packages server sont consernées.
+        """
         #list id server relay
         list_server_relay = XmppMasterDatabase().get_List_jid_ServerRelay_enable(enabled=1)
         for jid in list_server_relay:
@@ -636,17 +641,10 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def pkgs_register_synchro_package_multisharing(self, session, package, typesynchro ="create"):
-        list_idars = XmppMasterDatabase().get_List_Mutual_ARS_from_cluster_of_one_idars(package['shareobject']['ars_id'])
-        list_server_relay = XmppMasterDatabase().getRelayServerfromid(list_idars[0])
-        #list id server relay
-        for relaydata in list_server_relay:
-            #exclude local package server
-            if relaydata['jid'].startswith("rspulse@pulse/"):
-                continue
-            self.setSyncthingsync(package['id'], relaydata['jid'], typesynchro , watching = 'yes')
-
-    @DatabaseHelper._sessionm
-    def pkgs_register_synchro_package_multisharing(self, session, package, typesynchro ="create"):
+        """
+        cette function permet de d'enregistrer les ars qui doivent signaler la mise a jour d'un package.
+        Cette fonction est utiliser seulement dans le mode  partage de packageserver seul les ars conserne par le partage sont conserné.
+        """
         list_idars = XmppMasterDatabase().get_List_Mutual_ARS_from_cluster_of_one_idars(package['shareobject']['ars_id'])
         list_server_relay = XmppMasterDatabase().getRelayServerfromid(list_idars[0])
         #list id server relay
@@ -952,8 +950,7 @@ class PkgsDatabase(DatabaseHelper):
                                  algoid,
                                  enabled=1,
                                  share_type=None):
-        
-        sql ="""SELECT 
+        sql ="""SELECT
                     pkgs.pkgs_shares.id AS id_sharing,
                     pkgs.pkgs_shares.name AS name,
                     pkgs.pkgs_shares.comments AS comments,
@@ -983,8 +980,8 @@ class PkgsDatabase(DatabaseHelper):
                                                                                  algoid)
         typeclause = ""
         if share_type is not None:
-            typeclause =""" AND pkgs.pkgs_shares.type = '%s' """ % (share_type)       
-        sql = """ %s 
+            typeclause =""" AND pkgs.pkgs_shares.type = '%s' """ % (share_type)
+        sql = """ %s
                   %s %s
                   ORDER BY pkgs.pkgs_rules_local.order;""" % (sql,
                                                               whereclause,
