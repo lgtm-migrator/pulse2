@@ -453,12 +453,42 @@ class PkgsDatabase(DatabaseHelper):
                 result["datas"]["share_id"].append(package.pkgs_share_id if package.pkgs_share_id is not None else "")
                 result["datas"]["size"].append(package.size if package.size is not None else "")
         return result
+
     @DatabaseHelper._sessionm
     def update_package_size(self, session, uuid, size):
-        package = session.query(Packages).filter(Packages.uuid == uuid).first()
-        package.size = size
+        """
+        this function update size in package and return the quotas of thr sharing
+        """
+        result = {"size" : size, "uuid" : uuid, "error" : 0}
+        try:
+            package = session.query(Packages).filter(Packages.uuid == uuid).first()
+            if package:
+                package.size = size
+                result["label"] = package.label
+                pkgs_share_id = package.pkgs_share_id
+                result["pkgs_share_id"] = pkgs_share_id
+                session.commit()
+                session.flush()
+                if pkgs_share_id is not None:
+                    re1 = session.query( func.sum(Packages.size).label("total_size")).filter(Packages.pkgs_share_id == pkgs_share_id).first()
+                    resultquotas = self.update_sharing_susedquotas(pkgs_share_id, re1.total_size)
+                    result.update(resultquotas)
+        except:
+            result ["error"] = 1
+        return result
+
+    @DatabaseHelper._sessionm
+    def update_sharing_susedquotas(self, session, id , usesize):
+        """
+        search quotas of sharing
+        """
+        result = {"quotas" : 0, "usedquotas" : 0  }
+        re = session.query(Pkgs_shares).filter(Pkgs_shares.id == id).first()
+        if re:
+            re.usedquotas = usesize
         session.commit()
         session.flush()
+        return result
 
     @DatabaseHelper._sessionm
     def remove_package(self, session, uuid):
