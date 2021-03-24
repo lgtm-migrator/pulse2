@@ -379,7 +379,7 @@ class PkgsDatabase(DatabaseHelper):
                             LEFT JOIN
                         pkgs_rules_algos ON pkgs_rules_local.pkgs_rules_algos_id = pkgs_rules_algos.id
                     WHERE
-                        packages.uuid NOT IN (SELECT 
+                        packages.uuid NOT IN (SELECT
                                 syncthingsync.uuidpackage
                             FROM
                                 pkgs.syncthingsync)
@@ -496,14 +496,33 @@ class PkgsDatabase(DatabaseHelper):
         return result
 
     @DatabaseHelper._sessionm
+    def get_pkgs_share_from_uuid(self, session, uuid ):
+        package = session.query(Packages).filter(Packages.uuid == uuid).first()
+        if package:
+           return package.to_array()
+        return None
+
+    @DatabaseHelper._sessionm
     def remove_package(self, session, uuid):
         """Delete the specified package from the DB
         Param :
             uuid: string of the uuid of the specified package.
+
+        Updates the quotas used by the sharing in which the UUID package belongs.
         """
+        packagesdata = self.get_pkgs_share_from_uuid(uuid)
         session.query(Packages).filter(Packages.uuid == uuid).delete()
         session.commit()
         session.flush()
+        if packagesdata is not None and \
+                'pkgs_share_id' in packagesdata and \
+                    packagesdata['pkgs_share_id'] is not None:
+            re1 = session.query( func.sum(Packages.size).label("total_size")).\
+                filter(Packages.pkgs_share_id == packagesdata['pkgs_share_id']).first()
+            return self.update_sharing_susedquotas(packagesdata['pkgs_share_id'],
+                                                           re1.total_size)
+        return {"quotas" : 0, "usedquotas" : 0}
+
 
     ######## Extensions / Rules ##########
     @DatabaseHelper._sessionm
