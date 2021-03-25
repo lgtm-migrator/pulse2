@@ -254,4 +254,8 @@ function get_all_packages_deploy($login, $start=-1, $end=-1, $filter=""){
   return xmlCall("pkgs.get_all_packages_deploy", [$login, $start, $end, $filter]);
 }
 
+function list_dependancies_for_user_permission($login){
+  return xmlCall("pkgs.list_dependancies_for_user_permission", [$login]);
+}
+
 ?>

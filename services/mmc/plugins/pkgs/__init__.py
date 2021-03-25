@@ -1869,3 +1869,11 @@ def get_all_packages_deploy(login, start=-1, end=-1, filter=""):
     objsearch['list_sharing'] = list_sharing_id(objsearch)
     listuuidpackag=PkgsDatabase().get_list_packages_deploy_view(objsearch, start, end, filter)
     return apimanagepackagemsc.loadpackagelistmsc_on_select_package(listuuidpackag)
+
+def list_dependancies_for_user_permission(login):
+    objsearch={'login' : login, 'permission' : "r"}
+    objsearch['list_sharing'] = list_sharing_id(objsearch)
+    listuuidpackag=PkgsDatabase().get_list_packages_deploy_view(objsearch)
+    return apimanagepackagemsc.loadpackagelistdependence_on_select_package(listuuidpackag)
+
+
