@@ -171,6 +171,10 @@ def pkgs_search_share(objsearch):
     wrapper["config"]["centralizedmultiplesharing"] = PkgsConfig("pkgs").centralizedmultiplesharing
     wrapper["config"]["movepackage"] = PkgsConfig("pkgs").movepackage
 
+    permission  = None
+    if "permission" in objsearch:
+        permission  = objsearch['permission']
+
     # global sharing
     if objsearch['login'] == 'root':
         # global sharing yes
@@ -196,7 +200,9 @@ def pkgs_search_share(objsearch):
             elif id_algo == 2: # 1 sharing on profile userlogger.
                 if 'profil' in objsearch:
                     debug("algos id is %s [%s]" % (id_algo, algo[2]))
-                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['profil'], algoid=id_algo)
+                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['profil'],
+                                                                     algoid=id_algo,
+                                                                     permission = permission)
                     if result:
                         for t in result:
                             re = [x['name'] for x in sharing_result]
