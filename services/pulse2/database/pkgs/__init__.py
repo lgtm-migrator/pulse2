@@ -337,17 +337,26 @@ class PkgsDatabase(DatabaseHelper):
         if filter == "":
             _filter = ""
         else:
-            _filter = """AND
-            (packages.conf_json LIKE '%%%s%%'
-        OR
-            pkgs_shares.name LIKE '%%%s%%'
-        OR
-            pkgs_shares.type LIKE '%%%s%%'
-        OR
-            permission LIKE '%%%s%%')"""%(filter,
-                                            filter,
-                                            filter,
-                                            filter)
+            _filter = """AND ( pkgs_shares.name LIKE '%%%s%%'
+            OR
+                pkgs_shares.type LIKE '%%%s%%'
+            OR
+                packages.label LIKE '%%%s%%'
+            OR
+                packages.description LIKE '%%%s%%'
+            OR
+                packages.version LIKE '%%%s%%'
+            OR
+                packages.uuid LIKE '%%%s%%'
+            OR
+                packages.metagenerator LIKE '%%%s%%'
+            OR
+                packages.Qversion LIKE '%%%s%%'
+            OR
+                packages.Qvendor LIKE '%%%s%%'
+            OR
+                packages.Qsoftware LIKE '%%%s%%'
+            )"""%(filter, filter, filter, filter, filter,filter, filter, filter, filter, filter,filter, filter, filter)
 
         if filter1 == "":
             _filter1 = ""
