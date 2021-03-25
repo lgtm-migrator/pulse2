@@ -167,7 +167,6 @@ class apimanagepackagemsc:
     def loadpackagelistdependence_on_select_package(listuuidpackag):
         xmpp_list = []
         folderpackages = os.path.join("/", "var" ,"lib","pulse2","packages")
-        for packagefiles in [os.path.join(folderpackages, x, "xmppdeploy.json" ) for x in listuuidpackag["uuid"]]:
         for x in listuuidpackag["uuid"]:
             packagefiles = os.path.join(folderpackages, x, "xmppdeploy.json" )
             if not os.path.exists(packagefiles):
