@@ -1862,7 +1862,10 @@ def list_sharing_id(objsearch):
     return list_id_sharing
 
 def get_all_packages_deploy(login, start=-1, end=-1, filter=""):
-    objsearch = {'login': login}
+    """
+        only user with persission partage read must deploy
+    """
+    objsearch={'login' : login, 'permission' : "r"}
     objsearch['list_sharing'] = list_sharing_id(objsearch)
     listuuidpackag=PkgsDatabase().get_list_packages_deploy_view(objsearch, start, end, filter)
     return apimanagepackagemsc.loadpackagelistmsc_on_select_package(listuuidpackag)
