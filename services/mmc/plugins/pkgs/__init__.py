@@ -1863,17 +1863,22 @@ def list_sharing_id(objsearch):
 
 def get_all_packages_deploy(login, start=-1, end=-1, filter=""):
     """
-        only user with persission partage read must deploy
+        Only the packages with share permissions can deploy
     """
     objsearch={'login' : login, 'permission' : "r"}
     objsearch['list_sharing'] = list_sharing_id(objsearch)
     listuuidpackag=PkgsDatabase().get_list_packages_deploy_view(objsearch, start, end, filter)
     return apimanagepackagemsc.loadpackagelistmsc_on_select_package(listuuidpackag)
 
-def list_dependancies_for_user_permission(login):
-    objsearch={'login' : login, 'permission' : "r"}
+def get_dependencies_list_from_permissions(login):
+    """
+    This function is used to retrieve the dependency list in function of the permissions.
+    Args:
+        login: The login of the user we are seeking dependencies
+    Returns:
+        It returns the dependency list in function of the permissions
+    """
+    objsearch = {'login': login, 'permission': "r"}
     objsearch['list_sharing'] = list_sharing_id(objsearch)
-    listuuidpackag=PkgsDatabase().get_list_packages_deploy_view(objsearch)
-    return apimanagepackagemsc.loadpackagelistdependence_on_select_package(listuuidpackag)
-
-
+    listuuidpackag = PkgsDatabase().get_list_packages_deploy_view(objsearch)
+    return apimanagepackagemsc.load_packagelist_dependencies(listuuidpackag)
