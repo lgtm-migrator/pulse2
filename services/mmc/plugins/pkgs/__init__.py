@@ -2,7 +2,7 @@
 #
 # (c) 2004-2007 Linbox / Free&ALter Soft, http://linbox.com
 # (c) 2007-2008 Mandriva
-# (c) 2017      Siveo
+# (c) 2017-2021 Siveo
 #
 # $Id$
 #
@@ -171,9 +171,9 @@ def pkgs_search_share(objsearch):
     wrapper["config"]["centralizedmultiplesharing"] = PkgsConfig("pkgs").centralizedmultiplesharing
     wrapper["config"]["movepackage"] = PkgsConfig("pkgs").movepackage
 
-    permission  = None
+    permission = None
     if "permission" in objsearch:
-        permission  = objsearch['permission']
+        permission = objsearch['permission']
 
     # global sharing
     if objsearch['login'] == 'root':
@@ -189,7 +189,9 @@ def pkgs_search_share(objsearch):
             if id_algo == 1:
                 if 'login' in objsearch:
                     logger.debug(" algos id is %s [%s]" % (id_algo, algo[2]))
-                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['login'], id_algo)
+                    result = PkgsDatabase().pkgs_sharing_rule_search(objsearch['profil'],
+                                                                     algoid=id_algo,
+                                                                     permission=permission)
                     if result:
                         for t in result:
                             re = [x['name'] for x in sharing_result]
@@ -468,7 +470,6 @@ def putPackageDetail(package, need_assign=True):
         return False
 
     # ___ try compability with old packages ___
-    strdate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if "localisation_server" not in  package:
         package['localisation_server']="global"
 
@@ -1855,15 +1856,13 @@ def get_all_packages(login, sharing_activated=False, start=-1, end=-1, filter=""
     return PkgsDatabase().get_all_packages(login, sharing_activated, start, end, filter)
 
 def list_sharing_id(objsearch):
-    list_id_sharing =[]
+    list_id_sharing = []
     for sharing in pkgs_search_share(objsearch)['datas']:
         list_id_sharing.append(sharing['id_sharing'])
     return list_id_sharing
 
 def get_all_packages_deploy(login, start=-1, end=-1, filter=""):
-    objsearch={'login' : login}
+    objsearch = {'login': login}
     objsearch['list_sharing'] = list_sharing_id(objsearch)
     listuuidpackag=PkgsDatabase().get_list_packages_deploy_view(objsearch, start, end, filter)
     return apimanagepackagemsc.loadpackagelistmsc_on_select_package(listuuidpackag)
-
-

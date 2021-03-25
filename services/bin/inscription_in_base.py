@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; -*-
 #
-# (c) 2016 siveo, http://www.siveo.net
+# (c) 2016-2021 siveo, http://www.siveo.net
 #
 # This file is part of Pulse 2, http://www.siveo.net
 #
@@ -25,17 +25,12 @@
 # il doit etre utilise que pour les package en mode standanrd.
 # il lit tous les packages dans /var/lib/pulse/packages et les inscrit en base.
 
-import shutil
-import sys,os
+import sys
+import os
 import logging
-import platform
 import subprocess
-import base64
-import time
 import json
-import re
 import traceback
-from datetime import datetime
 from optparse import OptionParser
 import MySQLdb
 import getpass
@@ -78,8 +73,7 @@ class managepackage:
             if managepackage.agenttype == "relayserver":
                 return os.path.join("/", "var", "lib", "pulse2", "packages")
             else:
-                return os.path.join(os.path.expanduser('~pulseuser'),
-'packages')
+                return os.path.join(os.path.expanduser('~pulseuser'), 'packages')
         elif sys.platform.startswith('win'):
             return os.path.join(
                 os.environ["ProgramFiles"], "Pulse", "var", "tmp", "packages")
@@ -90,35 +84,38 @@ class managepackage:
             return None
 
     @staticmethod
-    def search_list_package(dirpartage = None):
+    def search_list_package(shared_dir=None):
         """
-            list tout les packages in les partages
+            This function searches packages in the global and
+            local shares.
         """
-        packagelist=[]
-        if dirpartage is None:
+        packagelist = []
+        if shared_dir is None:
             dirpackage = managepackage.packagedir()
         else:
-            dirpartage = os.path.abspath(os.path.realpath(dirpartage))
+            shared_dir = os.path.abspath(os.path.realpath(shared_dir))
         dirglobal = os.path.join(dirpackage,"sharing", "global")
         packagelist = [os.path.join(dirglobal, f) for f in os.listdir(dirglobal) if len(f) == 36]
         dirlocal  = os.path.join(dirpackage, "sharing")
-        pathnamepartage = [os.path.join(dirlocal, f) for f in os.listdir(dirlocal) if f != "global"]
-        for part in pathnamepartage:
+        share_pathname = [os.path.join(dirlocal, f) for f in os.listdir(dirlocal) if f != "global"]
+        for part in share_pathname:
             filelist = [os.path.join(part, f) for f in os.listdir(part) if len(f) == 36]
             packagelist += filelist
         return packagelist
 
     @staticmethod
-    def package_for_deploy_from_partage(dirpartage = None, verbeux = False):
+    def package_for_deploy_from_share(shared_dir=None, verbose=False):
         """
-            Cette fonction crée les liens symbolique pour les partages.
+            This function creates symlinks in the packages directory
+            to the target in the local/global share
         """
-        if dirpartage is None:
+
+        if shared_dir is None:
             dirpackage = managepackage.packagedir()
         else:
-            dirpartage = os.path.abspath(os.path.realpath(dirpartage))
+            shared_dir = os.path.abspath(os.path.realpath(shared_dir))
         for x in  managepackage.search_list_package():
-            if verbeux:
+            if verbose:
                 print "symbolic link %s to %s" %(x , os.path.join(dirpackage, os.path.basename(x)))
             try:
                 os.symlink(x , os.path.join(dirpackage, os.path.basename(x)))
@@ -126,9 +123,9 @@ class managepackage:
                 pass
 
     @staticmethod
-    def del_link_symbolic(dirpackage = None):
+    def remove_symlinks(dirpackage=None):
         """
-            Cette fonction suprime les liens symboliques cassés pour les partages.
+        This function remove symlinks
         """
         if dirpackage is None:
             dirpackage = managepackage.packagedir()
@@ -160,12 +157,10 @@ class managepackage:
         """
 
         if os.path.isfile(filename):
-            with open(filename,
-'r') as info:
+            with open(filename, 'r') as info:
                 jsonFile = info.read()
             try:
-                outputJSONFile = json.loads(jsonFile.decode('utf-8',
-'ignore'))
+                outputJSONFile = json.loads(jsonFile.decode('utf-8', 'ignore'))
                 return outputJSONFile
             except Exception as e:
                 logger.error("We failed to decode the file %s" % filename)
@@ -186,7 +181,7 @@ class managepackage:
                     return outputJSONFile
             except Exception as e:
                 logger.error("Please verify the format of the descriptor for"
-                             "the package %s." %s)
+                             "the package %s." % packagename)
                 logger.error("we are encountering the error: %s" % str(e))
         return None
 
@@ -202,7 +197,6 @@ class managepackage:
             It returns the version of the package
         """
         for package in managepackage.listpackages():
-            # print os.path.join(package,"xmppdeploy.json")
             try:
                 outputJSONFile = managepackage.loadjsonfile(os.path.join(package, "xmppdeploy.json"))
                 if 'info' in outputJSONFile \
@@ -352,29 +346,29 @@ if __name__ == '__main__':
     base="pkgs"
     db=None
 
-    textprogrammehelp="Ce Programme permet de inscrire ou reinscrire dans la table les packages existant dans le repertoire /var/lib/pulse2/packages"
+    help_message="This program is use to add or readd in the database, the package already in /var/lib/pulse2/packages"
 
-    optp = OptionParser(description=textprogrammehelp)
+    optp = OptionParser(description=help_message)
     optp.add_option("-H", "--hostname",
                     dest="hostname", default = "localhost",
-                    help="hostname SGBD")
+                    help="Hostname of the SQL Server")
 
     optp.add_option("-p", "--port",
                     dest="port", default = 3306,
-                    help="port_decreation")
+                    help="port of the SQL Server")
 
     optp.add_option("-u", "--user",
                     dest="user", default = "root",
-                    help="user compter")
+                    help="username in the SQL Server")
     password=""
     optp.add_option("-P", "--password",
                     dest="password", default = "",
-                    help="password connection")
+                    help="Password of the user in the SQL Server")
 
 
     optp.add_option("-g", "--regeneratetable",action="store_true",
                     dest="regeneratetable", default=False,
-                    help="reinitialise des packages dans la bases")
+                    help="reser the package list in the database")
 
     opts, args = optp.parse_args()
 
@@ -412,54 +406,50 @@ if __name__ == '__main__':
             finally:
                 cursor.close()
 
-        packagedir=os.path.join("/", "var", "lib", "pulse2", "packages")
-        sharing=os.path.join(packagedir,"sharing")
-        #list_package_non_lien_symbolique =   [os.path.join(packagedir, x) for x in os.listdir(packagedir) \
-            #if len(x) == 36 and\
-                #os.path.isdir(os.path.join(packagedir, x)) and\
-                    #not  os.path.islink(os.path.join(packagedir, x))]
-        list_package =   [os.path.join(packagedir, x) for x in os.listdir(packagedir) \
+        packagedir = os.path.join("/", "var", "lib", "pulse2", "packages")
+        sharing = os.path.join(packagedir,"sharing")
+        list_package = [os.path.join(packagedir, x) for x in os.listdir(packagedir) \
             if len(x) == 36 and\
-                os.path.isdir(os.path.join(packagedir, x)) ]
+                os.path.isdir(os.path.join(packagedir, x))]
 
-        for partage in list_package:
-            jsonfilepath = os.path.join(partage, "conf.json")
-            contenuedejson = managepackage.loadjsonfile(jsonfilepath)
+        for package in list_package:
+            jsonfilepath = os.path.join(package, "conf.json")
+            json_file = managepackage.loadjsonfile(jsonfilepath)
 
-            result = simplecommand("du -b %s" % partage)
-            taillebytefolder = int(result['result'][0].split()[0])
-            fiche={ "size" : "%s" % taillebytefolder,
-                    "label" :contenuedejson['name'],
-                    "description" : contenuedejson['description'],
-                    "version" : contenuedejson['version'],
-                    "os" : contenuedejson['targetos'],
-                    "metagenerator" : contenuedejson['metagenerator'],
-                    "uuid" : contenuedejson['id'],
-                    "entity_id": contenuedejson['entity_id'],
-                    "sub_packages": json.dumps(contenuedejson['sub_packages']),
-                    "reboot": contenuedejson['reboot'],
-                    "inventory_associateinventory": contenuedejson['inventory']['associateinventory'],
-                    "inventory_licenses": contenuedejson['inventory']['licenses'],
-                    "Qversion": contenuedejson['inventory']['queries']['Qversion'],
-                    "Qvendor": contenuedejson['inventory']['queries']['Qvendor'],
-                    "Qsoftware": contenuedejson['inventory']['queries']['Qsoftware'],
-                    "boolcnd": contenuedejson['inventory']['queries']['boolcnd'],
-                    "postCommandSuccess_command": contenuedejson['commands']['postCommandSuccess']['command'],
-                    "postCommandSuccess_name": contenuedejson['commands']['postCommandSuccess']['name'],
-                    "installInit_command": contenuedejson['commands']['installInit']['command'],
-                    "installInit_name": contenuedejson['commands']['installInit']['name'],
-                    "postCommandFailure_command": contenuedejson['commands']['postCommandFailure']['command'],
-                    "postCommandFailure_name": contenuedejson['commands']['postCommandFailure']['name'],
-                    "command_command": contenuedejson['commands']['command']['command'],
-                    "command_name": contenuedejson['commands']['command']['name'],
-                    "preCommand_command": contenuedejson['commands']['preCommand']['command'],
-                    "preCommand_name": contenuedejson['commands']['preCommand']['name'],
-                    "pkgs_share_id": "NULL",
-                    "edition_status": 1,
-                    "conf_json": json.dumps(contenuedejson)}
+            result = simplecommand("du -b %s" % package)
+            sizebytefolder = int(result['result'][0].split()[0])
+            package_infos = {"size": "%s" % sizebytefolder,
+                     "label":json_file['name'],
+                     "description": json_file['description'],
+                     "version": json_file['version'],
+                     "os": json_file['targetos'],
+                     "metagenerator": json_file['metagenerator'],
+                     "uuid": json_file['id'],
+                     "entity_id": json_file['entity_id'],
+                     "sub_packages": json.dumps(json_file['sub_packages']),
+                     "reboot": json_file['reboot'],
+                     "inventory_associateinventory": json_file['inventory']['associateinventory'],
+                     "inventory_licenses": json_file['inventory']['licenses'],
+                     "Qversion": json_file['inventory']['queries']['Qversion'],
+                     "Qvendor": json_file['inventory']['queries']['Qvendor'],
+                     "Qsoftware": json_file['inventory']['queries']['Qsoftware'],
+                     "boolcnd": json_file['inventory']['queries']['boolcnd'],
+                     "postCommandSuccess_command": json_file['commands']['postCommandSuccess']['command'],
+                     "postCommandSuccess_name": json_file['commands']['postCommandSuccess']['name'],
+                     "installInit_command": json_file['commands']['installInit']['command'],
+                     "installInit_name": json_file['commands']['installInit']['name'],
+                     "postCommandFailure_command": json_file['commands']['postCommandFailure']['command'],
+                     "postCommandFailure_name": json_file['commands']['postCommandFailure']['name'],
+                     "command_command": json_file['commands']['command']['command'],
+                     "command_name": json_file['commands']['command']['name'],
+                     "preCommand_command": json_file['commands']['preCommand']['command'],
+                     "preCommand_name": json_file['commands']['preCommand']['name'],
+                     "pkgs_share_id": "NULL",
+                     "edition_status": 1,
+                     "conf_json": json.dumps(json_file)}
 
-            for p in fiche:
-                fiche[p] = MySQLdb.escape_string(str(fiche[p]))
+            for p in package_infos:
+                package_infos[p] = MySQLdb.escape_string(str(package_infos[p]))
 
 
             sql="""INSERT INTO `pkgs`.`packages` (
@@ -498,35 +488,35 @@ if __name__ == '__main__':
                                                     "%s","%s","%s","%s","%s",
                                                     "%s","%s","%s","%s","%s",
                                                     %s,"%s","%s",%s);"""%(
-                                                    fiche['label'],
-                                                    fiche['description'],
-                                                    fiche['uuid'],
-                                                    fiche['version'],
-                                                    fiche['os'],
-                                                    fiche['metagenerator'],
-                                                    fiche['entity_id'],
-                                                    fiche['sub_packages'],
-                                                    fiche['reboot'],
-                                                    fiche['inventory_associateinventory'],
-                                                    fiche['inventory_licenses'],
-                                                    fiche['Qversion'],
-                                                    fiche['Qvendor'],
-                                                    fiche['Qsoftware'],
-                                                    fiche['boolcnd'],
-                                                    fiche['postCommandSuccess_command'],
-                                                    fiche['postCommandSuccess_name'],
-                                                    fiche['installInit_command'],
-                                                    fiche['installInit_name'],
-                                                    fiche['postCommandFailure_command'],
-                                                    fiche['postCommandFailure_name'],
-                                                    fiche['command_command'],
-                                                    fiche['command_name'],
-                                                    fiche['preCommand_command'],
-                                                    fiche['preCommand_name'],
-                                                    fiche['pkgs_share_id'],
-                                                    fiche['edition_status'],
-                                                    fiche['conf_json'],
-                                                    fiche['size'])
+                                                    package_infos['label'],
+                                                    package_infos['description'],
+                                                    package_infos['uuid'],
+                                                    package_infos['version'],
+                                                    package_infos['os'],
+                                                    package_infos['metagenerator'],
+                                                    package_infos['entity_id'],
+                                                    package_infos['sub_packages'],
+                                                    package_infos['reboot'],
+                                                    package_infos['inventory_associateinventory'],
+                                                    package_infos['inventory_licenses'],
+                                                    package_infos['Qversion'],
+                                                    package_infos['Qvendor'],
+                                                    package_infos['Qsoftware'],
+                                                    package_infos['boolcnd'],
+                                                    package_infos['postCommandSuccess_command'],
+                                                    package_infos['postCommandSuccess_name'],
+                                                    package_infos['installInit_command'],
+                                                    package_infos['installInit_name'],
+                                                    package_infos['postCommandFailure_command'],
+                                                    package_infos['postCommandFailure_name'],
+                                                    package_infos['command_command'],
+                                                    package_infos['command_name'],
+                                                    package_infos['preCommand_command'],
+                                                    package_infos['preCommand_name'],
+                                                    package_infos['pkgs_share_id'],
+                                                    package_infos['edition_status'],
+                                                    package_infos['conf_json'],
+                                                    package_infos['size'])
 
             print sql
             try:
@@ -553,5 +543,5 @@ if __name__ == '__main__':
     finally:
         if db is not None:
             db.close()
-    for partage in list_package:
-        print partage
+    for package in list_package:
+        print package

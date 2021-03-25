@@ -551,7 +551,14 @@ class PkgsDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def update_package_size(self, session, uuid, size):
         """
-        this function update size in package and return the quotas of thr sharing
+        This function update the size in package of the package.
+        Args:
+            session: the SQLAlchemy session
+            uuid: The uuid of the package
+            size: The new size of the package
+        Returns:
+            It returns the Quota for the shares.
+
         """
         result = {"size" : size, "uuid" : uuid, "error" : 0}
         try:
@@ -564,20 +571,23 @@ class PkgsDatabase(DatabaseHelper):
                 session.commit()
                 session.flush()
                 if pkgs_share_id is not None:
-                    re1 = session.query( func.sum(Packages.size).label("total_size")).filter(Packages.pkgs_share_id == pkgs_share_id).first()
-                    resultquotas = self.update_sharing_susedquotas(pkgs_share_id, re1.total_size)
+                    sql_request = session.query( func.sum(Packages.size).label("total_size")).filter(Packages.pkgs_share_id == pkgs_share_id).first()
+                    resultquotas = self.update_sharing_usedquotas(pkgs_share_id, sql_request.total_size)
                     result.update(resultquotas)
         except:
-            result ["error"] = 1
+            result["error"] = 1
         return result
 
     @DatabaseHelper._sessionm
-    def update_sharing_susedquotas(self, session, id , usesize):
+    def update_sharing_usedquotas(self, session, rule_id , usesize):
         """
-        search quotas of sharing
+        Search quotas in the shares
+        Args:
+            session: the SQLAlchemy session
+            usesize:
         """
         result = {"quotas" : 0, "usedquotas" : 0  }
-        re = session.query(Pkgs_shares).filter(Pkgs_shares.id == id).first()
+        re = session.query(Pkgs_shares).filter(Pkgs_shares.id == rule_id).first()
         if re:
             re.usedquotas = usesize
         session.commit()
@@ -585,7 +595,16 @@ class PkgsDatabase(DatabaseHelper):
         return result
 
     @DatabaseHelper._sessionm
-    def get_pkgs_share_from_uuid(self, session, uuid ):
+    def get_pkgs_share_from_uuid(self, session, uuid):
+        """
+        This function is used to obtain a package based on the uuid.
+        Args:
+            session: the SQLAlchemy session.
+            uuid: string of the uuid of the specified package.
+
+        Returns:
+            It returns the package based on the uuid.
+        """
         package = session.query(Packages).filter(Packages.uuid == uuid).first()
         if package:
            return package.to_array()
@@ -593,8 +612,11 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def remove_package(self, session, uuid):
-        """Delete the specified package from the DB
+        """
+        Delete the specified package from the DB and
+        Updates the quotas used by the sharing in which the UUID package belongs.
         Param :
+            session: the SQLAlchemy session
             uuid: string of the uuid of the specified package.
 
         Updates the quotas used by the sharing in which the UUID package belongs.
@@ -606,12 +628,11 @@ class PkgsDatabase(DatabaseHelper):
         if packagesdata is not None and \
                 'pkgs_share_id' in packagesdata and \
                     packagesdata['pkgs_share_id'] is not None:
-            re1 = session.query( func.sum(Packages.size).label("total_size")).\
+            sql_request = session.query( func.sum(Packages.size).label("total_size")).\
                 filter(Packages.pkgs_share_id == packagesdata['pkgs_share_id']).first()
-            return self.update_sharing_susedquotas(packagesdata['pkgs_share_id'],
-                                                           re1.total_size)
+            return self.update_sharing_usedquotas(packagesdata['pkgs_share_id'],
+                                                           sql_request.total_size)
         return {"quotas" : 0, "usedquotas" : 0}
-
 
     ######## Extensions / Rules ##########
     @DatabaseHelper._sessionm
@@ -623,9 +644,9 @@ class PkgsDatabase(DatabaseHelper):
         return extensions
 
     @DatabaseHelper._sessionm
-    def delete_extension(self,session, id):
+    def delete_extension(self,session, rule_id):
         try:
-            session.query(Extensions).filter(Extensions.id == id).delete()
+            session.query(Extensions).filter(Extensions.id == rule_id).delete()
             session.commit()
             session.flush()
             return True
@@ -633,12 +654,14 @@ class PkgsDatabase(DatabaseHelper):
             return False
 
     @DatabaseHelper._sessionm
-    def raise_extension(self,session, id):
-        """ Raise the selected rule
+    def raise_extension(self,session, rule_id):
+        """ 
+        Raise the selected rule
         Param:
-            id: int corresponding to the rule id we want to raise
+            session: the SQLAlchemy session
+            rule_id: int corresponding to the rule id we want to raise
         """
-        rule_to_raise = session.query(Extensions).filter(Extensions.id == id).one()
+        rule_to_raise = session.query(Extensions).filter(Extensions.id == rule_id).one()
         rule_to_switch = session.query(Extensions).filter(Extensions.rule_order < rule_to_raise.rule_order).order_by(desc(Extensions.rule_order)).first()
 
         rule_to_raise.rule_order, rule_to_switch.rule_order = rule_to_switch.getRule_order(), rule_to_raise.getRule_order()
@@ -647,12 +670,14 @@ class PkgsDatabase(DatabaseHelper):
 
 
     @DatabaseHelper._sessionm
-    def lower_extension(self,session, id):
-        """ Lower the selected rule
+    def lower_extension(self,session, rule_id):
+        """ 
+        Lower the selected rule
         Param:
-            id: int corresponding to the rule id we want to raise
+            session: the SQLAlchemy session
+            rule_id: int corresponding to the rule id we want to raise
         """
-        rule_to_lower = session.query(Extensions).filter(Extensions.id == id).one()
+        rule_to_lower = session.query(Extensions).filter(Extensions.id == rule_id).one()
         rule_to_switch = session.query(Extensions).filter(Extensions.rule_order > rule_to_lower.rule_order).order_by(asc(Extensions.rule_order)).first()
 
         rule_to_lower.rule_order, rule_to_switch.rule_order = rule_to_switch.getRule_order(), rule_to_lower.getRule_order()
@@ -663,6 +688,7 @@ class PkgsDatabase(DatabaseHelper):
     def get_last_extension_order(self,session):
         """ Lower the selected rule
         Param:
+            session: the SQLAlchemy session
             id: int corresponding to the rule id we want to raise
         """
         last_rule = session.query(Extensions).order_by(desc(Extensions.rule_order)).first()
@@ -676,6 +702,7 @@ class PkgsDatabase(DatabaseHelper):
     def add_extension(self,session, datas):
         """ Lower the selected rule
         Param:
+            session: the SQLAlchemy session
             id: int corresponding to the rule id we want to raise
         """
         if 'id' in datas:
@@ -1103,7 +1130,7 @@ class PkgsDatabase(DatabaseHelper):
                                  algoid,
                                  enabled=1,
                                  share_type=None,
-                                 permission = None):
+                                 permission=None):
         sql ="""SELECT
                     pkgs.pkgs_shares.id AS id_sharing,
                     pkgs.pkgs_shares.name AS name,
@@ -1117,7 +1144,7 @@ class PkgsDatabase(DatabaseHelper):
                     pkgs.pkgs_rules_local.id AS id_rule,
                     pkgs.pkgs_rules_local.pkgs_rules_algos_id AS algos_id,
                     pkgs.pkgs_rules_local.order AS order_rule,
-                    pkgs.pkgs_rules_local.suject AS subject,
+                    pkgs.pkgs_rules_local.subject AS subject,
                     pkgs.pkgs_rules_local.permission AS permission,
                     pkgs.pkgs_shares.quotas AS quotas,
                     pkgs.pkgs_shares.usedquotas AS usedquotas
@@ -1135,9 +1162,11 @@ class PkgsDatabase(DatabaseHelper):
         typeclause = ""
         if share_type is not None:
             typeclause =""" AND pkgs.pkgs_shares.type = '%s' """ % (share_type)
+
         permitionclause = ""
         if permission is not None:
             permitionclause =""" AND pkgs.pkgs_shares.permission like '%%%s%%' """ % (permission)
+
         sql = """ %s
                   %s %s %s
                   ORDER BY pkgs.pkgs_rules_local.order;""" % (sql,
