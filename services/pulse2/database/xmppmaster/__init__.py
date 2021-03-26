@@ -1128,7 +1128,7 @@ class XmppMasterDatabase(DatabaseHelper):
         return resultatout
 
     @DatabaseHelper._sessionm
-    def get_ARS_from_ars_inclut_in_cluster_of_list_idars(self, session, self, session, listidars, start, limit, filter):
+    def get_ars_list_belongs_cluster(self, session, self, session, listidars, start, limit, filter):
         try:
             start = int(start)
         except:
