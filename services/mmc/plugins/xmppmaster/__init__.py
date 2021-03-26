@@ -744,6 +744,64 @@ def get_xmppmachines_list(start, limit, filter, presence):
 
 def get_xmpprelays_list(start, limit, filter, presence):
     return XmppMasterDatabase().get_xmpprelays_list(start, limit, filter, presence)
+def get_list_ars_from_sharing(sharings, start, limit, filter):
+    listidars=[]
+    for t in sharings:
+        if "r" in  t['permission'] :
+            listidars.append(t['ars_id'])
+    re={}
+    re =  XmppMasterDatabase().get_ARS_from_ars_inclut_in_cluster_of_list_idars(listidars, start, limit, filter)
+    re1 =  XmppMasterDatabase().get_stat_ars_machine(re['jid'])
+    re['total_machines']=[]
+    re['uninventoried']=[]
+    re['publicclass']=[]
+    re['nblinuxmachine']=[]
+    re['inventoried_online']=[]
+    re['mach_on']=[]
+    re['uninventoried_online']=[]
+    re['nbmachinereconf']=[]
+    re['kioskon']=[]
+    re['inventoried']=[]
+    re['nbdarwin']=[]
+    re['kioskoff']=[]
+    re['bothclass']=[]
+    re['privateclass']=[]
+    re['mach_off']=[]
+    re['inventoried_offline']=[]
+    re['with_uuid_serial']=[]
+    re['nb_OU_mach']=[]
+    re['uninventoried_offline']=[]
+    re['nbwindows']=[]
+    re['nb_ou_user']=[]
+    for jid in re['jid']:
+        logger.error("JFKJFK jid %s" % re1[jid] )
+        re['total_machines'].append(re1[jid]['nbmachine'])
+        re['uninventoried'].append(re1[jid]['uninventoried'])
+        re['publicclass'].append(re1[jid]['publicclass'])
+        re['nblinuxmachine'].append(re1[jid]['nblinuxmachine'])
+        re['inventoried_online'].append(re1[jid]['inventoried_online'])
+        re['mach_on'].append(re1[jid]['mach_on'])
+        re['uninventoried_online'].append(re1[jid]['uninventoried_online'])
+        re['nbmachinereconf'].append(re1[jid]['nbmachinereconf'])
+        re['kioskon'].append(re1[jid]['kioskon'])
+        re['inventoried'].append(re1[jid]['inventoried'])
+        re['nbdarwin'].append(re1[jid]['nbdarwin'])
+        re['kioskoff'].append(re1[jid]['kioskoff'])
+        re['bothclass'].append(re1[jid]['bothclass'])
+        re['privateclass'].append(re1[jid]['privateclass'])
+        re['mach_off'].append(re1[jid]['mach_off'])
+        re['inventoried_offline'].append(re1[jid]['inventoried_offline'])
+        re['with_uuid_serial'].append(re1[jid]['with_uuid_serial'])
+        re['nb_OU_mach'].append(re1[jid]['nb_OU_mach'])
+        re['uninventoried_offline'].append(re1[jid]['uninventoried_offline'])
+        re['nbwindows'].append(re1[jid]['nbwindows'])
+        re['nb_ou_user'].append(re1[jid]['nb_ou_user'])
+
+
+    res={"total" : len(re['jid']),
+         "datas" : re
+         }
+    return res
 
 def get_clusters_list(start, limit, filter):
     return XmppMasterDatabase().get_clusters_list(start, limit, filter)
