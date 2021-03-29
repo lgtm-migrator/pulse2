@@ -1138,10 +1138,10 @@ class XmppMasterDatabase(DatabaseHelper):
         except:
             limit = -1
 
-        #filter activate
-        filterars=""
+        # filter activate
+        filterars = ""
         if filter != "":
-            filterars=""" AND (  relayserver.subnet LIKE '%%%s%%' OR 
+            filterars = """ AND (relayserver.subnet LIKE '%%%s%%' OR
                 relayserver.nameserver LIKE '%%%s%%' OR
                 relayserver.ipserver LIKE '%%%s%%' OR
                 relayserver.ipconnection LIKE '%%%s%%' OR
@@ -1156,8 +1156,8 @@ class XmppMasterDatabase(DatabaseHelper):
                 relayserver.package_server_ip LIKE '%%%s%%' OR
                 relayserver.package_server_port LIKE '%%%s%%' OR
                 relayserver.syncthing_port LIKE '%%%s%%') """ % (filter,filter,filter,filter,filter,
-                                                                filter,filter,filter,filter,filter,
-                                                                filter,filter,filter,filter,filter)
+                                                                 filter,filter,filter,filter,filter,
+                                                                 filter,filter,filter,filter,filter)
 
         if listidars:
             listin = "%s"%  ",".join([str(x) for x in listidars])
@@ -1206,7 +1206,7 @@ class XmppMasterDatabase(DatabaseHelper):
             sql=sql+";"
             result = session.execute(sql)
 
-            # count ars
+            #  Count the ARS
             sql_count = "SELECT FOUND_ROWS();"
             ret_count = session.execute(sql_count)
             count = ret_count.first()[0]
@@ -1242,7 +1242,8 @@ class XmppMasterDatabase(DatabaseHelper):
                     resultobj['enabled_css'].append("machineNamepresente" if row[6] == "1" else "machineName")
                     resultobj['mandatory'].append(row[8])
                     resultobj['switchonoff'].append(row[7])
-        resultobj["count"]= count
+        
+        resultobj["count"] = count
         return resultobj
 
     @DatabaseHelper._sessionm
