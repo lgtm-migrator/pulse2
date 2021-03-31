@@ -396,6 +396,7 @@ class PkgsDatabase(DatabaseHelper):
         for package in ret:
             result["uuid"].append(package[0])
         return result
+
     @DatabaseHelper._sessionm
     def get_all_packages(self, session, login, sharing_activated=False, start=-1, end=-1, ctx={}):
         """
@@ -500,6 +501,8 @@ class PkgsDatabase(DatabaseHelper):
                             packages
                                 LEFT JOIN
                             pkgs_shares ON pkgs_shares.id = packages.pkgs_share_id
+                                LEFT JOIN
+                            pkgs_rules_local ON pkgs_rules_local.pkgs_shares_id = pkgs_shares.id
                         WHERE
                             packages.pkgs_share_id IN (%s) AND
                             packages.uuid NOT IN (SELECT
@@ -509,11 +512,14 @@ class PkgsDatabase(DatabaseHelper):
                             %s %s %s %s
                         ;"""%(idsharestr, _filter, where_clause, limit, offset)
 
-
-            ret = session.execute(sql)
-            sql_count = "SELECT FOUND_ROWS();"
-            ret_count = session.execute(sql_count)
-            count = ret_count.first()[0]
+            if idsharestr != "":
+                ret = session.execute(sql)
+                sql_count = "SELECT FOUND_ROWS();"
+                ret_count = session.execute(sql_count)
+                count = ret_count.first()[0]
+            else:
+                ret = []
+                count = 0
         else:
 
             query = session.query(Packages).order_by(Packages.label)
