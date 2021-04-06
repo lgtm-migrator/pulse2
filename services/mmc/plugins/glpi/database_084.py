@@ -747,8 +747,8 @@ class Glpi084(DyngroupDatabaseHelper):
             else:
                 result['data']['presence'].append(0)
 
-            for column in reg_columns:
-                result['data']['reg'][column].append(None)
+            #for column in reg_columns:
+                #result['data']['reg'][column].append(None)
 
         #regquery = session.query(
         #    self.regcontents.c.computers_id,
