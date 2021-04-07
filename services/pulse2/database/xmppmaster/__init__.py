@@ -1138,6 +1138,21 @@ class XmppMasterDatabase(DatabaseHelper):
         except:
             limit = -1
 
+        resultobj ={'id': [],
+                    'hostname': [],
+                    'jid': [],
+                    'jid_from_relayserver': [],
+                    'cluster_name': [],
+                    'cluster_description': [],
+                    'classutil': [],
+                    'macaddress': [],
+                    'ip_xmpp': [],
+                    'enabled': [],
+                    'enabled_css': [],
+                    'mandatory': [],
+                    'switchonoff': []}
+
+        count = 0
         # filter activate
         filterars = ""
         if filter != "":
@@ -1214,19 +1229,6 @@ class XmppMasterDatabase(DatabaseHelper):
             session.commit()
             session.flush()
 
-            resultobj ={'id': [],
-                        'hostname': [],
-                        'jid': [],
-                        'jid_from_relayserver': [],
-                        'cluster_name': [],
-                        'cluster_description': [],
-                        'classutil': [],
-                        'macaddress': [],
-                        'ip_xmpp': [],
-                        'enabled': [],
-                        'enabled_css': [],
-                        'mandatory': [],
-                        'switchonoff': []}
             if result:
                 for row in result:
                     resultobj['id'].append(row[0])
@@ -5436,7 +5438,7 @@ class XmppMasterDatabase(DatabaseHelper):
             elif ctx['computerpresence'] == 'no_presence':
                 computerpresence = " AND enabled = 0 "
         sql = """
-                SELECT
+                SELECT SQL_CALC_FOUND_ROWS
                     mach.*,
                     GROUP_CONCAT(DISTINCT CONCAT(reg.name, '|', reg.value)
                         SEPARATOR '@@@') AS regedit,
@@ -5471,6 +5473,10 @@ class XmppMasterDatabase(DatabaseHelper):
             logger.info("SQL request :  %s" % sql)
 
         result = session.execute(sql)
+        result = session.execute(sql)
+        sql_count = "SELECT FOUND_ROWS();"
+        ret_count = session.execute(sql_count)
+        count = ret_count.first()[0]
         session.commit()
         session.flush()
         ret = self.query_to_array_of_dict(result,bycolumn=True,
@@ -5495,6 +5501,7 @@ class XmppMasterDatabase(DatabaseHelper):
                         if len(couplekeyvalue) == 2:
                             if couplekeyvalue[0] == columkeyreg:
                                 ret['data'][columkeyreg].append(couplekeyvalue[1])
+        ret['total'] = count
         return ret
 
 

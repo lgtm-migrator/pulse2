@@ -757,6 +757,8 @@ def get_list_ars_from_sharing(sharings, start, limit, filter):
             "datas": {},
             "partielcount" : 0
             }
+        return res
+
     stat_ars_machine = XmppMasterDatabase().get_stat_ars_machine(ars_list['jid'])
     ars_list['total_machines'] = []
     ars_list['uninventoried'] = []
@@ -780,28 +782,50 @@ def get_list_ars_from_sharing(sharings, start, limit, filter):
     ars_list['nbwindows'] = []
     ars_list['nb_ou_user'] = []
     for jid in ars_list['jid']:
-        ars_list['total_machines'].append(stat_ars_machine[jid]['nbmachine'])
-        ars_list['uninventoried'].append(stat_ars_machine[jid]['uninventoried'])
-        ars_list['publicclass'].append(stat_ars_machine[jid]['publicclass'])
-        ars_list['nblinuxmachine'].append(stat_ars_machine[jid]['nblinuxmachine'])
-        ars_list['inventoried_online'].append(stat_ars_machine[jid]['inventoried_online'])
-        ars_list['mach_on'].append(stat_ars_machine[jid]['mach_on'])
-        ars_list['uninventoried_online'].append(stat_ars_machine[jid]['uninventoried_online'])
-        ars_list['nbmachinereconf'].append(stat_ars_machine[jid]['nbmachinereconf'])
-        ars_list['kioskon'].append(stat_ars_machine[jid]['kioskon'])
-        ars_list['inventoried'].append(stat_ars_machine[jid]['inventoried'])
-        ars_list['nbdarwin'].append(stat_ars_machine[jid]['nbdarwin'])
-        ars_list['kioskoff'].append(stat_ars_machine[jid]['kioskoff'])
-        ars_list['bothclass'].append(stat_ars_machine[jid]['bothclass'])
-        ars_list['privateclass'].append(stat_ars_machine[jid]['privateclass'])
-        ars_list['mach_off'].append(stat_ars_machine[jid]['mach_off'])
-        ars_list['inventoried_offline'].append(stat_ars_machine[jid]['inventoried_offline'])
-        ars_list['with_uuid_serial'].append(stat_ars_machine[jid]['with_uuid_serial'])
-        ars_list['nb_OU_mach'].append(stat_ars_machine[jid]['nb_OU_mach'])
-        ars_list['uninventoried_offline'].append(stat_ars_machine[jid]['uninventoried_offline'])
-        ars_list['nbwindows'].append(stat_ars_machine[jid]['nbwindows'])
-        ars_list['nb_ou_user'].append(stat_ars_machine[jid]['nb_ou_user'])
-
+        if 'jid' in stat_ars_machine:
+            ars_list['total_machines'].append(stat_ars_machine[jid]['nbmachine'])
+            ars_list['uninventoried'].append(stat_ars_machine[jid]['uninventoried'])
+            ars_list['publicclass'].append(stat_ars_machine[jid]['publicclass'])
+            ars_list['nblinuxmachine'].append(stat_ars_machine[jid]['nblinuxmachine'])
+            ars_list['inventoried_online'].append(stat_ars_machine[jid]['inventoried_online'])
+            ars_list['mach_on'].append(stat_ars_machine[jid]['mach_on'])
+            ars_list['uninventoried_online'].append(stat_ars_machine[jid]['uninventoried_online'])
+            ars_list['nbmachinereconf'].append(stat_ars_machine[jid]['nbmachinereconf'])
+            ars_list['kioskon'].append(stat_ars_machine[jid]['kioskon'])
+            ars_list['inventoried'].append(stat_ars_machine[jid]['inventoried'])
+            ars_list['nbdarwin'].append(stat_ars_machine[jid]['nbdarwin'])
+            ars_list['kioskoff'].append(stat_ars_machine[jid]['kioskoff'])
+            ars_list['bothclass'].append(stat_ars_machine[jid]['bothclass'])
+            ars_list['privateclass'].append(stat_ars_machine[jid]['privateclass'])
+            ars_list['mach_off'].append(stat_ars_machine[jid]['mach_off'])
+            ars_list['inventoried_offline'].append(stat_ars_machine[jid]['inventoried_offline'])
+            ars_list['with_uuid_serial'].append(stat_ars_machine[jid]['with_uuid_serial'])
+            ars_list['nb_OU_mach'].append(stat_ars_machine[jid]['nb_OU_mach'])
+            ars_list['uninventoried_offline'].append(stat_ars_machine[jid]['uninventoried_offline'])
+            ars_list['nbwindows'].append(stat_ars_machine[jid]['nbwindows'])
+            ars_list['nb_ou_user'].append(stat_ars_machine[jid]['nb_ou_user'])
+        else:
+            ars_list['total_machines'].append(0)
+            ars_list['uninventoried'].append(0)
+            ars_list['publicclass'].append(0)
+            ars_list['nblinuxmachine'].append(0)
+            ars_list['inventoried_online'].append(0)
+            ars_list['mach_on'].append(0)
+            ars_list['uninventoried_online'].append(0)
+            ars_list['nbmachinereconf'].append(0)
+            ars_list['kioskon'].append(0)
+            ars_list['inventoried'].append(0)
+            ars_list['nbdarwin'].append(0)
+            ars_list['kioskoff'].append(0)
+            ars_list['bothclass'].append(0)
+            ars_list['privateclass'].append(0)
+            ars_list['mach_off'].append(0)
+            ars_list['inventoried_offline'].append(0)
+            ars_list['with_uuid_serial'].append(0)
+            ars_list['nb_OU_mach'].append(0)
+            ars_list['uninventoried_offline'].append(0)
+            ars_list['nbwindows'].append(0)
+            ars_list['nb_ou_user'].append(0)
 
     res = {"total": ars_list['count'],
            "datas": ars_list,
@@ -939,7 +963,19 @@ def create_reverse_ssh_from_am_to_ars(jidmachine,
     structreverse['data']['uninterrupted'] = uninterrupted
     return structreverse['data']
 
-def get_packages_list(jid, filter=""):
+def get_packages_list(jid, CGIGET=""):
+    filter = ""
+    maxperpage = 10
+    start = 0
+    nb_dataset = 0
+    if "filter" in CGIGET:
+        filter = CGIGET["filter"]
+    if "maxperpage" in CGIGET:
+        maxperpage = int(CGIGET["maxperpage"])
+    if "start" in  CGIGET:
+        start = int(CGIGET["start"])
+    end = start + maxperpage
+
     timeout = 15
     result = ObjectXmpp().iqsendpulse(jid, {"action": "packageslist", "data": "/var/lib/pulse2/packages"}, timeout)
 
@@ -957,50 +993,41 @@ def get_packages_list(jid, filter=""):
             'metagenerator': [],
             'count_files': [],
         },
-        'total': 0
+        'total': 0,
+        'nb_dataset' : 0
     }
 
     try:
         packages = json.loads(result)
         count = 0
-        for package in packages['datas']:
-            if filter != "":
+        _result['datas']['total'] = len(packages['datas']);
+        pp=[]
+        if filter != "":
+            for package in packages['datas']:
                 if re.search(filter, package['description']) or\
                     re.search(filter, package['name']) or\
                     re.search(filter, package['version']) or\
                     re.search(filter, package['targetos']) or\
                     re.search(filter, package['methodtransfer']) or\
                     re.search(filter, package['metagenerator']):
-
-                    _result['datas']['files'].append(package['files'])
-                    _result['datas']['description'].append(package['description'])
-                    _result['datas']['licenses'].append(package['licenses'])
-                    _result['datas']['name'].append(package['name'])
-                    _result['datas']['uuid'].append(package['uuid'].split('/')[-1])
-                    _result['datas']['os'].append(package['targetos'])
-                    _result['datas']['size'].append(package['size'])
-                    _result['datas']['version'].append(package['version'])
-                    _result['datas']['methodtransfer'].append(package['methodtransfer'])
-                    _result['datas']['metagenerator'].append(package['metagenerator'])
-                    _result['datas']['count_files'].append(package['count_files'])
-                    count += 1
-            else:
-                _result['datas']['files'].append(package['files'])
-                _result['datas']['description'].append(package['description'])
-                _result['datas']['licenses'].append(package['licenses'])
-                _result['datas']['name'].append(package['name'])
-                _result['datas']['uuid'].append(package['uuid'].split('/')[-1])
-                _result['datas']['os'].append(package['targetos'])
-                _result['datas']['size'].append(package['size'])
-                _result['datas']['version'].append(package['version'])
-                _result['datas']['methodtransfer'].append(package['methodtransfer'])
-                _result['datas']['metagenerator'].append(package['metagenerator'])
-                _result['datas']['count_files'].append(package['count_files'])
-
-        if filter != "":
-            _result['total'] = count
+                    pp.append(package)
         else:
-            _result['total'] = packages['total']
+            pp= packages['datas']
+        for package in pp[start:end]:
+            nb_dataset+=1
+            _result['datas']['files'].append(package['files'])
+            _result['datas']['description'].append(package['description'])
+            _result['datas']['licenses'].append(package['licenses'])
+            _result['datas']['name'].append(package['name'])
+            _result['datas']['uuid'].append(package['uuid'].split('/')[-1])
+            _result['datas']['os'].append(package['targetos'])
+            _result['datas']['size'].append(package['size'])
+            _result['datas']['version'].append(package['version'])
+            _result['datas']['methodtransfer'].append(package['methodtransfer'])
+            _result['datas']['metagenerator'].append(package['metagenerator'])
+            _result['datas']['count_files'].append(package['count_files'])
+        _result['total'] = len(pp);
+        _result['nb_dataset'] = nb_dataset
     except Exception as e:
         logging.error(e)
         pass
