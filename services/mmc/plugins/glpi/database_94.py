@@ -3979,8 +3979,8 @@ class Glpi94(DyngroupDatabaseHelper):
                 self.logger.error("\n We encountered the error %s" % e)
                 self.logger.error("\n The backtrace is \n%s" % (traceback.format_exc()))
         return resultrecord
-    
-    
+
+
     @DatabaseHelper._sessionm
     def get_machines_list1(self, session, start, end, ctx):
         # start and end are used to set the limit parameter in the query
@@ -4020,7 +4020,7 @@ class Glpi94(DyngroupDatabaseHelper):
         online_machines = XmppMasterDatabase().getlistPresenceMachineid()
 
         if online_machines is not None:
-            online_machines = [id.replace("UUID", "") for id in online_machines]
+            online_machines = [int(id.replace("UUID", "")) for id in online_machines if id != "UUID" and id != ""]
         query = session.query(Machine.id.label('uuid')).distinct(Machine.id)\
         .join(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
         .outerjoin(self.user, Machine.users_id == self.user.c.id)\
