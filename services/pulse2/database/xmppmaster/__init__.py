@@ -7795,7 +7795,10 @@ where agenttype="machine" and groupdeploy in (
                             id_rule,
                             cmd,
                             type_event="log",
-                            status_event=1):
+                            status_event=1,
+                            parameter_other=None,
+                            ack_user=None,
+                            ack_date=None):
         try:
             new_Monitoring_event = Mon_event()
             new_Monitoring_event.machines_id = machines_id
@@ -7803,6 +7806,9 @@ where agenttype="machine" and groupdeploy in (
             new_Monitoring_event.id_device = id_device
             new_Monitoring_event.type_event = type_event
             new_Monitoring_event.cmd = cmd
+            new_Monitoring_event.parameter_other = parameter_other
+            new_Monitoring_event.ack_user = ack_user
+            new_Monitoring_event.ack_date = ack_date
             session.add(new_Monitoring_event)
             session.commit()
             session.flush()
