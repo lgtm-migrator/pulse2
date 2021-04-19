@@ -766,9 +766,11 @@ class Mon_event(Base, XmppMasterDBObj):
     machines_id = Column(Integer, nullable=False)
     id_rule = Column(Integer, nullable=False)
     id_device = Column(Integer, nullable=False)
-    parameter_other = Column(String(1024), nullable=True)
-    ack_user = Column(String(90), nullable=True)
-    ack_date = Column(DateTime, default=datetime.datetime.now)
+    parameter_other=  Column(String(1025), default=None)
+    ack_user =  Column(String(90), default=None)
+    ack_date = Column(DateTime,  default=None)
+
+
 
 class Mon_panels_template(Base, XmppMasterDBObj):
     # ====== Table name =========================
