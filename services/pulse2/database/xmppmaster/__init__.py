@@ -2324,7 +2324,7 @@ class XmppMasterDatabase(DatabaseHelper):
                            model="",
                            manufacturer="",
                            json_re="",
-                           glpi_entity_id=None,
+                           glpi_entity_id=1,
                            glpi_location_id=None,
                            glpi_regkey_id=None):
 
@@ -5431,7 +5431,7 @@ class XmppMasterDatabase(DatabaseHelper):
         regs=filter(r.search, self.config.summary)
         list_reg_columns_name = [getattr( self.config, regkey).split("|")[0].split("\\")[-1] \
                         for regkey in regs]
-        entity=""
+        entity = ""
         if 'location' in ctx and ctx['location'] != "":
             entity = " AND ent.glpi_id in (%s) "% str(ctx['location']).replace('UUID',"")
 
@@ -5674,7 +5674,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     xmppmaster.machines
                  WHERE
                     enabled = '1' and
-                    agenttype = 'machine' and uuid_inventorymachine IS NOT NULL;"""
+                    agenttype = 'machine' and uuid_inventorymachine IS NOT NULL OR uuid_inventorymachine!='';"""
 
         presencelist = session.execute(sql)
         session.commit()

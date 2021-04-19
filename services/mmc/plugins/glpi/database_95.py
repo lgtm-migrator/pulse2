@@ -723,7 +723,7 @@ class Glpi95(DyngroupDatabaseHelper):
             query = query.filter(Entities.id.in_(listentity))
 
         # Add all the like clauses to find machines containing the criterion
-        if criterion != "":
+        if criterion != "" and idmachine == "" and uuidsetup == "":
             if field == "":
                 query = query.filter(or_(
                     Machine.name.contains(criterion),
@@ -847,7 +847,7 @@ class Glpi95(DyngroupDatabaseHelper):
             online_machines = []
             online_machines = XmppMasterDatabase().getlistPresenceMachineid()
             if online_machines is not None:
-                online_machines = [int(uuid.replace("UUID", "")) for uuid in online_machines if uuid !=""]
+                online_machines = [int(id.replace("UUID", "")) for id in online_machines if id != "UUID" and id != ""]
 
         query = session.query(Machine.id.label('uuid')).distinct(Machine.id)\
             .join(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
@@ -948,10 +948,11 @@ class Glpi95(DyngroupDatabaseHelper):
 
         # Select machines from the specified entity
         if location != "":
-            query = query.filter(Entities.id == location)
+            listentity=[int(x.strip()) for x in location.split(',')]
+            query = query.filter(Entities.id.in_(listentity))
 
         # Add all the like clauses to find machines containing the criterion
-        if criterion != ""  and idmachine == "" and uuidsetup == "":
+        if criterion != "" and idmachine == "" and uuidsetup == "":
             if field == "":
                 query = query.filter(or_(
                     Machine.name.contains(criterion),
