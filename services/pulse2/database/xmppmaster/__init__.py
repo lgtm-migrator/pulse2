@@ -8202,7 +8202,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
             templateevent = templateevent.replace(search, str(dictresult[t]))
         return templateevent
 
-    def _action_new_event(self,
+def _action_new_event(self,
                           objectlist_local_rule,
                           xmppobject,
                           msg_from,
@@ -8253,6 +8253,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                     self.logger.warning("No treatment on"\
                             "missing on def binding action%s " % (z))
                     continue
+
 
                 idevent = self.setMonitoring_event(id_machine,
                                          id_device,
@@ -8311,6 +8312,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                         self.logger.debug("call script python pid %s : %s " %(pid,
                                                                               dest_script))
                         self.update_status_event(idevent)
+
 
                     elif z['type_event'] == "email" and \
                         os.path.isfile(src_script) and \
