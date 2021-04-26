@@ -167,18 +167,19 @@ $total = $machines1["total"];
 $datas = $machines1["data"];
 $xmppdatas = $machines['xmppdata'];
 
-$passage_a_la_ligne = array("<br />","<br>","<br/>","<br />","&lt;br /&gt;","&lt;br/&gt;","&lt;br&gt;");
+$br = array("<br />","<br>","<br/>","<br />","&lt;br /&gt;","&lt;br/&gt;","&lt;br&gt;");
 foreach ($datas as $nametableau => $tableau){
     foreach($datas[$nametableau] as  $key => &$value){
-       $value = str_ireplace( array("\\r\\n"), "\r\n", $value);
-       $value = str_ireplace( array("\\n"), "\r\n", $value);
-       $value = str_ireplace($passage_a_la_ligne, "\r\n", $value);
-       if( stripos (  $value, "script") !== false){
+        $value = str_ireplace( array("\\r\\n"), "\r\n", $value);
+        $value = str_ireplace( array("\\n"), "\r\n", $value);
+        $value = str_ireplace($br, "\r\n", $value);
+        if(stripos ($value, "script") !== false){
             $value  = htmlspecialchars($value);
         }
-       $value =  htmlentities($value);
+        $value =  htmlentities($value);
     }
 }
+
 $presencesClass = [];
 $params = [];
 

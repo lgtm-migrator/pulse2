@@ -723,7 +723,7 @@ class Glpi95(DyngroupDatabaseHelper):
             query = query.filter(Entities.id.in_(listentity))
 
         # Add all the like clauses to find machines containing the criterion
-        if criterion != "" and idmachine == "" and uuidsetup == "":
+        if criterion != "":
             if field == "":
                 query = query.filter(or_(
                     Machine.name.contains(criterion),
@@ -4237,7 +4237,7 @@ class Glpi95(DyngroupDatabaseHelper):
                         'operatingsystemservicepacks_id': ret.operatingsystemservicepacks_id,
                         'operatingsystemarchitectures_id': ret.operatingsystemarchitectures_id,
                         'license_number': ret.license_number,
-                        'license_id': ret.license_id,
+                        'license_id': ret.licenseid,
                         'operatingsystemkernelversions_id': ret.operatingsystemkernelversions_id}
             except Exception:
                 self.logger.error("\n%s" % (traceback.format_exc()))
