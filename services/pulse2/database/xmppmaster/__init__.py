@@ -217,7 +217,7 @@ class XmppMasterDatabase(DatabaseHelper):
         try:
             q = session.query(Agentsubscription)
             q = q.filter(Agentsubscription.name == name)
-            record = q.one_or_none()
+            record = q.first()
             if record:
                 record.name = name
                 session.commit()
@@ -227,6 +227,7 @@ class XmppMasterDatabase(DatabaseHelper):
                 return self.setagentsubscription(name)
         except Exception as e:
             logging.getLogger().error(str(e))
+            return None
 
     @DatabaseHelper._sessionm
     def setSubscription(self,
@@ -259,7 +260,7 @@ class XmppMasterDatabase(DatabaseHelper):
         try:
             q = session.query(Subscription)
             q = q.filter(Subscription.macadress == macadress)
-            record = q.one_or_none()
+            record = q.first()
             if record:
                 record.macadress = macadress
                 record.idagentsubscription = idagentsubscription
@@ -270,6 +271,7 @@ class XmppMasterDatabase(DatabaseHelper):
                 return self.setSubscription(macadress, idagentsubscription)
         except Exception as e:
             logging.getLogger().error(str(e))
+            return None
 
     @DatabaseHelper._sessionm
     def setuplistSubscription(self,
@@ -926,6 +928,35 @@ class XmppMasterDatabase(DatabaseHelper):
             logging.getLogger().error(str(e))
             traceback.print_exc(file=sys.stdout)
             return relayserver_list
+
+    @DatabaseHelper._sessionm
+    def get_Arsid_list_from_clusterid_list(self,
+                                           session,
+                                           idscluster):
+        """
+            This function returns the list of the ars from a cluster id or cluster cluster list id.
+            Args:
+                session: The SQLAlchemy session
+                idscluster: cluster id or cluster list id
+            Returns:
+                It returns the list of the ARS contained in the cluster(s)
+        """
+        if isinstance( idscluster, basestring ):
+            idscluster = [ idscluster.strip() ]
+
+        if not idscluster:
+            return []
+        strlistcluster = ",".join([str(x) for x in idscluster])
+        sql="""SELECT
+                    id_ars
+                FROM
+                    xmppmaster.has_cluster_ars
+                WHERE
+                    id_cluster IN (%s);""" % strlistcluster
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        return [x for x in result]
 
     @DatabaseHelper._sessionm
     def get_List_Mutual_ARS_from_cluster_of_one_idars(self, session, idars):
