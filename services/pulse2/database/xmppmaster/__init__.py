@@ -2019,7 +2019,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     `glpi_location_id` = %s
                 WHERE
                     `id` = '%s';''' % ("UUID%s" % glpiinformation['data']['uuidglpicomputer'][0],
-                                    glpiinformation['data']['description'][0].replace("'", "\\'"),
+                                    glpiinformation['data']['description'][0].replace('"','\\"').replace("'","\\'"),
                                     glpiinformation['data']['owner_firstname'][0],
                                     glpiinformation['data']['owner_realname'][0],
                                     glpiinformation['data']['owner'][0],
@@ -5719,6 +5719,46 @@ class XmppMasterDatabase(DatabaseHelper):
             return a
 
     @DatabaseHelper._sessionm
+    def getidlistPresenceMachine(self, session, presence=None):
+        """
+        This function is used to retrieve the list of the machines based on the 'presence' argument.
+
+        Args:
+            session: The SQLAlchemy session
+            presence: if True, it returns the list of the machine with an agent up.
+                      if False, it returns the list of the machine with an agent down.
+                      if None, it returns the list with all the machines.
+        Returns:
+            It returns the list of the machine based on the 'presence' argument.
+        """
+        strpresence = ""
+
+        try:
+            if presence is not None:
+                if presence == True:
+                    strpresence = " and enabled = 1"
+                else:
+                    strpresence = " and enabled = 0"
+            sql = """SELECT
+                        SUBSTR(uuid_inventorymachine, 5)
+                    FROM
+                        xmppmaster.machines
+                    WHERE
+                        agenttype = 'machine'
+                    and
+                        uuid_inventorymachine IS NOT NULL %s;""" % strpresence
+            presencelist = session.execute(sql)
+            session.commit()
+            session.flush()
+            return [ x[0] for x in  presencelist ]
+        except Exception as e:
+            logging.getLogger().error("Error debug for the getidlistPresenceMachine function!")
+            logging.getLogger().error("The presence of the machine is:  %s" % presence)
+            logging.getLogger().error("The sql error is: %s" % sql)
+            logging.getLogger().error("the Exception catched is %s" % str(e))
+            return []
+
+    @DatabaseHelper._sessionm
     def getxmppmasterfilterforglpi(self, session, listqueryxmppmaster = None):
         fl = listqueryxmppmaster[3].replace('*',"%")
         if listqueryxmppmaster[2] == "OU user":
@@ -6287,6 +6327,62 @@ class XmppMasterDatabase(DatabaseHelper):
         if ret[0] == 0:
             return False
         return True
+
+    @DatabaseHelper._sessionm
+    def getMachinedeployexistonHostname(self, session, hostname):
+        """
+        This function is used to find all the machines based on the hostname
+        Args:
+            session: The SQLAlchemy session
+            hostname: The hostname we are searching
+
+        Returns:
+            It returns the list of the machines with the searched hostname
+        """
+        machinesexits = []
+        try:
+            sql="""SELECT
+                    machines.id AS id,
+                    machines.uuid_inventorymachine AS uuid,
+                    machines.uuid_serial_machine AS serial,
+                    GROUP_CONCAT(network.mac) AS macs
+                FROM
+                    xmppmaster.machines
+                        JOIN
+                    xmppmaster.network ON machines.id = network.machines_id
+                WHERE
+                    machines.agenttype = 'machine'
+                        AND machines.hostname LIKE '%s'
+                GROUP BY machines.id;""" % hostname.strip()
+            machines = session.execute(sql)
+        except Exception as e:
+            logging.getLogger().error("The hostname is: %s" % str(e))
+            logging.getLogger().error("We encountered the error: %s" % str(e))
+            return machinesexits
+
+        for machine in machines:
+            mach = {'id':  machine.id,
+                    'uuid': machine.uuid,
+                    'macs': machine.macs,
+                    'serial': machine.serial}
+            machinesexits.append(mach)
+        return machinesexits
+
+    @DatabaseHelper._sessionm
+    def getMachineHostname(self, session, hostname):
+        try:
+            machine = session.query(Machines.id,
+                                    Machines.uuid_inventorymachine).\
+                                        filter(Machines.hostname == hostname).first()
+            session.commit()
+            session.flush()
+            if machine:
+                return {"id": machine.id,
+                        "uuid_inventorymachine": machine.uuid_inventorymachine}
+        except Exception as e:
+            logging.getLogger().error("function getMachineHostname %s" % str(e))
+
+        return {}
 
     @DatabaseHelper._sessionm
     def getGuacamoleRelayServerMachineHostname(self, session, hostname,
