@@ -3408,6 +3408,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     'deploymentsuccess' : 0,
                     'abortontimeout' : 0,
                     'abortmissingagent' : 0,
+                    'abortinconsistentglpiinformation' : 0,
                     'abortrelaydown' : 0,
                     'abortalternativerelaysdown' : 0,
                     'abortinforelaymissing' : 0,
@@ -3451,6 +3452,8 @@ class XmppMasterDatabase(DatabaseHelper):
                     ret['abortontimeout'] = liststatus[t]
                 elif t == 'ABORT MISSING AGENT':
                     ret['abortmissingagent'] = liststatus[t]
+                elif t == 'ABORT INCONSISTENT GLPI INFORMATION':
+                    ret['abortinconsistentglpiinformation'] = liststatus[t]
                 elif t == 'ABORT RELAY DOWN':
                     ret['abortrelaydown'] = liststatus[t]
                 elif t == 'ABORT ALTERNATIVE RELAYS DOWN':
@@ -3475,7 +3478,6 @@ class XmppMasterDatabase(DatabaseHelper):
                     ret['abortdeploymentcancelledbyuser'] = liststatus[t]
                 elif t == 'ABORT PACKAGE EXECUTION ERROR':
                     ret['abortpackageexecutionerror'] = liststatus[t]
-
                 elif t == 'DEPLOYMENT START':
                     ret['deploymentstart'] = liststatus[t]
                 elif t == 'WOL 1':
@@ -3499,6 +3501,7 @@ class XmppMasterDatabase(DatabaseHelper):
             return ret
         except Exception:
             return ret
+
 
     @DatabaseHelper._sessionm
     def getdeployment(self, session, command_id, filter="", start=0, limit=-1):
