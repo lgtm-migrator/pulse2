@@ -744,14 +744,13 @@ class Glpi92(DyngroupDatabaseHelper):
 
         query = query.order_by(Machine.name)
 
-        online_machines=[]
+        online_machines = []
         # All computers
         if "computerpresence" not in ctx:
             # Do nothing more
             pass
         elif ctx["computerpresence"] == "no_presence":
             online_machines = XmppMasterDatabase().getidlistPresenceMachine(presence=False)
-            #query = query.filter(Machine.id.notin_(online_machines))
         else:
             online_machines = XmppMasterDatabase().getidlistPresenceMachine(presence=True)
 

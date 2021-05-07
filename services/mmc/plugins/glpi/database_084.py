@@ -559,7 +559,7 @@ class Glpi084(DyngroupDatabaseHelper):
                     ret[q[2]] = [q[1], q[2], q[3], listid]
         return ret
 
-    def _machineobjectdymresult(self, ret, encode= 'iso-8859-1'):
+    def _machineobjectdymresult(self, ret, encode='iso-8859-1'):
         """
             this function return dict result sqlalchimy
         """
@@ -723,14 +723,13 @@ class Glpi084(DyngroupDatabaseHelper):
 
         query = query.order_by(Machine.name)
 
-        online_machines=[]
+        online_machines = []
         # All computers
         if "computerpresence" not in ctx:
             # Do nothing more
             pass
         elif ctx["computerpresence"] == "no_presence":
             online_machines = XmppMasterDatabase().getidlistPresenceMachine(presence=False)
-            #query = query.filter(Machine.id.notin_(online_machines))
         else:
             online_machines = XmppMasterDatabase().getidlistPresenceMachine(presence=True)
 

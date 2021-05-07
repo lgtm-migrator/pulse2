@@ -1218,7 +1218,7 @@ def test_consolidation_inventory(xmppobject, sessionid, data, showinfobool, msg,
                 try:
                     setupuuid = getMachineInformationByUuidMachine(uuid, showinfobool=True)
                 except Exception:
-                    setupuuid={}
+                    setupuuid = {}
                 if isinstance(setupuuid, dict) and 'count' in setupuuid and setupuuid['count'] != 0:
                     if showinfobool:
                         logger.info("setupuuid %s" % setupuuid)
