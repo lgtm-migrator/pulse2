@@ -5590,6 +5590,25 @@ class XmppMasterDatabase(DatabaseHelper):
             result[linemachine.uuid_inventorymachine] = [out, 1 ]
         return result
 
+    @DatabaseHelper._sessionm
+    def update_uuid_inventory(self, session, id, UUID):
+        """
+            initialise uuid inventory
+        """
+        try:
+            sql = """UPDATE `xmppmaster`.`machines`
+                    SET
+                        `uuid_inventorymachine` = '%s'
+                    WHERE
+                        `id`  = %s;""" % (UUID, id)
+            result = session.execute(sql)
+            session.commit()
+            session.flush()
+            return result
+        except Exception as e:
+            logging.getLogger().error("call_set_list_machine: %s" % str(e))
+            return False
+
     #topology
     @DatabaseHelper._sessionm
     def listRS(self,session):
