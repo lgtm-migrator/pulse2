@@ -258,4 +258,11 @@ function get_dependencies_list_from_permissions($login){
   return xmlCall("pkgs.get_dependencies_list_from_permissions", [$login]);
 }
 
+function pkgs_search_ars_list_from_cluster_rules($login){
+  return xmlCall("pkgs.pkgs_search_ars_list_from_cluster_rules", [$login]);
+}
+
+function get_Cluster_list_rule($login){
+  return xmlCall("pkgs.get_Cluster_list_rule", [$login]);
+}
 ?>

@@ -1238,8 +1238,8 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def get_Cluster_list_rule(self,
-                              session,
-                              objsearch):
+                          session,
+                          objsearch):
         if 'login' in objsearch:
             sql ="""
                 SELECT
@@ -1248,7 +1248,8 @@ class PkgsDatabase(DatabaseHelper):
                     pkgs.pkgs_rules_global
                 WHERE
                     '%s' REGEXP (pkgs.pkgs_rules_global.subject)
-                        AND permission LIKE '%%r%%';"""%objsearch['login']
+                        AND permission LIKE '%%r%%'
+                        AND pkgs.pkgs_rules_global.pkgs_rules_algos_id = 3;"""%objsearch['login']
             result = session.execute(sql)
             session.commit()
             session.flush()
