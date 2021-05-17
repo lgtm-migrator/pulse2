@@ -1897,17 +1897,18 @@ class XmppMasterDatabase(DatabaseHelper):
                                         name)
         return None
     @DatabaseHelper._sessionm
-    def create_Glpi_location( self,
-                            session,
-                            complete_name,
-                            name,
-                            glpi_id):
+    def create_Glpi_location(self,
+                             session,
+                             complete_name,
+                             name,
+                             glpi_id):
         """
             create Glpi_location
         """
         if glpi_id is None or glpi_id == '':
             logging.getLogger().warning("create_Glpi_location glpi_id missing")
             return None
+
         ret = self.get_Glpi_location(glpi_id)
         if ret is None:
             try:
@@ -2873,15 +2874,15 @@ class XmppMasterDatabase(DatabaseHelper):
         datenow = datetime.now()
         result = session.query(Deploy).filter( and_( Deploy.startcmd <= datenow,
                                                      Deploy.syncthing == 1)).all()
-        id_deploylist=set()
+        id_deploylist = set()
         # TODO: search keysyncthing in table machine.
         session.commit()
         session.flush()
         if not result:
             return list(id_deploylist)
-        list_id_ars={}
-        list_ars = set( )
-        list_cluster = set( )
+        list_id_ars = {}
+        list_ars = set()
+        list_cluster = set()
         # syncthing and set stat to 2
         self.chang_status_deploy_syncthing(datenow)
         cluster = self.clusterlistars()
@@ -2908,13 +2909,13 @@ class XmppMasterDatabase(DatabaseHelper):
 
             e = json.loads(t.result)
             package = os.path.basename( e['path'])
-            #creation du partage si celui ci n'existe pas.
-            id_deploy = self.setSyncthing_deploy_group( t.title,
-                                                        uuid.uuid4(),#namepartage
-                                                        package,
-                                                        t.command,
-                                                        t.group_uuid,
-                                                        dateend = t.endcmd)
+            # We create the share if it does not exist.
+            id_deploy = self.setSyncthing_deploy_group(t.title,
+                                                       uuid.uuid4(),
+                                                       package,
+                                                       t.command,
+                                                       t.group_uuid,
+                                                       dateend=t.endcmd)
             id_deploylist.add(id_deploy)
             clu =  self.clusternum(t.jid_relay)
             ars_cluster_id = self.setSyncthing_ars_cluster( clu['numcluster'],
@@ -2931,28 +2932,28 @@ class XmppMasterDatabase(DatabaseHelper):
                 if t.jid_relay in cluster[z]['listarscluster']:
                     # on trouve le cluster qui possede ars
                     clusterdata = cluster[z]
-            self.setSyncthing_machine(  t.jidmachine,
-                                        t.jid_relay,
-                                        json.dumps(clusterdata),
-                                        package,
-                                        t.sessionid,
-                                        t.start,
-                                        t.startcmd,
-                                        t.endcmd,
-                                        t.command,
-                                        t.group_uuid,
-                                        t.result,
-                                        ars_cluster_id,
-                                        syncthing = t.syncthing,
-                                        state =t.state,
-                                        user =t.user,
-                                        type_partage= "",
-                                        title=t.title,
-                                        inventoryuuid=t.inventoryuuid,
-                                        login=t.login,
-                                        macadress=t.macadress,
-                                        comment="%s_%s" % (t.command,
-                                                           t.group_uuid,))
+            self.setSyncthing_machine(t.jidmachine,
+                                      t.jid_relay,
+                                      json.dumps(clusterdata),
+                                      package,
+                                      t.sessionid,
+                                      t.start,
+                                      t.startcmd,
+                                      t.endcmd,
+                                      t.command,
+                                      t.group_uuid,
+                                      t.result,
+                                      ars_cluster_id,
+                                      syncthing=t.syncthing,
+                                      state=t.state,
+                                      user=t.user,
+                                      type_partage= "",
+                                      title=t.title,
+                                      inventoryuuid=t.inventoryuuid,
+                                      login=t.login,
+                                      macadress=t.macadress,
+                                      comment="%s_%s" % (t.command,
+                                                         t.group_uuid,))
 
         return list(id_deploylist)
 
@@ -3398,40 +3399,38 @@ class XmppMasterDatabase(DatabaseHelper):
             machinedeploy =session.query(Deploy.state,
                                          func.count(Deploy.state)).\
                                              filter(and_( Deploy.command == command_id,
-
                                                             Deploy.startcmd == datestart
                                                         )
                                                 ).group_by(Deploy.state)
             machinedeploy = machinedeploy.all()
-            ret = {
-                    'totalmachinedeploy' : 0,
-                    'deploymentsuccess' : 0,
-                    'abortontimeout' : 0,
-                    'abortmissingagent' : 0,
-                    'abortinconsistentglpiinformation' : 0,
-                    'abortrelaydown' : 0,
-                    'abortalternativerelaysdown' : 0,
-                    'abortinforelaymissing' : 0,
-                    'errorunknownerror' : 0,
-                    'abortpackageidentifiermissing' : 0,
-                    'abortpackagenamemissing' : 0,
-                    'abortpackageversionmissing' : 0,
-                    'abortpackageworkflowerror' : 0,
-                    'abortdescriptormissing' : 0,
-                    'abortmachinedisappeared' : 0,
-                    'abortdeploymentcancelledbyuser' : 0,
-                    'aborttransferfailed' : 0,
-                    'abortpackageexecutionerror' : 0,
-                    'deploymentstart' : 0,
-                    'wol1' : 0,
-                    'wol2' : 0,
-                    'wol3' : 0,
-                    'waitingmachineonline' : 0,
-                    'deploymentpending' : 0,
-                    'deploymentdelayed' : 0,
-                    'deploymentspooled' : 0,
-                    'otherstatus' : 0,
-                    }
+            ret = {'totalmachinedeploy': 0,
+                   'deploymentsuccess': 0,
+                   'abortontimeout': 0,
+                   'abortmissingagent': 0,
+                   'abortinconsistentglpiinformation': 0,
+                   'abortrelaydown': 0,
+                   'abortalternativerelaysdown': 0,
+                   'abortinforelaymissing': 0,
+                   'errorunknownerror': 0,
+                   'abortpackageidentifiermissing': 0,
+                   'abortpackagenamemissing': 0,
+                   'abortpackageversionmissing': 0,
+                   'abortpackageworkflowerror': 0,
+                   'abortdescriptormissing': 0,
+                   'abortmachinedisappeared': 0,
+                   'abortdeploymentcancelledbyuser': 0,
+                   'aborttransferfailed': 0,
+                   'abortpackageexecutionerror': 0,
+                   'deploymentstart': 0,
+                   'wol1': 0,
+                   'wol2': 0,
+                   'wol3': 0,
+                   'waitingmachineonline': 0,
+                   'deploymentpending': 0,
+                   'deploymentdelayed': 0,
+                   'deploymentspooled': 0,
+                   'otherstatus': 0,
+                  }
             dynamic_status_list = self.get_log_status()
             dynamic_label = []
             dynamic_status = []
@@ -5591,23 +5590,31 @@ class XmppMasterDatabase(DatabaseHelper):
         return result
 
     @DatabaseHelper._sessionm
-    def update_uuid_inventory(self, session, id, UUID):
+    def update_uuid_inventory(self, session, sql_id, uuid):
         """
-            initialise uuid inventory
+        This function is used to update the uuid_inventorymachine value
+        in the database for a specific machine.
+        Args:
+            session: The SQLAlchemy session
+            sql_id: the id of the machine in the SQL database
+            uuid: The uuid_inventorymachine of the machine
+        Return:
+           It returns None if it failed to update the machine uuid_inventorymachine.
         """
         try:
             sql = """UPDATE `xmppmaster`.`machines`
                     SET
                         `uuid_inventorymachine` = '%s'
                     WHERE
-                        `id`  = %s;""" % (UUID, id)
+                        `id`  = %s;""" % (uuid, sql_id)
             result = session.execute(sql)
             session.commit()
             session.flush()
             return result
         except Exception as e:
-            logging.getLogger().error("call_set_list_machine: %s" % str(e))
-            return False
+            logging.getLogger().error("Function update_uuid_inventory")
+            logging.getLogger().error("We got the error: %s" % str(e))
+            return None
 
     #topology
     @DatabaseHelper._sessionm
@@ -5727,7 +5734,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     xmppmaster.machines
                  WHERE
                     enabled = '1' and
-                    agenttype = 'machine' and uuid_inventorymachine IS NOT NULL OR uuid_inventorymachine!='';"""
+                    agenttype = 'machine' and (uuid_inventorymachine IS NOT NULL OR uuid_inventorymachine!='');"""
 
         presencelist = session.execute(sql)
         session.commit()

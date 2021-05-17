@@ -107,7 +107,6 @@ progress::-moz-progress-bar {
 <?php
 global $conf;
 $maxperpage = $conf["global"]["maxperpage"];
-print_r($_GET);
 extract($_GET);
 
 $filter  = isset($_GET['filter'])?$_GET['filter']:"";
@@ -400,9 +399,7 @@ echo "<div>";
         echo (isset($deploymentsuccess)&&$deploymentsuccess) ? "<td>"._T("Deployment Success","xmppmaster")."</td>" : "";
         echo (isset($deploymenterror)&&$deploymenterror) ? "<td>"._T("Deployment Error","xmppmaster")."</td>" : "";
         echo (isset($abortmissingagent)&&$abortmissingagent) ? "<td>"._T("Abort Missing Agent","xmppmaster")."</td>" : "";
-
         echo (isset($abortinconsistentglpiinformation)&&$abortinconsistentglpiinformation) ? "<td>"._T("Abort inconsistent GLPI Information","xmppmaster")."</td>" : "";
-
         echo (isset($abortrelaydown)&&$abortrelaydown) ? "<td>"._T("Abort Relay Down","xmppmaster")."</td>" : "";
         echo (isset($abortalternativerelaysdow)&&$abortalternativerelaysdown) ?"<td>"._T("Abort Alternative relay down","xmppmaster")."</td>" : "";
         echo (isset($abortinforelaymissing)&&$abortinforelaymissing) ? "<td>"._T("Abort Info Relay Missing","xmppmaster")."</td>" : "";
@@ -431,10 +428,7 @@ echo "<div>";
         echo (isset($deploymentsuccess)&&$deploymentsuccess) ? "<td>".$deploymentsuccess."</td>" : "";
         echo (isset($deploymenterror)&&$deploymenterror) ? "<td>".$deploymenterror."</td>" : "";
         echo (isset($abortmissingagent)&&$abortmissingagent) ? "<td>".$abortmissingagent."</td>" : "";
-
         echo (isset($abortinconsistentglpiinformation)&&$abortinconsistentglpiinformation) ? "<td>".$abortinconsistentglpiinformation."</td>" : "";
-
-
         echo (isset($abortrelaydown)&&$abortrelaydown) ? "<td>".$abortrelaydown."</td>" : "";
         echo (isset($abortalternativerelaysdow)&&$abortalternativerelaysdown) ?"<td>".$abortalternativerelaysdown."</td>" : "";
         echo (isset($abortinforelaymissing)&&$abortinforelaymissing) ? "<td>".$abortinforelaymissing."</td>" : "";
@@ -480,10 +474,7 @@ echo "<div>";
         echo (isset($deploymentsuccess)&&$deploymentsuccess) ? "<td>"._T("Deployment Success","xmppmaster")."</td>" : "";
         echo (isset($deploymenterror)&&$deploymenterror) ? "<td>"._T("Deployment Error","xmppmaster")."</td>" : "";
         echo (isset($abortmissingagent)&&$abortmissingagent) ? "<td>"._T("Abort Missing Agent","xmppmaster")."</td>" : "";
-
         echo (isset($abortinconsistentglpiinformation)&&$abortinconsistentglpiinformation) ? "<td>"._T("Abort Inconsistent GLPI Information","xmppmaster")."</td>" : "";
-
-
         echo (isset($abortrelaydown)&&$abortrelaydown) ? "<td>"._T("Abort Relay Down","xmppmaster")."</td>" : "";
         echo (isset($abortalternativerelaysdow)&&$abortalternativerelaysdown) ?"<td>"._T("Abort Alternative relay down","xmppmaster")."</td>" : "";
         echo (isset($abortinforelaymissing)&&$abortinforelaymissing) ? "<td>"._T("Abort Info Relay Missing","xmppmaster")."</td>" : "";
@@ -512,10 +503,7 @@ echo "<div>";
         echo (isset($deploymentsuccess)&&$deploymentsuccess) ? "<td>".$deploymentsuccess."</td>" : "";
         echo (isset($deploymenterror)&&$deploymenterror) ? "<td>".$deploymenterror."</td>" : "";
         echo (isset($abortmissingagent)&&$abortmissingagent) ? "<td>".$abortmissingagent."</td>" : "";
-
-
         echo (isset($abortinconsistentglpiinformation)&&$abortinconsistentglpiinformation) ? "<td>".$abortinconsistentglpiinformation."</td>" : "";
-
         echo (isset($abortrelaydown)&&$abortrelaydown) ? "<td>".$abortrelaydown."</td>" : "";
         echo (isset($abortalternativerelaysdow)&&$abortalternativerelaysdown) ?"<td>".$abortalternativerelaysdown."</td>" : "";
         echo (isset($abortinforelaymissing)&&$abortinforelaymissing) ? "<td>".$abortinforelaymissing."</td>" : "";
@@ -793,9 +781,6 @@ echo '<script src="modules/xmppmaster/graph/js/chart.js"></script>';
         echo 'datas.push({"label":"Abort Inconsistent GLPI Information ", "value":parseInt('.$abortinconsistentglpiinformation.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortinconsistentglpiinformation",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
     }
 
-
-
-
     if ($abortinforelaymissing > 0){
         echo 'datas.push({"label":"Abort Info For Relay Missing ", "value":parseInt('.$abortinforelaymissing.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortinforelaymissing",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
     }
@@ -883,11 +868,6 @@ echo '<script src="modules/xmppmaster/graph/js/chart.js"></script>';
     if ($abortinconsistentglpiinformation > 0){
         echo 'datas2.push({"label":"Abort Inconsistent GLPI Information ", "value":parseInt('.$abortinconsistentglpiinformation.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortinconsistentglpiinformation",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
     }
-
-
-
-
-
 
     if ($abortinforelaymissing > 0){
         echo 'datas2.push({"label":"Abort Info For Relay Missing ", "value":parseInt('.$abortinforelaymissing.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortinforelaymissing",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
