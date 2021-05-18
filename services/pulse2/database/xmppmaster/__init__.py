@@ -3502,42 +3502,50 @@ class XmppMasterDatabase(DatabaseHelper):
             return ret
 
     @DatabaseHelper._sessionm
-    def getstatdeployfromcommandidtitle(self, session, command_id, title):
+    def getstatdeploy_from_command_id_and_title(self, session, command_id, title):
+        """
+        Retrieve the deploy statistics based on the command_id and name
+        Args:
+            session: The SQL Alchemy session
+            command_id: id of the deploy
+            title: The name of deploy
+        Return:
+            It returns the number of machines per status.
+        """
         try:
-            machinedeploy =session.query(Deploy.state,
-                                         func.count(Deploy.state)).\
-                                             filter(and_( Deploy.command == command_id,
+            machinedeploy = session.query(Deploy.state,
+                                          func.count(Deploy.state)).\
+                                              filter(and_(Deploy.command == command_id,
                                                           Deploy.title == title)
-                                                ).group_by(Deploy.state)
+                                                    ).group_by(Deploy.state)
             machinedeploy = machinedeploy.all()
-            ret = {
-                    'totalmachinedeploy' : 0,
-                    'deploymentsuccess' : 0,
-                    'abortontimeout' : 0,
-                    'abortmissingagent' : 0,
-                    'abortrelaydown' : 0,
-                    'abortalternativerelaysdown' : 0,
-                    'abortinforelaymissing' : 0,
-                    'errorunknownerror' : 0,
-                    'abortpackageidentifiermissing' : 0,
-                    'abortpackagenamemissing' : 0,
-                    'abortpackageversionmissing' : 0,
-                    'abortpackageworkflowerror' : 0,
-                    'abortdescriptormissing' : 0,
-                    'abortmachinedisappeared' : 0,
-                    'abortdeploymentcancelledbyuser' : 0,
-                    'aborttransferfailed' : 0,
-                    'abortpackageexecutionerror' : 0,
-                    'deploymentstart' : 0,
-                    'wol1' : 0,
-                    'wol2' : 0,
-                    'wol3' : 0,
-                    'waitingmachineonline' : 0,
-                    'deploymentpending' : 0,
-                    'deploymentdelayed' : 0,
-                    'deploymentspooled' : 0,
-                    'otherstatus' : 0,
-                    }
+            ret = {'totalmachinedeploy': 0,
+                   'deploymentsuccess': 0,
+                   'abortontimeout': 0,
+                   'abortmissingagent': 0,
+                   'abortrelaydown': 0,
+                   'abortalternativerelaysdown': 0,
+                   'abortinforelaymissing': 0,
+                   'errorunknownerror': 0,
+                   'abortpackageidentifiermissing': 0,
+                   'abortpackagenamemissing': 0,
+                   'abortpackageversionmissing': 0,
+                   'abortpackageworkflowerror': 0,
+                   'abortdescriptormissing': 0,
+                   'abortmachinedisappeared': 0,
+                   'abortdeploymentcancelledbyuser': 0,
+                   'aborttransferfailed': 0,
+                   'abortpackageexecutionerror': 0,
+                   'deploymentstart': 0,
+                   'wol1': 0,
+                   'wol2': 0,
+                   'wol3': 0,
+                   'waitingmachineonline': 0,
+                   'deploymentpending': 0,
+                   'deploymentdelayed': 0,
+                   'deploymentspooled': 0,
+                   'otherstatus': 0,
+                  }
             dynamic_status_list = self.get_log_status()
             dynamic_label = []
             dynamic_status = []
@@ -3616,8 +3624,18 @@ class XmppMasterDatabase(DatabaseHelper):
                                     start=0,
                                     limit=-1):
         """
-            Get list machine xmpp master for 1 deploy
-            for 1 command name and 1 title of deploy
+        Get the list of deploys based on the command_id and title of the packages.
+
+        Arg:
+            sesion: The SQL Alchemy session
+            command_id: The id the package
+            title: Name of the package
+            filter: Used filters in the web page
+            start: Number of the first package to show.
+            limit: Maximum number of deploys sent at once.
+        Return:
+            It returns the list of the deploys
+
         """
         criterion = filter['criterion']
         filter = filter['filter']
@@ -3628,10 +3646,8 @@ class XmppMasterDatabase(DatabaseHelper):
         query = session.query(Deploy).filter(and_(Deploy.command == command_id,
                                                   Deploy.title == title))
         if filter == "status" and criterion != "":
-            query = query.filter(or_(
-                Deploy.state.contains(criterion),
-                Deploy.inventoryuuid.contains(criterion),
-            ))
+            query = query.filter(or_(Deploy.state.contains(criterion),
+                                     Deploy.inventoryuuid.contains(criterion),))
         if filter != 'infos':
             count = query.count()
             if limit != -1:
@@ -3639,16 +3655,16 @@ class XmppMasterDatabase(DatabaseHelper):
         else:
             count = 0
         result = query.all()
-        elements = {
-        "id" : [],
-        "uuid" : [],
-        "status" : []
-        }
+        elements = {"id": [],
+                    "uuid": [],
+                    "status": []
+                   }
+
         for deployment in result:
             elements['id'].append(deployment.inventoryuuid.replace("UUID", ""))
             elements['uuid'].append(deployment.inventoryuuid)
             elements['status'].append(deployment.state)
-        return {"total": count, "datas":elements}
+        return {"total": count, "datas": elements}
 
     @DatabaseHelper._sessionm
     def getdeployment(self, session, command_id, filter="", start=0, limit=-1):
