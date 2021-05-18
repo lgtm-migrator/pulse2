@@ -93,6 +93,7 @@ for ($i=0;$i< count( $arraydeploy['tabdeploy']['start']);$i++){
     $param['gid']=$arraydeploy['tabdeploy']['group_uuid'][$i];
     $param['cmd_id']=$arraydeploy['tabdeploy']['command'][$i];
     $param['login']=$arraydeploy['tabdeploy']['login'][$i];
+    $param['title']=$arraydeploy['tabdeploy']['title'][$i];
     $logs[] = $logAction;
     $params[] = $param;
 }

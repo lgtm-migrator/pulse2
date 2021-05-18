@@ -339,6 +339,18 @@ def loginbycommand(commandid):
 def getdeployfromcommandid(command_id, uuid):
     return XmppMasterDatabase().getdeployfromcommandid(command_id, uuid)
 
+
+def getdeployment_cmd_and_title(command_id,
+                                title,
+                                filter="",
+                                start=0,
+                                limit=-1):
+    return XmppMasterDatabase().getdeployment_cmd_and_title(command_id,
+                                                            title,
+                                                            filter,
+                                                            start,
+                                                            limit)
+
 def getdeployment(command_id, filter="", start=0, limit=-1):
     return XmppMasterDatabase().getdeployment(command_id, filter, start, limit)
 

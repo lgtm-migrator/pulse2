@@ -3501,6 +3501,48 @@ class XmppMasterDatabase(DatabaseHelper):
         except Exception:
             return ret
 
+    @DatabaseHelper._sessionm
+    def getdeployment_cmd_and_title(self,
+                                    session,
+                                    command_id,
+                                    title,
+                                    filter="",
+                                    start=0,
+                                    limit=-1):
+        """
+            Get list machine xmpp master for 1 deploy
+            for 1 command name and 1 title of deploy
+        """
+        criterion = filter['criterion']
+        filter = filter['filter']
+
+        start = int(start)
+        limit = int(limit)
+
+        query = session.query(Deploy).filter(and_(Deploy.command == command_id,
+                                                  Deploy.title == title))
+        if filter == "status" and criterion != "":
+            query = query.filter(or_(
+                Deploy.state.contains(criterion),
+                Deploy.inventoryuuid.contains(criterion),
+            ))
+        if filter != 'infos':
+            count = query.count()
+            if limit != -1:
+                query = query.offset(start).limit(limit)
+        else:
+            count = 0
+        result = query.all()
+        elements = {
+        "id" : [],
+        "uuid" : [],
+        "status" : []
+        }
+        for deployment in result:
+            elements['id'].append(deployment.inventoryuuid.replace("UUID", ""))
+            elements['uuid'].append(deployment.inventoryuuid)
+            elements['status'].append(deployment.state)
+        return {"total": count, "datas":elements}
 
     @DatabaseHelper._sessionm
     def getdeployment(self, session, command_id, filter="", start=0, limit=-1):
