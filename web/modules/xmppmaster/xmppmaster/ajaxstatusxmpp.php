@@ -64,18 +64,33 @@ $arraystate = array();
 $params = array();
 $logs   = array();
 $startdeploy = array();
+$endcmd = array();
+$startcmd = array();
 $tolmach=array();
 $successmach=array();
 $errormach=array();
 $abortmachuser = array();
 $processmachr = array();
 
-// $dd = xmlrpc_getstatbycmd(3);
 foreach( $arraydeploy['tabdeploy']['start'] as $ss){
     if (gettype($ss) == "string"){
         $startdeploy[]=$ss;
     }
 }
+    $arraydeploy['tabdeploy']['start'] = $startdeploy;
+
+foreach( $arraydeploy['tabdeploy']['endcmd'] as $ss){
+    $ee =  get_object_vars ( $ss);
+    $endcmd[]=gmdate("Y-m-d H:i:s", $ee['timestamp']);
+}
+    $arraydeploy['tabdeploy']['endcmd'] = $endcmd;
+
+    foreach( $arraydeploy['tabdeploy']['startcmd'] as $ss){
+    $ee =  get_object_vars ( $ss);
+    $startcmd[]=gmdate("Y-m-d H:i:s", $ee['timestamp']);
+}
+    $arraydeploy['tabdeploy']['startcmd'] = $startcmd;
+
 
 $logAction = new ActionItem(_("detaildeploy"),
                                 "viewlogs",
@@ -84,7 +99,6 @@ $logAction = new ActionItem(_("detaildeploy"),
                                 "xmppmaster",
                                 "xmppmaster");
 
-$arraydeploy['tabdeploy']['start'] = $startdeploy;
 
 for ($i=0;$i< count( $arraydeploy['tabdeploy']['start']);$i++){
     $param=array();
@@ -94,6 +108,9 @@ for ($i=0;$i< count( $arraydeploy['tabdeploy']['start']);$i++){
     $param['cmd_id']=$arraydeploy['tabdeploy']['command'][$i];
     $param['login']=$arraydeploy['tabdeploy']['login'][$i];
     $param['title']=$arraydeploy['tabdeploy']['title'][$i];
+    $param['start']=$arraydeploy['tabdeploy']['start'][$i];
+    $param['endcmd']=$arraydeploy['tabdeploy']['endcmd'][$i];
+    $param['startcmd']=$arraydeploy['tabdeploy']['startcmd'][$i];
     $logs[] = $logAction;
     $params[] = $param;
 }
@@ -111,10 +128,12 @@ foreach($arraydeploy['tabdeploy']['group_uuid'] as $groupid){
         $error = True;
         $arraydeploy['tabdeploy']['state'][$index] = "<span style='font-weight: bold; color : red;'>DEPLOY ERROR TIMEOUT</span>";
     }
-        $deploydate = (array)$arraydeploy['tabdeploy']['startcmd'][$index];
-        $deploydate = substr($deploydate['scalar'], 0, 4).'-'.substr($deploydate['scalar'], 4, 2).'-'.substr($deploydate['scalar'], 6, 2).' '.substr($deploydate['scalar'], 9);
-        $result = xmlrpc_getstatdeployfromcommandidstartdate($arraydeploy['tabdeploy']['command'][$index],
-                                                             $deploydate);
+//         $deploydate = (array)$arraydeploy['tabdeploy']['startcmd'][$index];
+//         $deploydate = substr($deploydate['scalar'], 0, 4).'-'.substr($deploydate['scalar'], 4, 2).'-'.substr($deploydate['scalar'], 6, 2).' '.substr($deploydate['scalar'], 9);
+//         $result = xmlrpc_getstatdeployfromcommandidstartdate($arraydeploy['tabdeploy']['command'][$index],
+//                                                              $deploydate);
+        $result = xmlrpc_getstatdeployfromcommandidtitle( $arraydeploy['tabdeploy']['command'][$index],
+                                                          $arraydeploy['tabdeploy']['title'][$index]);
         $done = 0;
         $aborted = 0;
         $inprogress = 0;

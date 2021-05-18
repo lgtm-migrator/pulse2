@@ -941,8 +941,10 @@ class DyngroupDatabase(pulse2.database.dyngroup.DyngroupDatabase):
                 commandId = cmd_id,
                 deployGroupId = deploy_group_id
             ).one()
-        except (MultipleResultsFound, NoResultFound) as e:
-            self.logger.warn('Error while fetching convergence phases for command %s: %s' % (cmd_id, e))
+        except MultipleResultsFound as e:
+            self.logger.warn('Error MultipleResultsFound while fetching convergence phases for command %s: %s' % (cmd_id, e))
+        except  NoResultFound as e:
+            self.logger.warn('Error NoResultFound while fetching convergence phases for command %s: %s' % (cmd_id, e))
         if ret:
             try:
                 return cPickle.loads(ret.cmdPhases)

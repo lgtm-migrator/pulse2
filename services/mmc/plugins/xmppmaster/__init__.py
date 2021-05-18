@@ -351,6 +351,11 @@ def getdeployment_cmd_and_title(command_id,
                                                             start,
                                                             limit)
 
+def getstatdeployfromcommandidtitle(command_id,
+                                    title):
+    return XmppMasterDatabase().getstatdeployfromcommandidtitle(command_id,
+                                                                title)
+
 def getdeployment(command_id, filter="", start=0, limit=-1):
     return XmppMasterDatabase().getdeployment(command_id, filter, start, limit)
 

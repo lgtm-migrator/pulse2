@@ -153,9 +153,11 @@ $infocmd = command_detail($cmd_id);
 $creator_user = $infocmd['creator'] ;
 $creation_date = datecmd($infocmd['creation_date']);
 
-$start_date =  $lastcommandid['start_dateunixtime'];
-$end_date = $lastcommandid['end_dateunixtime'];
+// $start_date =  $lastcommandid['start_dateunixtime'];
+// $end_date = $lastcommandid['end_dateunixtime'];
 
+$start_date =  $startcmd;
+$end_date   =  $endcmd ;
 // Get uuid, hostname and status of the deployed machines from xmppmaster.deploy
 // $getdeployment = xmlrpc_getdeployment($cmd_id, $filter, $start, $maxperpage);
 $getdeployment = xmlrpc_getdeployment_cmd_and_title($cmd_id,
@@ -175,10 +177,10 @@ else
     $count = $re['total'];
 
 // STATS FROM XMPPMASTER DEPLOY
-$statsfromdeploy = xmlrpc_getstatdeployfromcommandidstartdate( $cmd_id,
-                                                               date("Y-m-d H:i:s",
-                                                               $start_date));
-
+// $statsfromdeploy = xmlrpc_getstatdeployfromcommandidstartdate( $cmd_id,
+//                                                                date("Y-m-d H:i:s",
+//                                                                $start_date));
+$statsfromdeploy = xmlrpc_getstatdeployfromcommandidtitle( $cmd_id, $title);
 // get some info from msc for this deployment
 $info = xmlrpc_getdeployfromcommandid($cmd_id, "UUID_NONE");
 
@@ -264,8 +266,8 @@ echo "<table class='listinfos' cellspacing='0' cellpadding='5' border='1'>";
     echo "<tbody>";
         echo "<tr>";
             echo '<td>'.$creation_date.'</td>';
-            echo '<td>'.date("Y-m-d H:i:s", $start_date).'</td>';
-            echo '<td>'.date("Y-m-d H:i:s", $end_date).'</td>';
+            echo '<td>'. $start_date.'</td>';
+            echo '<td>'.$end_date.'</td>';
             echo '<td>'.$creator_user.'</td>';
             if($isconvergence != 0){
                 echo "<td><img style='position:relative;top : 5px;' src='modules/msc/graph/images/install_convergence.png'/></td>";
