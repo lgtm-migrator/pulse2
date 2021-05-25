@@ -8184,7 +8184,10 @@ where agenttype="machine" and groupdeploy in (
                             id_rule,
                             cmd,
                             type_event="log",
-                            status_event=1):
+                            status_event=1,
+                            parameter_other=None,
+                            ack_user=None,
+                            ack_date=None):
         try:
             new_Monitoring_event = Mon_event()
             new_Monitoring_event.machines_id = machines_id
@@ -8192,6 +8195,9 @@ where agenttype="machine" and groupdeploy in (
             new_Monitoring_event.id_device = id_device
             new_Monitoring_event.type_event = type_event
             new_Monitoring_event.cmd = cmd
+            new_Monitoring_event.parameter_other = parameter_other
+            new_Monitoring_event.ack_user = ack_user
+            new_Monitoring_event.ack_date = ack_date
             session.add(new_Monitoring_event)
             session.commit()
             session.flush()
@@ -8856,6 +8862,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                 " monitoring format json error %s" % (device_type, str(e))
             logging.getLogger().error("%s" % msg)
             return (msg, -1)
+
         try:
             logging.getLogger().debug("compile")
             code = compile(bindingstring, '<string>', 'exec')
@@ -8884,32 +8891,6 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                                json.dumps(data,indent=4))
         logging.getLogger().debug("%s" % msg)
         return (msg, resultbinding)
-
-    def __binding_application(self, datastring, bindingstring, device_type):
-        resultbinding = None
-        try:
-            data=json.loads(datastring)
-        except Exception as e:
-            return "[binding error device rule %s] : data from message" \
-                " monitoring format json error %s" % (device_type, str(e))
-
-        try:
-            code = compile(bindingstring, '<string>', 'exec')
-            exec(code)
-        except KeyError as e:
-            resultbinding = "[binding error device rule %s] : key %s in "\
-                "binding:\n%s\nis missing. Check your binding on data\n%s" % (
-                    device_type,
-                    str(e),
-                    bindingstring,
-                    json.dumps(data,indent=4))
-        except Exception as e:
-            resultbinding = "[binding device rule %s error %s] in binding:\n%s\ "\
-                "on data\n%s"%(device_type,
-                               str(e),
-                               bindingstring,
-                               json.dumps(data,indent=4))
-        return resultbinding
 
     @DatabaseHelper._sessionm
     def getlistMonitoring_devices_type(self,
@@ -8946,7 +8927,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                     WHERE
                         hostname LIKE '%s'
                             AND device_type LIKE '%s';''' % (hostname,
-                                                        device_type)
+                                                             device_type)
         else:
             sql = ''' SELECT
                         *
@@ -8981,6 +8962,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                           doc):
         # search rule for device and machine
         pass
+
 
 
     @DatabaseHelper._sessionm
