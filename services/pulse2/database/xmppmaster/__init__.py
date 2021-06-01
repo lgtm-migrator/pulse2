@@ -6266,9 +6266,15 @@ class XmppMasterDatabase(DatabaseHelper):
             return {}
 
     @DatabaseHelper._sessionm
-    def update_Presence_Relay(self, session, jid, presense=0):
+    def update_Presence_Relay(self, session, jid, presence=0):
         """
-            update relay table presense
+            Update the presence in the relay and machine SQL Tables
+            Args:
+                session: The SQL Alchemy session
+                jid: jid of the relay to update
+                presence: Availability of the relay
+                          0: Set the relay as offline
+                          1: Set the relay as online
         """
         try:
             user = str(jid).split("@")[0]
@@ -6277,7 +6283,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     SET
                         `enabled` = '%s'
                     WHERE
-                        `xmppmaster`.`machines`.`jid` like('%s@%%');""" % (presense,
+                        `xmppmaster`.`machines`.`jid` like('%s@%%');""" % (presence,
                                                                            user)
             session.execute(sql)
             sql = """UPDATE
@@ -6285,7 +6291,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     SET
                         `enabled` = '%s'
                     WHERE
-                        `xmppmaster`.`relayserver`.`jid` like('%s@%%');""" % (presense,
+                        `xmppmaster`.`relayserver`.`jid` like('%s@%%');""" % (presence,
                                                                               user)
             session.execute(sql)
             session.commit()
