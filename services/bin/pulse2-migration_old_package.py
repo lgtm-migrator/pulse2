@@ -25,7 +25,7 @@ import json, os, sys
 from datetime import datetime
 import traceback
 
-datenow = datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
+datenow = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def readjsonfile(namefile):
 
@@ -37,74 +37,72 @@ def writejsonfile(namefile, data):
     with open(namefile, 'w') as json_data:
         json.dump(data, json_data, indent=4)
 
-def listpartage():
+def sharing_list():
     exclude_name_package = ["sharing", ".stfolder", ".stignore"]
-    folderpackages = os.path.join("/", "var" ,"lib","pulse2","packages","sharing")
-    return  [ os.path.join(folderpackages,x) for x in os.listdir(folderpackages) \
+    folderpackages = os.path.join("/", "var", "lib", "pulse2", "packages", "sharing")
+    return  [os.path.join(folderpackages,x) for x in os.listdir(folderpackages) \
                 if os.path.isdir(os.path.join(folderpackages,x)) \
                     and x not in exclude_name_package]
 
-def listpackage():
-    listpackagestotal=[]
-    listepartage = listpartage()
+def packages_list():
+    total_packages=[]
+    list_of_sharing = sharing_list()
     exclude_name_package = ["sharing", ".stfolder", ".stignore" ]
     folderpackages = os.path.join("/", "var" ,"lib","pulse2","packages","sharing")
-    
-    for partage in listepartage:
-        listpackagestotal.extend(
-            [ os.path.join(partage,x) for x in os.listdir(partage) \
-                if os.path.isdir(os.path.join(partage,x)) \
+
+    for share in list_of_sharing:
+        total_packages.extend(
+            [ os.path.join(share,x) for x in os.listdir(share) \
+                if os.path.isdir(os.path.join(share, x)) \
                     and x not in exclude_name_package])
-    return listpackagestotal
+    return total_packages
 
 def main():
-    for path_packagename in listpackage():
-        namefilejson = os.path.join(path_packagename,"conf.json")
-        print
-        print "------- START traitement file %s _______" % namefilejson
+    for path_packagename in packages_list():
+        jsonfile_name = os.path.join(path_packagename,"conf.json")
+        print "We are looking for file %s" % jsonfile_name
         try:
-            jsondata = readjsonfile(namefilejson)
-            modif=False
-            partagename = os.path.basename(os.path.dirname(path_packagename))
+            jsondata = readjsonfile(jsonfile_name)
+            modif = False
+            name_of_share = os.path.basename(os.path.dirname(path_packagename))
             if "localisation_server" not in jsondata:
-                jsondata['localisation_server'] = partagename
-                print "localisation_server missing"
-                modif=True
+                jsondata['localisation_server'] = name_of_share
+                print "The localisation_server key is missing"
+                modif = True
             else:
                 if jsondata['localisation_server'].strip() == "":
-                    jsondata['localisation_server'] = partagename
-                    print "localisation_server exist but not share value"
-                    modif=True
-                elif jsondata['localisation_server'].strip() != partagename:
-                    print "localisation_server exist but error value is %s" %jsondata['localisation_server']
-                    jsondata['localisation_server'] = partagename
-                    modif=True
+                    jsondata['localisation_server'] = name_of_share
+                    print "The localisation_server key is available but empty"
+                    modif = True
+                elif jsondata['localisation_server'].strip() != name_of_share:
+                    print "The localisation_server key is available but with an error. The wrong value is %s" % jsondata['localisation_server']
+                    jsondata['localisation_server'] = name_of_share
+                    modif = True
             if "previous_localisation_server" not in jsondata:
-                jsondata['previous_localisation_server'] = partagename
-                print "previous_localisation_server missing"
-                modif=True
+                jsondata['previous_localisation_server'] = name_of_share
+                print "The previous_localisation_server key is missing"
+                modif = True
             if "creation_date" not in jsondata:
                 jsondata['creation_date'] = datenow
-                print "creation date missing missing"
-                modif=True
+                print "The creation_date key is missing"
+                modif = True
             if "creator" not in jsondata:
                 jsondata['creator'] = "oldtonewpackagescript"
-                print "creator name missing"
-                modif=True
+                print "The creator key is missing"
+                modif = True
             if "metagenerator" not in jsondata:
-                print "metagenerator missing"
+                print "The metagenerator key is missing"
                 jsondata['metagenerator'] = "expert"
             if modif:
-                print "save file %s"% namefilejson
-                writejsonfile(namefilejson, jsondata)
-                print "new file \n%s" % json.dumps(jsondata,indent=4)
+                print "save file %s" % jsonfile_name
+                writejsonfile(jsonfile_name, jsondata)
+                print "new file \n %s" % json.dumps(jsondata,indent=4)
             else:
                 print "Correct values pour ce packages"
-            print "------- END trairement file_______"
+            print "The file named: %s is now fixed"
         except:
-            print "VERIFY JSON FILE %s"%namefilejson  
+            print "VERIFY JSON FILE %s" % jsonfile_name
             print "%s" % traceback.format_exc()
-            print "------- END trairement file _______"
-    return 0    
+    return 0
 if __name__ == '__main__':
     sys.exit(main())
