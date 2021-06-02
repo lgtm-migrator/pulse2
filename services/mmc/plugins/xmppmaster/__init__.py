@@ -449,6 +449,41 @@ def delDeploybygroup(numgrp):
     return XmppMasterDatabase().delDeploybygroup(numgrp)
 
 
+def getdeploy_by_team_user_recent(login, state, duree, min=None, max=None, filt=None):
+    if min == "":
+        min = None
+    if max == "":
+        max = None
+    if filt == "":
+        filt = None
+    return XmppMasterDatabase().getdeploy_by_team_user_recent(login, state, duree, min, max, filt)
+
+
+def getnotdeploy_by_team_user_recent(login, duree, min=None, max=None, filt=None):
+    if min == "":
+        min = None
+    if max == "":
+        max = None
+    if filt == "":
+        filt = None
+    pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
+    return MscDatabase().getnotdeploybyuserrecent(pulse_usersidlist, duree, min, max, filt)
+
+
+def get_deployxmppteamscheduler(login, min=None, max=None, filt=None):
+    if min == "":
+        min = None
+    if max == "":
+        max = None
+    if filt == "":
+        filt = None
+    # appel xmppmaster pour la liste des user de la team.
+    pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
+    # puis appel msc pour  avoir la liste des deployement scheduler de la team.
+    result = MscDatabase().deployxmppscheduler(pulse_usersidlist, min, max, filt)
+    return result
+
+
 def getdeploybyuserrecent(login, state, duree, min=None, max=None, filt=None):
     if min == "":
         min = None

@@ -668,6 +668,12 @@ class MscDatabase(DatabaseHelper):
         return ""
 
     def deployxmppscheduler(self, login, min , max, filt):
+        """
+            Cette fonction renvoie les deployements scheduler sur msc
+        """
+        listuser = []
+        if isinstance(login, list):
+            listuser = [ '"%s"'%x.strip() for x in login if x.strip() != ""]
         datenow = datetime.datetime.now()
         sqlselect="""
             SELECT
@@ -708,9 +714,15 @@ class MscDatabase(DatabaseHelper):
                     phase.state = 'ready'"""
 
         if login:
-            sqlfilter = sqlfilter + """
-            AND
-                commands.creator = '%s'"""%login
+            if listuser:
+                # login to list
+                sqlfilter = sqlfilter + """
+                AND
+                    commands.creator in (%s)""" % ",".join(listuser)
+            else:
+                sqlfilter = sqlfilter + """
+                AND
+                    commands.creator = '%s'""" % login
 
         if filt:
             sqlfilter = sqlfilter + """
@@ -806,6 +818,7 @@ class MscDatabase(DatabaseHelper):
         result['tabdeploy']['groupid'] = groupid
         result['tabdeploy']['titledeploy'] = titledeploy
         return result
+
 
     def updategroup(self, group):
         session = create_session()
@@ -918,11 +931,15 @@ class MscDatabase(DatabaseHelper):
         """
             select deploys not deployed
         """
-
+        list_login=[]
+        if login:
+            if isinstance(login, (tuple, list)):
+                list_login=[x.strip() for x in login if x.strip() != ""]
+            else :
+                list_login.append(login)
         datenow = datetime.datetime.now()
         delta = datetime.timedelta(seconds=intervalsearch)
         datereduced = datenow - delta
-
         query = session.query(Commands.id,
                               func.count(Commands.id).label('nb_machine'),
                               Commands.title,
@@ -943,18 +960,30 @@ class MscDatabase(DatabaseHelper):
         .filter(Commands.end_date > datereduced)\
         .filter(Commands.type != 2)
 
-        if filt:
-            query = query.filter(or_(Commands.title.like("%%%s%%"%filt), \
-                                     Commands.creator.like("%%%s%%"%filt),\
-                                     Commands.package_id.like("%%%s%%"%filt),\
-                                     Commands.start_date.like("%%%s%%"%filt),\
-                                     Commands.end_date.like("%%%s%%"%filt),\
-                                     CommandsOnHost.id.like("%%%s%%"%filt),\
-                                     Target.target_name.like("%%%s%%"%filt),\
-                                     Target.target_uuid.like("%%%s%%"%filt),\
-                                     Target.id_group.like("%%%s%%"%filt),\
-                                     Target.target_macaddr.like("%%%s%%"%filt)))
-
+        if list_login and  "root" not in list_login:
+            query = query.filter(Commands.creator.in_(list_login))
+            if filt:
+                query = query.filter(or_(Commands.title.like("%%%s%%"%filt),
+                                        Commands.package_id.like("%%%s%%"%filt),
+                                        Commands.start_date.like("%%%s%%"%filt),
+                                        Commands.end_date.like("%%%s%%"%filt),
+                                        CommandsOnHost.id.like("%%%s%%"%filt),
+                                        Target.target_name.like("%%%s%%"%filt),
+                                        Target.target_uuid.like("%%%s%%"%filt),
+                                        Target.id_group.like("%%%s%%"%filt),
+                                        Target.target_macaddr.like("%%%s%%"%filt)))
+        else:
+            if filt:
+                query = query.filter(or_(Commands.title.like("%%%s%%"%filt),
+                                        Commands.creator.like("%%%s%%"%filt),
+                                        Commands.package_id.like("%%%s%%"%filt),
+                                        Commands.start_date.like("%%%s%%"%filt),
+                                        Commands.end_date.like("%%%s%%"%filt),
+                                        CommandsOnHost.id.like("%%%s%%"%filt),
+                                        Target.target_name.like("%%%s%%"%filt),
+                                        Target.target_uuid.like("%%%s%%"%filt),
+                                        Target.id_group.like("%%%s%%"%filt),
+                                        Target.target_macaddr.like("%%%s%%"%filt)))
         query = query.group_by(Commands.id, CommandsOnHostPhase.state)
         nb = query.count()
         query = query.offset(int(min)).limit(int(max)-int(min))
@@ -975,6 +1004,7 @@ class MscDatabase(DatabaseHelper):
                            'gid': element[10],
                            'mac_address': element[11]})
         return result
+
 
     @DatabaseHelper._sessionm
     def __dispach_deploy(self, session, selectedMachines):
