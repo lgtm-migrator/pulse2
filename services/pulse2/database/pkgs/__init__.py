@@ -1479,3 +1479,75 @@ class PkgsDatabase(DatabaseHelper):
                 resuldict['permission']=y[13]
                 ret.append(resuldict)
         return ret
+
+    @DatabaseHelper._sessionm
+    def get_pkg_name_from_uuid(self, session, uuids):
+        query = session.query(Packages.label, Packages.uuid)
+        if type(uuids) is list:
+            query = query.filter(Packages.uuid.in_(uuids))
+        elif type(uuids) is str:
+            query = query.filter(Packages.uuid == uuids)
+
+        result = query.all()
+        tmp = {}
+        if result is not None:
+            for pkg in result :
+                tmp[pkg.uuid] = pkg.label
+
+        return tmp
+
+    @DatabaseHelper._sessionm
+    def get_files_infos(self, session, uuid, filename=""):
+        query = session.query(Pkgs_shares.share_path)\
+            .join(Packages, Pkgs_shares.id == Packages.pkgs_share_id)\
+            .filter(Packages.uuid == uuid).first()
+
+        path = query[0] if query is not None else None
+
+        result = {
+            "path": path,
+            "files": []
+        }
+        if path is None:
+            return result
+
+        try:
+            pkg_path = os.readlink(os.path.join(path, uuid))
+        except:
+            pkg_path = os.path.join(path, uuid)
+
+
+        mime_reader = magic.open(magic.MAGIC_MIME)
+        mime_reader.load()
+
+        if(os.path.isdir(pkg_path)):
+            result["valid_path"] = True
+            if filename == "":
+                # Get all files
+                result['files'] = [{
+                    'fullpath': os.path.join(pkg_path, file),
+                    'name': file,
+                    'size': str(os.path.getsize(os.path.join(pkg_path, file))),
+                    'mime': mime_reader.file(os.path.join(pkg_path, file)).split("; charset="),
+                    } for file in os.listdir(pkg_path) if os.path.isfile(os.path.join(pkg_path, file))]
+            else:
+                # Get specific file
+                if os.path.join(pkg_path, filename):
+                    result = {
+                        'name': filename,
+                        'mime': mime_reader.file(os.path.join(pkg_path, filename)).split("; charset="),
+                        'content' : ""
+                        }
+                    if result['mime'][0].startswith("text"):
+                        # knokno
+                        fp = open(os.path.join(pkg_path, filename), 'rb')
+                        result["content"] = base64.b64encode(fp.read())
+                        fp.close()
+                else:
+                    result = {
+                        'size': 0,
+                        'content' : ""
+                    }
+        else:
+            result["valid_path"] = False
+        return result

@@ -1564,6 +1564,8 @@ def get_xmpp_package(package_uuid):
     else:
         return False
 
+def get_pkg_name_from_uuid(uuids):
+    return PkgsDatabase().get_pkg_name_from_uuid(uuids)
 
 def get_meta_from_xmpp_package(package_uuid):
     """
@@ -1603,6 +1605,11 @@ def package_exists(uuid):
         return True
     else:
         return False
+
+def get_files_infos(uuid, filename=""):
+    """If possible, get the content of the packages files"""
+    result = PkgsDatabase().get_files_infos(uuid, filename)
+    return result
 
 class getCommand(object):
     def __init__(self, file):
