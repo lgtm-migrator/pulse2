@@ -1567,6 +1567,16 @@ def get_xmpp_package(package_uuid):
 def get_pkg_name_from_uuid(uuids):
     return PkgsDatabase().get_pkg_name_from_uuid(uuids)
 
+def get_pkg_creator_from_uuid(uuids):
+    """
+        Retrieve the creator of the package based on the uuids
+        Args:
+            uuids: uuids of the packages
+        Return:
+            It returns the name of the package
+    """
+    return PkgsDatabase().get_pkg_creator_from_uuid(uuids)
+
 def get_meta_from_xmpp_package(package_uuid):
     """
     Select the specified package and return the metaparameters in the json
