@@ -295,33 +295,45 @@ function xmlrpc_getdeploybyteamuserrecent($login,
                                           $max=null,
                                           $filt=null) {
     return xmlCall("xmppmaster.getdeploy_by_team_user_recent", array($login,
-                                                                        $state,
-                                                                        $duree,
-                                                                        $min ,
-                                                                        $max,
-                                                                        $filt));
+                                                                     $state,
+                                                                     $duree,
+                                                                     $min,
+                                                                     $max,
+                                                                     $filt));
 }
 function xmlrpc_getnotdeploybyteamuserrecent($login,
-                                          $duree,
-                                          $min=null,
-                                          $max=null,
-                                          $filt=null) {
+                                             $duree,
+                                             $min=null,
+                                             $max=null,
+                                             $filt=null) {
     return xmlCall("xmppmaster.getnotdeploy_by_team_user_recent", array($login,
                                                                         $duree,
-                                                                        $min ,
+                                                                        $min,
                                                                         $max,
                                                                         $filt));
 }
 
 
-function xmlrpc_get_deployxmppteamscheduler($login ,
+function xmlrpc_get_deployxmppteamscheduler($login,
                                             $start,
                                             $end,
                                             $filter){
     return xmlCall("xmppmaster.get_deployxmppteamscheduler", array($login,
-                                                                    $start ,
+                                                                    $start,
                                                                     $end,
                                                                     $filter));
+}
+
+function xmlrpc_getdeploybyteamuserpast( $login,
+                                         $duree,
+                                         $min=null,
+                                         $max=null,
+                                         $filt=null) {
+    return xmlCall("xmppmaster.getdeploybyteamuserpast", array( $login,
+                                                                $duree,
+                                                                $min,
+                                                                $max,
+                                                                $filt));
 }
 
 function xmlrpc_getdeploybyuserrecent( $login , $state, $duree, $min=null, $max=null, $filt=null) {
@@ -331,6 +343,7 @@ function xmlrpc_getdeploybyuserrecent( $login , $state, $duree, $min=null, $max=
 function xmlrpc_getdeploybyuserpast( $login, $duree, $min=null, $max=null, $filt=null) {
     return xmlCall("xmppmaster.getdeploybyuserpast", array($login, $duree, $min , $max, $filt));
 }
+
 
 function xmlrpc_getdeploybyuserlen($login) {
     return xmlCall("xmppmaster.getdeploybyuserlen", array($login));

@@ -76,7 +76,11 @@ if (isset($_GET['currenttasks']) && $_GET['currenttasks'] == '1'){
 else {
   $LastdeployINsecond = 3600*2160;
   echo "<h2>" . _T("Past tasks (last 3 months)") ."</h2>";
-  $arraydeploy = xmlrpc_getdeploybyuserpast( $_GET['login'] ,$LastdeployINsecond, $start, $end, $filter) ;
+  $arraydeploy = xmlrpc_getdeploybyteamuserpast($_GET['login'],
+                                                $LastdeployINsecond,
+                                                $start,
+                                                $end,
+                                                $filter) ;
 }
 
 if (isset($arraydeploy['total_of_rows']))

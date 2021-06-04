@@ -678,7 +678,7 @@ class MscDatabase(DatabaseHelper):
         sqlselect="""
             SELECT
                 COUNT(*) as nbmachine,
-                target.id_group AS GRP,
+                target.id_group AS GRP, 
                 CONCAT('',
                         IF(target.id_group != NULL
                                 OR target.id_group = '',
@@ -715,7 +715,7 @@ class MscDatabase(DatabaseHelper):
 
         if login:
             if listuser:
-                # login to list
+                # login to list 
                 sqlfilter = sqlfilter + """
                 AND
                     commands.creator in (%s)""" % ",".join(listuser)
@@ -747,8 +747,7 @@ class MscDatabase(DatabaseHelper):
 
         reqsql = reqsql + sqlgroupby+";"
 
-        ###### print reqsql
-
+        # count deployement groupe  et machines
         sqlselect="""
             Select COUNT(nb) AS TotalRecords from(
                 SELECT
@@ -771,6 +770,7 @@ class MscDatabase(DatabaseHelper):
             AND
             """% datenow.strftime('%Y-%m-%d %H:%M:%S')
         reqsql1 = sqlselect + sqlfilter + sqllimit + sqlgroupby + ") as tmp;";
+
         result={}
         resulta = self.db.execute(reqsql)
         resultb = self.db.execute(reqsql1)
@@ -959,8 +959,8 @@ class MscDatabase(DatabaseHelper):
         .filter(CommandsOnHostPhase.state == 'ready')\
         .filter(Commands.end_date > datereduced)\
         .filter(Commands.type != 2)
-
-        if list_login and  "root" not in list_login:
+        
+        if list_login :# and  "root" not in list_login
             query = query.filter(Commands.creator.in_(list_login))
             if filt:
                 query = query.filter(or_(Commands.title.like("%%%s%%"%filt),

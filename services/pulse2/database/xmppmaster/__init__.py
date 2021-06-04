@@ -4435,11 +4435,20 @@ class XmppMasterDatabase(DatabaseHelper):
             return []
 
     @DatabaseHelper._sessionm
-    def getdeploy_by_team_user_recent(self, session, login , state, duree, min=None , max=None, filt=None):
+    def getdeploy_by_team_user_recent(self,
+                                       session,
+                                       login ,
+                                       state,
+                                       duree,
+                                       min=None,
+                                       max=None,
+                                       filt=None):
         pulse_usersid = self.get_lit_all_user(login)
-        if pulse_usersid <= 1:
-            return self.getdeploybyuserrecent(login , state, duree, min=None , max=None, filt=None)
+        llogin=','.join([ '"%s"'%x for x in  pulse_usersid] )
 
+        if len(pulse_usersid) <= 1:
+            return self.getdeploybyuserrecent(login , state, duree, min=None , max=None, filt=None)
+               
         deploylog = session.query(Deploy).filter( Deploy.login.in_(pulse_usersid))
 
         if state:
@@ -4448,13 +4457,6 @@ class XmppMasterDatabase(DatabaseHelper):
         if duree:
             deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
 
-        count = """select count(*) as nb from (
-        select count(id) as nb
-        from deploy
-        where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
-        group by title
-        ) as x;"""
-
         if filt is not None:
             deploylog = deploylog.filter( or_(  Deploy.state.like('%%%s%%'%(filt)),
                                                 Deploy.pathpackage.like('%%%s%%'%(filt)),
@@ -4462,18 +4464,27 @@ class XmppMasterDatabase(DatabaseHelper):
                                                 Deploy.login.like('%%%s%%'%(filt)),
                                                 Deploy.host.like('%%%s%%'%(filt))))
             count = """select count(*) as nb from (
-              select count(id) as nb
-              from deploy
-              where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
-              AND (state LIKE "%%%s%%"
-              or pathpackage LIKE "%%%s%%"
-              or start LIKE "%%%s%%"
-              or login LIKE "%%%s%%"
-              or host LIKE "%%%s%%"
-              )
-              group by title
-              ) as x;""" % (filt, filt, filt, filt, filt,)
-
+                            select count(id) as nb
+                            from deploy
+                            where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
+                            AND login in (%s)
+                            AND (state LIKE "%%%s%%"
+                            or pathpackage LIKE "%%%s%%"
+                            or start LIKE "%%%s%%"
+                            or login LIKE "%%%s%%"
+                            or host LIKE "%%%s%%"
+                            )
+                            group by title
+                            ) as x;""" % (llogin, filt, filt, filt, filt, filt,)
+        else:
+            # nb deploiement different
+            count = """select count(*) as nb from (
+                            select count(id) as nb
+                            from deploy
+                            where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
+                            AND login in (%s)
+                            group by title
+                            ) as x;"""%(llogin)
 
         lentaillerequette = self.get_count(deploylog)
 
@@ -4482,16 +4493,11 @@ class XmppMasterDatabase(DatabaseHelper):
         session.flush()
         lenrequest = [x for x in result]
 
-        #lentaillerequette = session.query(func.count(distinct(Deploy.title)))[0]
         deploylog = deploylog.group_by(Deploy.title).order_by(desc(Deploy.id))
 
-        ##deploylog = deploylog.add_column(func.count(Deploy.title))
         if min is not None and max is not None:
-            deploylog = deploylog.offset(int(min)).limit(int(max)-int(min))
-
+            deploylog = deploylog.offset(int(min)).limit(int(max)-int(min))  
         result = deploylog.all()
-
-
         session.commit()
         session.flush()
         ret ={'total_of_rows' : 0,
@@ -4545,7 +4551,7 @@ class XmppMasterDatabase(DatabaseHelper):
 
 
     @DatabaseHelper._sessionm
-    def getdeploybyuserrecent(self, session, login , state, duree, min=None , max=None, filt=None):
+    def getdeploybyuserrecent(self, session, login, state, duree, min=None , max=None, filt=None):
         deploylog = session.query(Deploy)
         if login:
             deploylog = deploylog.filter( Deploy.login == login)
@@ -4555,32 +4561,55 @@ class XmppMasterDatabase(DatabaseHelper):
         if duree:
             deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
 
-        count = """select count(*) as nb from (
-        select count(id) as nb
-        from deploy
-        where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
-        group by title
-        ) as x;"""
-
         if filt is not None:
             deploylog = deploylog.filter( or_(  Deploy.state.like('%%%s%%'%(filt)),
                                                 Deploy.pathpackage.like('%%%s%%'%(filt)),
                                                 Deploy.start.like('%%%s%%'%(filt)),
                                                 Deploy.login.like('%%%s%%'%(filt)),
                                                 Deploy.host.like('%%%s%%'%(filt))))
-            count = """select count(*) as nb from (
-              select count(id) as nb
-              from deploy
-              where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
-              AND (state LIKE "%%%s%%"
-              or pathpackage LIKE "%%%s%%"
-              or start LIKE "%%%s%%"
-              or login LIKE "%%%s%%"
-              or host LIKE "%%%s%%"
-              )
-              group by title
-              ) as x;""" % (filt, filt, filt, filt, filt,)
-
+            if login:
+                count = """select count(*) as nb from (
+                                    select count(id) as nb
+                                    from deploy
+                                    where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
+                                    AND login like "%s"
+                                    AND (state LIKE "%%%s%%"
+                                    or pathpackage LIKE "%%%s%%"
+                                    or start LIKE "%%%s%%"
+                                    or login LIKE "%%%s%%"
+                                    or host LIKE "%%%s%%"
+                                    )
+                                    group by title
+                                    ) as x;""" % (login, filt, filt, filt, filt, filt,)
+            else:
+                count = """select count(*) as nb from (
+                                    select count(id) as nb
+                                    from deploy
+                                    where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
+                                    AND (state LIKE "%%%s%%"
+                                    or pathpackage LIKE "%%%s%%"
+                                    or start LIKE "%%%s%%"
+                                    or login LIKE "%%%s%%"
+                                    or host LIKE "%%%s%%"
+                                    )
+                                    group by title
+                                    ) as x;""" % (filt, filt, filt, filt, filt,)
+        else:
+            if login:
+                count = """select count(*) as nb from (
+                                    select count(id) as nb
+                                        from deploy
+                                        where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
+                                        AND login like "%s"
+                                        group by title
+                                    ) as x;""" % (login)
+            else:
+                count = """select count(*) as nb from (
+                                    select count(id) as nb
+                                        from deploy
+                                        where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
+                                        group by title
+                                    ) as x;"""
 
         lentaillerequette = self.get_count(deploylog)
 
@@ -4652,10 +4681,18 @@ class XmppMasterDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def getdeploybyuserpast(self, session, login, duree, min=None, max=None, filt=None):
-
+        """
+            3 cas pour le parameter login
+            login est vide on cherche toute les deployement passes de tout le monde.
+            login est 1 user string. on cherche tout les deploiement de ce user
+            login est 1 list, on cherche tout les deployement passe de la team de user.
+        """
         deploylog = session.query(Deploy)
         if login:
-            deploylog = deploylog.filter( Deploy.login == login)
+            if isinstance(login, list):
+                deploylog = deploylog.filter( Deploy.login.in_(login))
+            else:
+                deploylog = deploylog.filter( Deploy.login.like(login))
 
         if duree:
             deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
@@ -4674,18 +4711,50 @@ class XmppMasterDatabase(DatabaseHelper):
         lentaillerequette = session.query(func.count(distinct(Deploy.title)))[0]
 
         # It is the same as deploylog, but for unknown reason, the count doesn't works with ORM
-        count = """select count(*) as nb from (
-          select count(id) as nb
-          from deploy
-          where start >= DATE_SUB(NOW(),INTERVAL 3 MONTH)
-          AND (state LIKE "%%%s%%"
-          or pathpackage LIKE "%%%s%%"
-          or start LIKE "%%%s%%"
-          or login LIKE "%%%s%%"
-          or host LIKE "%%%s%%"
-          )
-          group by title
-          ) as x;"""%(filt,filt,filt,filt,filt,)
+        if login:
+            if isinstance(login, list):
+                llogin=','.join([ '"%s"'%x for x in  login] )
+                count = """select count(*) as nb from (
+                select count(id) as nb
+                from deploy
+                where start >= DATE_SUB(NOW(),INTERVAL 3 MONTH)
+                AND login in (%s)
+                AND (state LIKE "%%%s%%"
+                or pathpackage LIKE "%%%s%%"
+                or start LIKE "%%%s%%"
+                or login LIKE "%%%s%%"
+                or host LIKE "%%%s%%"
+                )
+                group by title
+                ) as x;"""%(llogin, filt,filt,filt,filt,filt,)
+            else:
+                count = """select count(*) as nb from (
+                select count(id) as nb
+                from deploy
+                where start >= DATE_SUB(NOW(),INTERVAL 3 MONTH)
+                AND login LIKE "%s"
+                AND (state LIKE "%%%s%%"
+                or pathpackage LIKE "%%%s%%"
+                or start LIKE "%%%s%%"
+                or login LIKE "%%%s%%"
+                or host LIKE "%%%s%%"
+                )
+                group by title
+                ) as x;"""%(login, filt,filt,filt,filt,filt,)
+        else:
+            count = """select count(*) as nb from (
+            select count(id) as nb
+            from deploy
+            where start >= DATE_SUB(NOW(),INTERVAL 3 MONTH)
+            AND (state LIKE "%%%s%%"
+            or pathpackage LIKE "%%%s%%"
+            or start LIKE "%%%s%%"
+            or login LIKE "%%%s%%"
+            or host LIKE "%%%s%%"
+            )
+            group by title
+            ) as x;"""%(filt,filt,filt,filt,filt,)
+
         count = session.execute(count)
         count = [nbcount for nbcount in count]
 
@@ -4729,7 +4798,6 @@ class XmppMasterDatabase(DatabaseHelper):
                 hostname = linedeploy.host.split('.')[0]
             else:
                 try:
-                    # Old jid : macaddress@relay/name
                     hostname = linedeploy.host.split('/')[1]
                 except Exception as e:
                     hostname = linedeploy.host.split('.')[0]
@@ -4750,6 +4818,7 @@ class XmppMasterDatabase(DatabaseHelper):
             ret['tabdeploy']['jid_relay'].append(linedeploy.jid_relay)
             ret['tabdeploy']['title'].append(linedeploy.title)
         return ret
+
 
 
     @DatabaseHelper._sessionm

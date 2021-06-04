@@ -449,25 +449,45 @@ def delDeploybygroup(numgrp):
     return XmppMasterDatabase().delDeploybygroup(numgrp)
 
 
-def getdeploy_by_team_user_recent(login, state, duree, min=None, max=None, filt=None):
+def getdeploy_by_team_user_recent(login,
+                                  state,
+                                  duree,
+                                  min=None,
+                                  max=None,
+                                  filt=None):
     if min == "":
         min = None
     if max == "":
         max = None
     if filt == "":
         filt = None
-    return XmppMasterDatabase().getdeploy_by_team_user_recent(login, state, duree, min, max, filt)
+    return XmppMasterDatabase().getdeploy_by_team_user_recent(login,
+                                                              state,
+                                                              duree,
+                                                              min,
+                                                              max,
+                                                              filt)
 
 
-def getnotdeploy_by_team_user_recent(login, duree, min=None, max=None, filt=None):
+def getnotdeploy_by_team_user_recent(login,
+                                     duree,
+                                     min=None,
+                                     max=None,
+                                     filt=None):
     if min == "":
         min = None
     if max == "":
         max = None
     if filt == "":
         filt = None
+    # call xmppmaster search users list of team    
     pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
-    return MscDatabase().getnotdeploybyuserrecent(pulse_usersidlist, duree, min, max, filt)
+    # call msc search no deploy    
+    return MscDatabase().getnotdeploybyuserrecent(pulse_usersidlist,
+                                                  duree,
+                                                  min,
+                                                  max,
+                                                  filt)
 
 
 def get_deployxmppteamscheduler(login, min=None, max=None, filt=None):
@@ -477,14 +497,34 @@ def get_deployxmppteamscheduler(login, min=None, max=None, filt=None):
         max = None
     if filt == "":
         filt = None
-    # appel xmppmaster pour la liste des user de la team.
-    pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
-    # puis appel msc pour  avoir la liste des deployement scheduler de la team.
+    # call xmppmaster search users list of team         
+    pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)  
+    # call msc function for search scheduled deployement of login team.
     result = MscDatabase().deployxmppscheduler(pulse_usersidlist, min, max, filt)
     return result
 
 
-def getdeploybyuserrecent(login, state, duree, min=None, max=None, filt=None):
+def getdeploybyteamuserpast(login, duree, min=None, max=None, filt=None):
+    if min == "":
+        min = None
+    if max == "":
+        max = None
+    # call xmppmaster search users list of team         
+    pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
+    # call xmppmaster search deploy  list terminate of login team         
+    return XmppMasterDatabase().getdeploybyuserpast(pulse_usersidlist,
+                                                    duree,
+                                                    min,
+                                                    max,
+                                                    filt)
+
+
+def getdeploybyuserrecent(login,
+                          state,
+                          duree,
+                          min=None,
+                          max=None,
+                          filt=None):
     if min == "":
         min = None
     if max == "":
@@ -494,7 +534,11 @@ def getdeploybyuserrecent(login, state, duree, min=None, max=None, filt=None):
     return XmppMasterDatabase().getdeploybyuserrecent(login, state, duree, min, max, filt)
 
 
-def getdeploybyuserpast(login, duree, min=None, max=None, filt=None):
+def getdeploybyuserpast(login,
+                        duree,
+                        min=None,
+                        max=None,
+                        filt=None):
     if min == "":
         min = None
     if max == "":
@@ -502,7 +546,9 @@ def getdeploybyuserpast(login, duree, min=None, max=None, filt=None):
     return XmppMasterDatabase().getdeploybyuserpast(login, duree, min, max, filt)
 
 
-def getdeploybyuser(login, numrow, offset):
+def getdeploybyuser(login,
+                    numrow,
+                    offset):
     if not numrow:
         numrow = None
     if not offset:
