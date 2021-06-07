@@ -5147,7 +5147,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     `has_relayserverrules` ON  `relayserver`.`id` = `has_relayserverrules`.`relayserver_id`
             where
                 `has_relayserverrules`.`rules_id` = %d
-                    AND `has_relayserverrules`.`subject` = '%s'
+                    AND '%s' REGEXP `has_relayserverrules`.`subject`
                     AND `relayserver`.`enabled` = %d
                     AND `relayserver`.`moderelayserver` = 'static'
                     AND `relayserver`.`classutil` = '%s'
@@ -5160,7 +5160,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     `has_relayserverrules` ON  `relayserver`.`id` = `has_relayserverrules`.`relayserver_id`
             where
                 `has_relayserverrules`.`rules_id` = %d
-                    AND `has_relayserverrules`.`subject` = '%s'
+                    AND '%s' REGEXP `has_relayserverrules`.`subject`
                     AND `relayserver`.`enabled` = %d
                     AND `relayserver`.`moderelayserver` = 'static'
                     AND (`relayserver`.`switchonoff` OR `relayserver`.`mandatory`)
