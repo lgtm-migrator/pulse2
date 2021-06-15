@@ -480,9 +480,9 @@ def getnotdeploy_by_team_user_recent(login,
         max = None
     if filt == "":
         filt = None
-    # call xmppmaster search users list of team    
+    # call xmppmaster search users list of team
     pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
-    # call msc search no deploy    
+    # call msc search no deploy
     return MscDatabase().getnotdeploybyuserrecent(pulse_usersidlist,
                                                   duree,
                                                   min,
@@ -497,8 +497,8 @@ def get_deployxmppteamscheduler(login, min=None, max=None, filt=None):
         max = None
     if filt == "":
         filt = None
-    # call xmppmaster search users list of team         
-    pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)  
+    # call xmppmaster search users list of team
+    pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
     # call msc function for search scheduled deployement of login team.
     result = MscDatabase().deployxmppscheduler(pulse_usersidlist, min, max, filt)
     return result
@@ -509,9 +509,9 @@ def getdeploybyteamuserpast(login, duree, min=None, max=None, filt=None):
         min = None
     if max == "":
         max = None
-    # call xmppmaster search users list of team         
+    # call xmppmaster search users list of team
     pulse_usersidlist = XmppMasterDatabase().get_lit_all_user(login)
-    # call xmppmaster search deploy  list terminate of login team         
+    # call xmppmaster search deploy  list terminate of login team
     return XmppMasterDatabase().getdeploybyuserpast(pulse_usersidlist,
                                                     duree,
                                                     min,
@@ -868,7 +868,11 @@ def get_xmppmachines_list(start, limit, filter, presence):
 def get_xmpprelays_list(start, limit, filter, presence):
     return XmppMasterDatabase().get_xmpprelays_list(start, limit, filter, presence)
 
-def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
+def get_list_ars_from_sharing(sharings, start, limit, userlogin,  filter):
+    """
+        cette fonction renvoi la structure des ars avec les statstiques sur les machines.
+        sharing les structure des partage de utilisateur
+    """
     listidars = []
     arslistextend = []
     objsearch = {}
@@ -876,9 +880,8 @@ def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
         objsearch['login'] = userlogin
         arslistextend = PkgsDatabase().pkgs_search_ars_list_from_cluster_rules(objsearch)
         # on utilise la table rules global pour etendre ou diminuer les droits d'admins sur les ars.
-
     for share in sharings:
-        if "r" in share['permission'] :
+        if "r" in share['permission']:
             listidars.append(share['ars_id'])
     if arslistextend:
         listidars.extend([x[0] for x in arslistextend])
@@ -890,7 +893,6 @@ def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
             "partielcount" : 0
             }
         return res
-
     stat_ars_machine = XmppMasterDatabase().get_stat_ars_machine(ars_list['jid'])
     ars_list['total_machines'] = []
     ars_list['uninventoried'] = []
@@ -964,6 +966,7 @@ def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
            "partielcount" : len(ars_list['jid'])
            }
     return res
+
 
 def get_clusters_list(start, limit, filter):
     return XmppMasterDatabase().get_clusters_list(start, limit, filter)
