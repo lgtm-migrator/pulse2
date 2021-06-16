@@ -5806,7 +5806,7 @@ class XmppMasterDatabase(DatabaseHelper):
         ctx['filter']=ctx['filter'].strip()
         if "@@@DEBUG@@@" in ctx['filter']:
             debugfunction = 1
-            ctx['filter']  = ctx['filter'].replace("@@DEBUG@@", "").strip()
+            ctx['filter']  = ctx['filter'].replace("@@@DEBUG@@@", "").strip()
 
         if 'field' in ctx and ctx['field'].strip() != '':
             if 'filter' in ctx and ctx['filter'].strip() != '':
