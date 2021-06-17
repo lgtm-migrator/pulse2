@@ -5851,18 +5851,24 @@ class XmppMasterDatabase(DatabaseHelper):
                         for regkey in regs]
         entity = " "
         if 'location' in ctx and ctx['location'] != "":
-            entitystrlist = str(ctx['location']).replace('UUID',"").strip()
-            if entitystrlist.split(","):
-               pass
+            if ctx['location'].strip() == "-1":
+                logger.error("AA location is %s" % ctx['location'])
+                logger.error("AA location is %s" % type(ctx['location']))
+                pass
             else:
-                entity = " AND ent.glpi_id in (%s) "% entitystrlist
+                entitylist = [x.strip() \
+                                for x in str(ctx['location']).replace('UUID',"").split(",")\
+                                    if x !=""]
+                if entitylist:
+                    entitystrlist=",".join(entitylist)
+                    entity = " AND ent.glpi_id in (%s) "% entitystrlist
         computerpresence = ""
         if 'computerpresence' in ctx:
             if ctx['computerpresence'] == 'presence':
                 computerpresence = " AND enabled > 0 "
             elif ctx['computerpresence'] == 'no_presence':
                 computerpresence = " AND enabled = 0 "
-        ssql = """
+        sql = """
                 SELECT SQL_CALC_FOUND_ROWS
                     mach.id,
                     mach.jid,
