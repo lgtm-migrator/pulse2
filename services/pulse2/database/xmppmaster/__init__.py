@@ -5784,10 +5784,9 @@ class XmppMasterDatabase(DatabaseHelper):
                         'ip_xmpp', 'macaddress',
                         'subnetxmpp', 'agenttype',
                         'classutil', 'groupdeploy',
-                        'urlguacamole', 'picklekeypublic',
                         'ad_ou_machine', 'ad_ou_user',
                         'glpi_description',
-                        'lastuser', 'keysyncthing',
+                        'lastuser',
                         'glpi_owner_firstname', 'glpi_owner_realname',
                         'glpi_owner', 'glpi_entity_id',
                         'glpi_location_id','model',
@@ -5850,19 +5849,48 @@ class XmppMasterDatabase(DatabaseHelper):
         regs=filter(r.search, self.config.summary)
         list_reg_columns_name = [getattr( self.config, regkey).split("|")[0].split("\\")[-1] \
                         for regkey in regs]
-        entity = ""
+        entity = " "
         if 'location' in ctx and ctx['location'] != "":
-            entity = " AND ent.glpi_id in (%s) "% str(ctx['location']).replace('UUID',"")
-
+            entitystrlist = str(ctx['location']).replace('UUID',"").strip()
+            if entitystrlist.split(","):
+               pass
+            else:
+                entity = " AND ent.glpi_id in (%s) "% entitystrlist
         computerpresence = ""
         if 'computerpresence' in ctx:
             if ctx['computerpresence'] == 'presence':
                 computerpresence = " AND enabled > 0 "
             elif ctx['computerpresence'] == 'no_presence':
                 computerpresence = " AND enabled = 0 "
-        sql = """
+        ssql = """
                 SELECT SQL_CALC_FOUND_ROWS
-                    mach.*,
+                    mach.id,
+                    mach.jid,
+                    mach.uuid_serial_machine,
+                    mach.need_reconf,
+                    mach.enabled,
+                    mach.platform,archi,
+                    mach.hostname,
+                    mach.uuid_inventorymachine,
+                    mach.ippublic,
+                    mach.ip_xmpp,
+                    mach.macaddress,
+                    mach.subnetxmpp,
+                    mach.agenttype,
+                    mach.classutil,
+                    mach.groupdeploy,
+                    mach.ad_ou_machine,
+                    mach.ad_ou_user,
+                    mach.kiosk_presence,
+                    mach.lastuser,
+                    mach.glpi_description,
+                    mach.glpi_owner_firstname,
+                    mach.glpi_owner_realname,
+                    mach.glpi_owner,
+                    mach.glpi_entity_id,
+                    mach.glpi_location_id,
+                    mach.model,
+                    mach.manufacturer,
                     GROUP_CONCAT(DISTINCT CONCAT(reg.name, '|', reg.value)
                         SEPARATOR '@@@') AS regedit,
                     loc.name AS locationname,
@@ -5905,7 +5933,8 @@ class XmppMasterDatabase(DatabaseHelper):
         session.flush()
         ret = self.query_to_array_of_dict(result,bycolumn=True,
                                            listexclude=['picklekeypublic',
-                                                        'urlguacamole'])
+                                                        'urlguacamole',
+                                                        'keysyncthing'])
                                                         #'keysyncthing',
                                            #'glpi_location_id',
                                                         #'locationid',
