@@ -269,4 +269,8 @@ function xmlrpc_get_files_infos($uuid, $filename=""){
 function get_pkg_creator_from_uuid($uuids){
   return xmlCall("pkgs.get_pkg_creator_from_uuid", [$uuids]);
 }
+
+function get_shares_list($start=-1, $end=-1, $filter=""){
+  return xmlCall("pkgs.get_shares_list", [$start, $end, $filter]);
+}
 ?>

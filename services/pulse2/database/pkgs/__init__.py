@@ -1583,3 +1583,38 @@ class PkgsDatabase(DatabaseHelper):
         else:
             result["valid_path"] = False
         return result
+
+    @DatabaseHelper._sessionm
+    def get_shares_list(self, session, start, end, filter=""):
+        query = session.query(Pkgs_shares)
+
+        try:
+            start = int(start)
+        except:
+            start = -1
+        try:
+            end = int(end)
+        except:
+            end = -1
+
+        if filter != "":
+            query = query.filter(or_(Pkgs_shares.name.contains(filter),
+                                     Pkgs_shares.comments.contains(filter),
+                                     Pkgs_shares.type.contains(filter),
+                                     Pkgs_shares.uri.contains(filter),
+                                     Pkgs_shares.ars_name.contains(filter),
+                                     Pkgs_shares.share_path.contains(filter)))
+
+        count = query.count()
+        if start > -1:
+            query = query.offset(start)
+
+        if end > -1:
+            query = query.limit(end)
+
+        shares = query.all()
+        result = {
+            "total" : count,
+            "datas" : [share.to_array() for share in shares if share is not None]
+        }
+        return result

@@ -1853,3 +1853,9 @@ def get_dependencies_list_from_permissions(login):
     objsearch['list_sharing'] = list_sharing_id(objsearch)
     listuuidpackag = PkgsDatabase().get_list_packages_deploy_view(objsearch)
     return apimanagepackagemsc.load_packagelist_dependencies(listuuidpackag)
+
+
+def get_shares_list(start, end, filter=""):
+    """Get the packages sharings list"""
+    result = PkgsDatabase().get_shares_list(start, end, filter)
+    return result

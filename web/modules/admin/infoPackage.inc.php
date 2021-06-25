@@ -162,6 +162,15 @@ $page = new Page("moveRelayRule", _T("Move Relay Rule", "admin"));
 $page->setFile("modules/admin/admin/moveRelayRule.php");
 $submod->addPage($page);
 
+$page = new Page("pkgsSharingList", _T("Packages Sharings", "admin"));
+$page->setFile("modules/admin/admin/pkgsSharingList.php");
+$submod->addPage($page);
+
+$page = new Page("ajaxPkgsSharingList", _T("Packages Sharings", "admin"));
+$page->setFile("modules/admin/admin/ajaxPkgsSharingList.php");
+$page->setOptions(array("visible"=>False, "AJAX"=>True));
+$submod->addPage($page);
+
 $mod->addSubmod($submod);
 
 $MMCApp =& MMCApp::getInstance();

@@ -1,6 +1,6 @@
-<?
+<?php
 /**
- * (c) 2020-2021 Siveo, http://siveo.net
+ * (c) 2021 Siveo, http://siveo.net
  *
  * This file is part of Management Console (MMC).
  *
@@ -19,15 +19,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-$sidemenu= new SideMenu();
-$sidemenu->setClass("admin");
-$sidemenu->addSideMenuItem(
-    new SideMenuItem(_T("List of Relays","admin"), "admin", "admin", "relaysList")
-);
-$sidemenu->addSideMenuItem(new SideMenuItem(_T("Clusters List", 'admin'), "admin", "admin", "clustersList"));
-$sidemenu->addSideMenuItem(new SideMenuItem(_T("New Cluster", 'admin'), "admin", "admin", "newCluster"));
-$sidemenu->addSideMenuItem(
-    new SideMenuItem(_T("Rules","admin"), "admin", "admin", "rules")
-);
-$sidemenu->addSideMenuItem(new SideMenuItem(_T("Packages Sharings List","admin"), "admin", "admin", "pkgsSharingList"));
+require("graph/navbar.inc.php");
+require("modules/admin/admin/localSidebar.php");
+require_once("modules/xmppmaster/includes/xmlrpc.php");
+require_once("modules/pkgs/includes/xmlrpc.php");
+
+$p = new PageGenerator(_T("Package Sharings", 'admin'));
+$p->setSideMenu($sidemenu);
+$p->display();
+
+
+print "<br/><br/><br/>";
+$ajax = new AjaxFilter(urlStrRedirect("admin/admin/ajaxPkgsSharingList"));
+//$ajax = new AjaxFilter(urlStrRedirect("admin/admin/ajaxPkgsSharingList"), "container", [], 'formRunning');
+$ajax->display();
+print "<br/><br/><br/>";
+$ajax->displayDivToUpdate();
 ?>
