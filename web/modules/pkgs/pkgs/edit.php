@@ -414,11 +414,11 @@ if(isExpertMode1())
 
           if(in_array($uuid, $dependencies))
           {
-            $packagesInOptionAdded .= '<option class="opt_bubble" title="'.$name.' v.'.$version.'" value="'.$uuid.'">'.$name.' v.'.$version.'</option>';
+            $packagesInOptionAdded .= '<option title="'.$name.' v.'.$version.'" value="'.$uuid.'">'.$name.' v.'.$version.'</option>';
 
           }
           else{
-            $packagesInOptionNotAdded .= '<option class="opt_bubble" title="'.$name.' v.'.$version.'" value="'.$uuid.'">'.$name.' v.'.$version.'</option>';
+            $packagesInOptionNotAdded .= '<option title="'.$name.' v.'.$version.'" value="'.$uuid.'">'.$name.' v.'.$version.'</option>';
             $allDependenciesList[] = $xmpp_package;
           }
         }

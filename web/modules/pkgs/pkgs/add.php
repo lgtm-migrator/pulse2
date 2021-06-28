@@ -312,7 +312,7 @@ if (isset($_POST['bconfirm'])){
         $dependencies = get_dependencies_list_from_permissions($_SESSION["login"]);
         foreach($dependencies as $package)
         {
-            $packagesInOption .= '<option class="opt_bubble" title="'.$package['name'].' v.'.$package['version'].'" value="'.$package['uuid'].'">'.$package['name'].' V.'.$package['version'].'</option>';
+            $packagesInOption .= '<option title="'.$package['name'].' v.'.$package['version'].'" value="'.$package['uuid'].'">'.$package['name'].' V.'.$package['version'].'</option>';
         }
         $f->add(new TrFormElement(_T("Dependencies", "pkgs"),new SpanElement('<div id="grouplist">
     <table style="border: none;" cellspacing="0">
