@@ -1448,7 +1448,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
                                         name,
                                         uuidmachine,
                                         title,
-                                        "ERROR UNKNOWN ERROR",
+                                        statusmsg,
                                         sessiondeployementless,
                                         user=login,
                                         login=login,
