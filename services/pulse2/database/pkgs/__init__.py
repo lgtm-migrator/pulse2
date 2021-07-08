@@ -1250,7 +1250,8 @@ class PkgsDatabase(DatabaseHelper):
                     pkgs.pkgs_rules_global
                 WHERE
                     '%s' REGEXP (pkgs.pkgs_rules_global.subject)
-                        AND permission LIKE '%%r%%';"""%objsearch['login']
+                         AND permission LIKE '%%r%%'
+                         AND pkgs.pkgs_rules_global.pkgs_rules_algos_id = 3;""" % objsearch['login']
             result = session.execute(sql)
             session.commit()
             session.flush()
@@ -1484,6 +1485,14 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def get_pkg_name_from_uuid(self, session, uuids):
+        """
+            Retrieve the name of the package based on the uuids
+            Args:
+                session: The SQL Alchemy session
+                uuids: uuids of the packages
+            Return:
+                It returns the name of the package
+        """
         query = session.query(Packages.label, Packages.uuid)
         if type(uuids) is list:
             query = query.filter(Packages.uuid.in_(uuids))
@@ -1491,12 +1500,12 @@ class PkgsDatabase(DatabaseHelper):
             query = query.filter(Packages.uuid == uuids)
 
         result = query.all()
-        tmp = {}
+        pkg = {}
         if result is not None:
-            for pkg in result :
-                tmp[pkg.uuid] = pkg.label
+            for tmp in result:
+                pkg[tmp.uuid] = tmp.label
 
-        return tmp
+        return pkg
 
     @DatabaseHelper._sessionm
     def get_pkg_creator_from_uuid(self, session, uuids):
@@ -1506,7 +1515,7 @@ class PkgsDatabase(DatabaseHelper):
                 session: The SQL Alchemy session
                 uuids: uuids of the packages
             Return:
-                It returns the name of the package
+                It returns the name of the creator of the package
         """
         query = session.query(Packages.conf_json, Packages.uuid)
         if type(uuids) is list:
@@ -1530,6 +1539,20 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def get_files_infos(self, session, uuid, filename=""):
+        """
+            This is used to retrieve informations about a package.
+            Args:
+                session: The SQLAlchemy session
+                uuid: uuid of the package
+                filename: name of the file to analyze
+            Return:
+                Return informations about the package:
+                    - Name
+                    - Size
+                    - Mime
+                    - Fullpath
+                    - Content
+        """
         query = session.query(Pkgs_shares.share_path)\
             .join(Packages, Pkgs_shares.id == Packages.pkgs_share_id)\
             .filter(Packages.uuid == uuid).first()
@@ -1540,6 +1563,7 @@ class PkgsDatabase(DatabaseHelper):
             "path": path,
             "files": []
         }
+
         if path is None:
             return result
 
@@ -1557,11 +1581,11 @@ class PkgsDatabase(DatabaseHelper):
             if filename == "":
                 # Get all files
                 result['files'] = [{
-                    'fullpath': os.path.join(pkg_path, file),
-                    'name': file,
-                    'size': str(os.path.getsize(os.path.join(pkg_path, file))),
-                    'mime': mime_reader.file(os.path.join(pkg_path, file)).split("; charset="),
-                    } for file in os.listdir(pkg_path) if os.path.isfile(os.path.join(pkg_path, file))]
+                    'fullpath': os.path.join(pkg_path, pkg_file),
+                    'name': pkg_file,
+                    'size': str(os.path.getsize(os.path.join(pkg_path, pkg_file))),
+                    'mime': mime_reader.file(os.path.join(pkg_path, pkg_file)).split("; charset="),
+                    } for pkg_file in os.listdir(pkg_path) if os.path.isfile(os.path.join(pkg_path, pkg_file))]
             else:
                 # Get specific file
                 if os.path.join(pkg_path, filename):
@@ -1571,7 +1595,6 @@ class PkgsDatabase(DatabaseHelper):
                         'content' : ""
                         }
                     if result['mime'][0].startswith("text"):
-                        # knokno
                         fp = open(os.path.join(pkg_path, filename), 'rb')
                         result["content"] = base64.b64encode(fp.read())
                         fp.close()

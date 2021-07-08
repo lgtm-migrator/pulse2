@@ -272,5 +272,11 @@ function get_pkg_creator_from_uuid($uuids){
 
 function get_shares_list($start=-1, $end=-1, $filter=""){
   return xmlCall("pkgs.get_shares_list", [$start, $end, $filter]);
+function pkgs_search_ars_list_from_cluster_rules($login){
+  return xmlCall("pkgs.pkgs_search_ars_list_from_cluster_rules", [$login]);
+}
+
+function get_Cluster_list_rule($login){
+  return xmlCall("pkgs.get_Cluster_list_rule", [$login]);
 }
 ?>
