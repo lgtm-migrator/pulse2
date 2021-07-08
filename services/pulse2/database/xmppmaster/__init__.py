@@ -145,7 +145,7 @@ class XmppMasterDatabase(DatabaseHelper):
         Base.prepare(self.db, reflect=True)
         # add table auto_base
         self.Update_machine = Base.classes.update_machine
-        self.Ban_machine = Base.classes.ban_machine
+        self.Ban_machines = Base.classes.ban_machines
 
         if not self.initMappersCatchException():
             self.session = None
