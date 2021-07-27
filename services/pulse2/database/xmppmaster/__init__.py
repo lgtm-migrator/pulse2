@@ -6234,15 +6234,34 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def getxmppmasterfilterforglpi(self, session, listqueryxmppmaster = None):
         listqueryxmppmaster[2] = listqueryxmppmaster[2].lower()
-        fl = listqueryxmppmaster[3].replace('*',"%")
+        Regexpression = False
+        if listqueryxmppmaster[2] in [ "ou user", "ou machine"]:
+            # on test si expression relationel
+            if listqueryxmppmaster[3][:1] == "/" and  listqueryxmppmaster[3][-1:] == "/":
+                Regexpression = True
+                fl = listqueryxmppmaster[3][1:-1]
+        if not Regexpression:
+            # SQL Wildcards
+            # % : le symbole pourcentage représente zéro, un ou plusieurs caractères joker.
+            # dans l'ecriture shell on utilise wilcard * est %
+            fl = listqueryxmppmaster[3].replace('*',"%")
+
         if listqueryxmppmaster[2] == "ou user":
             machineid = session.query(Machines.uuid_inventorymachine).\
                 filter( Machines.uuid_inventorymachine.isnot(None))
-            machineid = machineid.filter(Machines.ad_ou_user.like(fl))
+            if Regexpression:
+                machineid = machineid.filter(Machines.ad_ou_user.op('regexp')(fl))
+            else:
+                machineid = machineid.filter(Machines.ad_ou_user.like(fl))
         elif listqueryxmppmaster[2]== "ou machine":
             machineid = session.query(Machines.uuid_inventorymachine).\
                 filter( Machines.uuid_inventorymachine.isnot(None))
-            machineid = machineid.filter(Machines.ad_ou_machine.like(fl))
+            if Regexpression:
+                machineid = machineid.filter(Machines.ad_ou_machine.op('regexp')(fl))
+            else:
+                machineid = machineid.filter(Machines.ad_ou_machine.like(fl))
+
+
         elif listqueryxmppmaster[2] == "online computer":
             d = XmppMasterDatabase().getlistPresenceMachineid()
             listid = [x.replace("UUID", "") for x in d]
@@ -6252,6 +6271,8 @@ class XmppMasterDatabase(DatabaseHelper):
         session.flush()
         ret = [str(m.uuid_inventorymachine).replace("UUID", "")  for m in machineid]
         return ret
+
+
 
     @DatabaseHelper._sessionm
     def getListPresenceMachine(self, session):
