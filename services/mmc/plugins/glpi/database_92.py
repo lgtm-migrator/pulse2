@@ -609,36 +609,25 @@ class Glpi92(DyngroupDatabaseHelper):
             result = element[0]
         return result
 
+
     def __xmppmasterfilter(self, filt = None):
         ret = {}#if filt['computerpresence'] == "presence":
         if "computerpresence" in filt:
             d = XmppMasterDatabase().getlistPresenceMachineid()
             listid = [x.replace("UUID", "") for x in d]
             ret["computerpresence"] = ["computerpresence","xmppmaster",filt["computerpresence"] , listid]
-        elif "query" in filt and filt['query'][0] in ["AND", "OR"]:
-            result = self.__analyse_proposition(filt['query'][:], result={})
-            for t in result:
-                if result[t][2].lower() in ["online computer", "ou user", "ou machine"]:
-                    listid = XmppMasterDatabase().getxmppmasterfilterforglpi(result[t])
-                    ret[result[t][2].lower()] = [result[t][1],result[t][2], result[t][3], listid]
+        elif "query" in filt and filt['query'][0] in ["AND", "OR", "NOT"]:
+            for q in filt['query'][1]:
+                #if len(q) >=3: and  q[2].lower() in ["online computer", "ou user", "ou machine"]:
+                if len(q) >=3:
+                    if  q[2].lower() in ["online computer",
+                                         'ou machine',
+                                         'ou user']:
+                        listid = XmppMasterDatabase().getxmppmasterfilterforglpi(q)
+                        q.append(listid)
+                        ret[q[2]] = [q[1], q[2], q[3], listid]
         return ret
 
-    def __analyse_proposition(self, query, result={}):
-        if query[0] in ['OR', 'AND']:
-                del query[0]
-                if query:
-                    result=self.__analyse_proposition(query, result)
-
-        if query and isinstance(query[0], basestring) and query[0]:
-            result[query[0]]=query
-
-        while len(query) > 0:
-            if isinstance(query[0],list):
-                result=self.__analyse_proposition(query[0], result)
-                del query[0]
-            else:
-                break;
-        return result
 
     @DatabaseHelper._sessionm
     def get_machines_list1(self, session, start, end, ctx):
@@ -1115,7 +1104,10 @@ class Glpi92(DyngroupDatabaseHelper):
 
             query_filter = None
 
-            filters = [self.machine.c.is_deleted == 0, self.machine.c.is_template == 0, self.__filter_on_filter(query), self.__filter_on_entity_filter(query, ctx)]
+            filters = [self.machine.c.is_deleted == 0,
+                       self.machine.c.is_template == 0,
+                       self.__filter_on_filter(query),
+                       self.__filter_on_entity_filter(query, ctx)]
 
             join_query, query_filter = self.filter(ctx, self.machine, filt, session.query(Machine), self.machine.c.id, filters)
 
@@ -1204,15 +1196,15 @@ class Glpi92(DyngroupDatabaseHelper):
             query = query.filter(self.machine.c.is_deleted == 0).filter(self.machine.c.is_template == 0)
             if PluginManager().isEnabled("xmppmaster"):
                 if ret:
-                    if "online computer" in ret:
-                        if ret["online computer"][2] == "True":
-                            query = query.filter(Machine.id.in_(ret["online computer"][3]))
-                        else:
-                            query = query.filter(Machine.id.notin_(ret["online computer"][3]))
-                    if "ou user" in ret:
-                        query = query.filter(Machine.id.in_(ret["ou user"][3]))
-                    if "ou machine" in ret:
-                        query = query.filter(Machine.id.in_(ret["ou machine"][3]))
+                    #if "online computer" in ret:
+                        #if ret["online computer"][2] == "True":
+                            #query = query.filter(Machine.id.in_(ret["online computer"][3]))
+                        #else:
+                            #query = query.filter(Machine.id.notin_(ret["online computer"][3]))
+                    #if "ou user" in ret:
+                        #query = query.filter(Machine.id.in_(ret["ou user"][3]))
+                    #if "ou machine" in ret:
+                        #query = query.filter(Machine.id.in_(ret["ou machine"][3]))
                     if "computerpresence" in ret:
                         if ret["computerpresence"][2] == "presence":
                             query = query.filter(Machine.id.in_(ret["computerpresence"][3]))
@@ -1466,7 +1458,7 @@ class Glpi92(DyngroupDatabaseHelper):
         """
         Map a name and request parameters on a sqlalchemy request
         """
-        if len(query) == 4:
+        if len(query) >= 4:
             # in case the glpi database is in latin1, don't forget dyngroup is in utf8
             # => need to convert what comes from the dyngroup database
             query[3] = self.encode(query[3])
