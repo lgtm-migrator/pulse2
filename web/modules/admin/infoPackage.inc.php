@@ -171,6 +171,27 @@ $page->setFile("modules/admin/admin/ajaxPkgsSharingList.php");
 $page->setOptions(array("visible"=>False, "AJAX"=>True));
 $submod->addPage($page);
 
+$page = new Page("ban", _T("Ban Machines", "admin"));
+$page->setFile("modules/admin/admin/ban.php");
+$page->setOptions(array("AJAX" => true));
+$submod->addPage($page);
+
+$page = new Page("ajaxban", _T("Ban Machines", "admin"));
+$page->setFile("modules/admin/admin/ajaxban.php");
+$page->setOptions(array("AJAX" => true, "visible" => false));
+$submod->addPage($page);
+
+$page = new Page("unban", _T("Unban Machines", "admin"));
+$page->setFile("modules/admin/admin/unban.php");
+$page->setOptions(array("AJAX" => true, "visible" => false));
+$submod->addPage($page);
+
+$page = new Page("ajaxunban", _T("Unban Machines", "admin"));
+$page->setFile("modules/admin/admin/ajaxunban.php");
+$page->setOptions(array("AJAX" => true, "visible" => false));
+$submod->addPage($page);
+
+
 $mod->addSubmod($submod);
 
 $MMCApp =& MMCApp::getInstance();
