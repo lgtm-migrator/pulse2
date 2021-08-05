@@ -420,6 +420,7 @@ echo "<div>";
         echo (isset($abortdescriptormissing)&&$abortdescriptormissing) ? "<td>"._T("Abort Descriptor Missing","xmppmaster")."</td>" : "";
         echo (isset($abortmachinedisappeared)&&$abortmachinedisappeared) ? "<td>"._T("Abort Machine Disappeared","xmppmaster")."</td>" : "";
         echo (isset($abortdeploymentcancelledbyuser)&&$abortdeploymentcancelledbyuser) ? "<td>"._T("Abort Deployment Cancelled By User","xmppmaster")."</td>" : "";
+        echo (isset($abortduplicatemachines)&&$abortduplicatemachines) ? "<td>"._T("Abort Duplicate Machines","xmppmaster")."</td>" : "";
         echo (isset($deploymentdelayed)&&$deploymentdelayed) ? "<td>"._T("Deployment Delayed","xmppmaster")."</td>" : "";
         echo (isset($deploymentstart)&&$deploymentstart) ? "<td>"._T("Deployment start","xmppmaster")."</td>" : "";
         echo (isset($deploymentpending)&&$deploymentpending) ? "<td>"._T("Deployment Pending","xmppmaster")."</td>" : "";
@@ -449,6 +450,7 @@ echo "<div>";
         echo (isset($abortdescriptormissing)&&$abortdescriptormissing) ? "<td>".$abortdescriptormissing."</td>" : "";
         echo (isset($abortmachinedisappeared)&&$abortmachinedisappeared) ? "<td>".$abortmachinedisappeared."</td>" : "";
         echo (isset($abortdeploymentcancelledbyuser)&&$abortdeploymentcancelledbyuser) ? "<td>".$abortdeploymentcancelledbyuser."</td>" : "";
+        echo (isset($abortduplicatemachines)&&$abortduplicatemachines) ? "<td>".$abortduplicatemachines."</td>" : "";
         echo (isset($deploymentdelayed)&&$deploymentdelayed) ? "<td>".$deploymentdelayed."</td>" : "";
         echo (isset($deploymentstart)&&$deploymentstart) ? "<td>".$deploymentstart."</td>" : "";
         echo (isset($deploymentpending)&&$deploymentpending) ? "<td>".$deploymentpending."</td>" : "";
@@ -494,6 +496,7 @@ echo "<div>";
         echo (isset($abortdescriptormissing)&&$abortdescriptormissing) ? "<td>"._T("Abort Descriptor Missing","xmppmaster")."</td>" : "";
         echo (isset($abortmachinedisappeared)&&$abortmachinedisappeared) ? "<td>"._T("Abort Machine Disappeared","xmppmaster")."</td>" : "";
         echo (isset($abortdeploymentcancelledbyuser)&&$abortdeploymentcancelledbyuser) ? "<td>"._T("Abort Deployment Cancelled By User","xmppmaster")."</td>" : "";
+        echo (isset($abortduplicatemachines)&&$abortduplicatemachines) ? "<td>"._T("Abort Duplicate Machines","xmppmaster")."</td>" : "";
         echo (isset($deploymentdelayed)&&$deploymentdelayed) ? "<td>"._T("Deployment Delayed","xmppmaster")."</td>" : "";
         echo (isset($deploymentstart)&&$deploymentstart) ? "<td>"._T("Deployment start","xmppmaster")."</td>" : "";
         echo (isset($deploymentpending)&&$deploymentpending) ? "<td>"._T("Deployment Pending","xmppmaster")."</td>" : "";
@@ -523,6 +526,7 @@ echo "<div>";
         echo (isset($abortdescriptormissing)&&$abortdescriptormissing) ? "<td>".$abortdescriptormissing."</td>" : "";
         echo (isset($abortmachinedisappeared)&&$abortmachinedisappeared) ? "<td>".$abortmachinedisappeared."</td>" : "";
         echo (isset($abortdeploymentcancelledbyuser)&&$abortdeploymentcancelledbyuser) ? "<td>".$abortdeploymentcancelledbyuser."</td>" : "";
+        echo (isset($abortduplicatemachines)&&$abortduplicatemachines) ? "<td>".$abortduplicatemachines."</td>" : "";
         echo (isset($deploymentdelayed)&&$deploymentdelayed) ? "<td>".$deploymentdelayed."</td>" : "";
         echo (isset($deploymentstart)&&$deploymentstart) ? "<td>".$deploymentstart."</td>" : "";
         echo (isset($deploymentpending)&&$deploymentpending) ? "<td>".$deploymentpending."</td>" : "";
@@ -818,6 +822,9 @@ echo '<script src="modules/xmppmaster/graph/js/chart.js"></script>';
     if ($abortdeploymentcancelledbyuser > 0){
         echo 'datas.push({"label":"ABORT DEPLOYMENT CANCELLED BY USER ", "value":parseInt('.$abortdeploymentcancelledbyuser.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortdeploymentcancelledbyuser",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
     }
+    if ($abortduplicatemachines > 0){
+        echo 'datas.push({"label":"Abort Duplicate Machines ", "value":parseInt('.$abortduplicatemachines.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortduplicatemachines",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
+    }
     if ($errorunknownerror > 0){
         echo 'datas.push({"label":"Error Unknown Error ", "value":parseInt('.$errorunknownerror.'), "color": "#ff0000", "href":"'.urlredirect_group_for_deploy("errorunknownerror",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
     }
@@ -905,6 +912,9 @@ echo '<script src="modules/xmppmaster/graph/js/chart.js"></script>';
     }
     if ($abortdeploymentcancelledbyuser > 0){
         echo 'datas2.push({"label":"ABORT DEPLOYMENT CANCELLED BY USER ", "value":parseInt('.$abortdeploymentcancelledbyuser.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortdeploymentcancelledbyuser",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
+    }
+    if ($abortduplicatemachines > 0){
+        echo 'datas2.push({"label":"Abort Duplicate Machines ", "value":parseInt('.$abortduplicatemachines.'), "color": "#FF8600", "href":"'.urlredirect_group_for_deploy("abortduplicatemachines",$_GET['gid'],$_GET['login'],$cmd_id).'"});';
     }
     if ($errorunknownerror > 0){
         echo 'datas2.push({"label":"Error Unknown Error ", "value":parseInt('.$errorunknownerror.'), "color": "#ff0000", "href":"'.urlredirect_group_for_deploy("errorunknownerror",$_GET['gid'],$_GET['login'],$cmd_id).'"});';

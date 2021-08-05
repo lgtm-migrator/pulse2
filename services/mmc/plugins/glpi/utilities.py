@@ -36,10 +36,10 @@ from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.sql.sqltypes import String, DateTime, NullType
 
 # python2/3 compatible.
-PY3 = str is not bytes
-text = str if PY3 else unicode
-int_type = int if PY3 else (int, long)
-str_type = str if PY3 else (str, unicode)
+is_python3 = str is not bytes
+text_type = str if is_python3 else unicode
+int_type = int if is_python3 else (int, long)
+str_type = str if is_python3 else (str, unicode)
 
 
 class StringLiteral(String):
@@ -49,9 +49,9 @@ class StringLiteral(String):
 
         def process(value):
             if isinstance(value, int_type):
-                return text(value)
+                return text_type(value)
             if not isinstance(value, str_type):
-                value = text(value)
+                value = text_type(value)
             result = super_processor(value)
             if isinstance(result, bytes):
                 result = result.decode(dialect.encoding)

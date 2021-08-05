@@ -18,6 +18,7 @@
 # along with Pulse 2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
+<<<<<<< HEAD
 """
 
     this plugins nettoy les roters none none dans le roster.
@@ -37,6 +38,23 @@ from utils import simplecommand
 plugin = {"VERSION" : "1.0", "NAME" : "scheduling_clean_roster",  "TYPE" : "all", "SCHEDULED" : True}
 
 SCHEDULE = {"schedule" : "5 0 * * *", "nb" : -1}# nb  -1 infinie
+=======
+
+"""
+    This plugin is used to clean the rosters.
+
+    To use this plugin, we need to have the substitutes on the same server as the ejabberd server.
+
+    TODO: If we need a different testcase, we will need to use IQs.
+"""
+import logging
+import traceback
+from utils import simplecommand
+
+plugin = {"VERSION": "1.0", "NAME": "scheduling_clean_roster", "TYPE": "all", "SCHEDULED": True}
+
+SCHEDULE = {"schedule": "5 0 * * *", "nb": -1}
+>>>>>>> origin/integration
 
 def schedule_main(objectxmpp):
     logging.getLogger().debug("==============Plugin scheduled==============")
@@ -46,10 +64,11 @@ def schedule_main(objectxmpp):
         result = simplecommand("ejabberdctl process_rosteritems delete none:to none master@pulse any")
         
         logging.getLogger().debug("cmd = ejabberdctl process_rosteritems delete none:to none master@pulse any")
-        logging.getLogger().debug("code return command = %s"% result['code'])
-        #logging.getLogger().debug("code return command = %s"% json.dumps(result['result'], indent=4))
-        logging.getLogger().debug("code return command = %s"% result['result'][0])
-        
+        logging.getLogger().debug("code return command = %s" % result['code'])
+        logging.getLogger().debug("code return command = %s" % result['result'][0])
+
         logging.getLogger().debug("============================================")
-    except Exception as e:
-        logging.getLogger().error("%s" % traceback.format_exc())
+
+    except Exception as execution_error:
+        logging.getLogger().error("The scheduling_clean_roster plugin failed to run with the error: %s" % execution_error)
+        logging.getLogger().error("We encountered the backtrace %s" % traceback.format_exc())

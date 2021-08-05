@@ -105,34 +105,28 @@ $filter  = isset($_GET['filter'])?$_GET['filter']:"";
 $start = isset($_GET['start'])?$_GET['start']:0;
 $end   = (isset($_GET['end'])?$_GET['start']+$maxperpage:$maxperpage);
 
-// if ($_SESSION["login"] == "root"){
-//   $relays = xmlrpc_get_xmpprelays_list($start, $maxperpage, $filter, 'all');
-// }else{
   $sharings = xmlrpc_pkgs_search_share(["login"=> $_SESSION["login"]]);
   if($sharings['config']['centralizedmultiplesharing'] == 1){
-      $relays = get_list_ars_from_sharing($sharings['datas'],$start, $maxperpage, $filter);
+      $relays = get_list_ars_from_sharing($sharings['datas'],$start, $maxperpage,$_SESSION["login"],  $filter);
   }else{
     $relays = xmlrpc_get_xmpprelays_list($start, $maxperpage, $filter, 'all');
   }
-// }
-$chaine=[];
+
+$chaine = [];
 $cn = [];
-$datas=$relays['datas'];
+$datas = $relays['datas'];
 foreach ($datas as $columns_name => $tabvalue){
     $chaine[$columns_name] = $columns_name;
 }
-$exclud=array();
 for ($index = 0; $index < count($datas['publicclass'] ); $index++) {
     $chainestr ="<table class='ttable'>";
     foreach($datas as $mach => $value ){
-//         if(in_array($mach,$exclud ) ||  $value[$index] ==""){
-//             continue;
-//         }
         $chainestr .= "<tr class='ttabletr'><td class='ttabletd'>".$mach ."</td><td class='ttabletd'>: ".$value[$index]."</td></tr>";
     }
 
     $chainestr .= "</table>";
 $cn[] = sprintf('<span class="infomach" mydata="%s">%s</pan>', $chainestr, $datas['hostname'][$index]);
+
 }
 
 //$editremoteconfigurationempty = new EmptyActionItem1(_("Edit config files"),"listconffile", "configg","computers","xmppmaster", "xmppmaster");
@@ -226,7 +220,6 @@ foreach($relays['datas']['hostname'] as $key=>$array){
   $raw++;
 }
 echo '<div id="switchresult"></div>';
-// $n = new OptimizedListInfos( $relays['datas']['hostname'], _T("Relays Xmpp", "admin"));
 $n = new OptimizedListInfos( $cn, _T("Relays Xmpp", "admin"));
 $n->setMainActionClasses($relays['datas']['enabled_css']);
 $n->disableFirstColumnActionLink();

@@ -1219,7 +1219,7 @@ class XmppMasterDatabase(DatabaseHelper):
                                                                  filter,filter,filter,filter,filter)
 
         if listidars:
-            listin = "%s"%  ",".join([str(x) for x in listidars])
+            listin = "%s"%  ",".join([str(x) for x in listidars if x != ""])
             sql="""
                 SELECT SQL_CALC_FOUND_ROWS
                     relayserver.id AS relayserver_id,
@@ -1448,7 +1448,7 @@ class XmppMasterDatabase(DatabaseHelper):
                 command_qa = command_qa.\
                     filter( Command_qa.command_start >= (datetime.now() - timedelta(seconds=during_the_last_seconds)))
             #nb = self.get_count(deploylog)
-        #lentaillerequette = session.query(func.count(distinct(Deploy.title)))[0]
+        #len_query = session.query(func.count(distinct(Deploy.title)))[0]
 
             nbtotal = self.get_count(command_qa)
             if start != "" and stop != "":
@@ -1741,7 +1741,7 @@ class XmppMasterDatabase(DatabaseHelper):
                            complete_name = None,
                            name = None):
         try:
-            result_entity = session.query(Glpi_entity).filter( Glpi_entity.glpi_id == glpi_id ).one()
+            result_entity = session.query(Glpi_entity).filter( Glpi_entity.glpi_id == glpi_id ).first()
             if result_entity:
                 if complete_name is not None:
                     result_entity.complete_name = complete_name
@@ -1763,7 +1763,7 @@ class XmppMasterDatabase(DatabaseHelper):
                            complete_name = None,
                            name = None):
         try:
-            result_location = session.query(Glpi_location).filter( Glpi_location.glpi_id == glpi_id ).one()
+            result_location = session.query(Glpi_location).filter( Glpi_location.glpi_id == glpi_id ).first()
             if result_location:
                 if complete_name is not None:
                     result_location.complete_name = complete_name
@@ -1811,7 +1811,7 @@ class XmppMasterDatabase(DatabaseHelper):
         #logging.getLogger().error("get_Glpi_entity")
         try:
             result_entity = session.query(Glpi_entity).\
-                filter( Glpi_entity.glpi_id == glpi_id ).one()
+                filter( Glpi_entity.glpi_id == glpi_id ).first()
             session.commit()
             session.flush()
             if result_entity:
@@ -1832,7 +1832,7 @@ class XmppMasterDatabase(DatabaseHelper):
         #logging.getLogger().error("get_Glpi_location")
         try:
             result_location = session.query(Glpi_location).\
-                filter( Glpi_location.glpi_id == glpi_id ).one()
+                filter( Glpi_location.glpi_id == glpi_id ).first()
             session.commit()
             session.flush()
             if result_location:
@@ -3455,6 +3455,7 @@ class XmppMasterDatabase(DatabaseHelper):
                    'abortdeploymentcancelledbyuser': 0,
                    'aborttransferfailed': 0,
                    'abortpackageexecutionerror': 0,
+                   'abortduplicatemachines': 0,
                    'deploymentstart': 0,
                    'wol1': 0,
                    'wol2': 0,
@@ -3511,6 +3512,8 @@ class XmppMasterDatabase(DatabaseHelper):
                     ret['abortdeploymentcancelledbyuser'] = liststatus[t]
                 elif t == 'ABORT PACKAGE EXECUTION ERROR':
                     ret['abortpackageexecutionerror'] = liststatus[t]
+                elif t == 'ABORT DUPLICATE MACHINES':
+                    ret['abortduplicatemachines'] = liststatus[t]
                 elif t == 'DEPLOYMENT START':
                     ret['deploymentstart'] = liststatus[t]
                 elif t == 'WOL 1':
@@ -3571,6 +3574,7 @@ class XmppMasterDatabase(DatabaseHelper):
                    'abortdeploymentcancelledbyuser': 0,
                    'aborttransferfailed': 0,
                    'abortpackageexecutionerror': 0,
+                   'abortduplicatemachines': 0,
                    'deploymentstart': 0,
                    'wol1': 0,
                    'wol2': 0,
@@ -3627,6 +3631,8 @@ class XmppMasterDatabase(DatabaseHelper):
                     ret['abortdeploymentcancelledbyuser'] = liststatus[t]
                 elif t == 'ABORT PACKAGE EXECUTION ERROR':
                     ret['abortpackageexecutionerror'] = liststatus[t]
+                elif t == 'ABORT DUPLICATE MACHINES':
+                    ret['abortduplicatemachines'] = liststatus[t]
                 elif t == 'DEPLOYMENT START':
                     ret['deploymentstart'] = liststatus[t]
                 elif t == 'WOL 1':
@@ -3717,6 +3723,10 @@ class XmppMasterDatabase(DatabaseHelper):
                 Deploy.state.contains(criterion),
                 Deploy.inventoryuuid.contains(criterion),
             ))
+
+        elif filter == "relays" and criterion != "":
+            query = query.filter(Deploy.jid_relay.contains(criterion))
+
         if filter != 'infos':
             count = query.count()
             if limit != -1:
@@ -4277,30 +4287,45 @@ class XmppMasterDatabase(DatabaseHelper):
         return ret
 
     @DatabaseHelper._sessionm
-    def getdeploybymachinegrprecent(self, session, group_uuid, state, duree, min , max, filt):
-        deploylog = session.query(Deploy)
-        if group_uuid:
-            deploylog = deploylog.filter( Deploy.group_uuid == group_uuid)
-        if duree:
-            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
-        if state:
-            deploylog = deploylog.filter( Deploy.state == state)
+    def get_deploy_from_group(self, session, group_uuid, state, intervalsearch, minimum, maximum, filt):
+        """
+        This function is used to retrieve the deploy of a machine's group.
 
-        #todo filter
-        #if filt:
-            #deploylog = deploylog.filter( or_(  Deploy.state.like('%%%s%%'%(filt)),
+        Args:
+            session: The SQL Alchemy session
+            group_uuid: The login of the user
+            state: The state of the deploy. (Started, Error, etc. ).
+            intervalsearch: The interval on which we search the deploys.
+            minimum: Minimum value ( for pagination )
+            maximum: Maximum value ( for pagination )
+            filt: Filter of the search
+        Returns:
+            It returns all the deployement of a group.
+        """
+        deploylog = session.query(Deploy)
+
+        if group_uuid:
+            deploylog = deploylog.filter(Deploy.group_uuid == group_uuid)
+        if intervalsearch:
+            deploylog = deploylog.filter(Deploy.start >= (datetime.now() - timedelta(seconds=intervalsearch)))
+        if state:
+            deploylog = deploylog.filter(Deploy.state == state)
+
+        # TODO: Add filter support
+        # if filt:
+            # deploylog = deploylog.filter( or_(Deploy.state.like('%%%s%%'%(filt)),
                                                 #Deploy.pathpackage.like('%%%s%%'%(filt)),
                                                 #Deploy.start.like('%%%s%%'%(filt)),
                                                 #Deploy.login.like('%%%s%%'%(filt)),
                                                 #Deploy.host.like('%%%s%%'%(filt))))
         nb = self.get_count(deploylog)
-        lentaillerequette = session.query(func.count(distinct(Deploy.title)))[0]
-        ##deploylog = deploylog.group_by(Deploy.title)
+        len_query = session.query(func.count(distinct(Deploy.title)))[0]
+        # deploylog = deploylog.group_by(Deploy.title)
         deploylog = deploylog.order_by(desc(Deploy.id))
 
         nb = self.get_count(deploylog)
-        if min and max:
-            deploylog = deploylog.offset(int(min)).limit(int(max)-int(min))
+        if minimum and maximum:
+            deploylog = deploylog.offset(int(minimum)).limit(int(maximim)-int(minimum))
 
         result = deploylog.all()
         session.commit()
@@ -4325,7 +4350,7 @@ class XmppMasterDatabase(DatabaseHelper):
                              'title': []
                 }
         }
-        ret['lentotal'] = lentaillerequette[0]
+        ret['lentotal'] = len_query[0]
         ret['lenquery'] = nb
         for linedeploy in result:
             #ret['tabdeploy']['len'].append(linedeploy[1])
@@ -4349,34 +4374,38 @@ class XmppMasterDatabase(DatabaseHelper):
         return ret
 
     @DatabaseHelper._sessionm
-    def getdeploybymachinerecent(self, session, uuidinventory, state, duree, min , max, filt):
+    def get_deploy_for_machine(self, session, uuidinventory, state, intervalsearch, minimum, maximum, filt):
+        """
+        This function is used to retrieve the deploy of a user.
+
+        Args:
+            session: The SQL Alchemy session
+            uuidinventory: The login of the user
+            state: The state of the deploy. (Started, Error, etc. ).
+            intervalsearch: The interval on which we search the deploys.
+            minimum: Minimum value ( for pagination )
+            maximum: Maximum value ( for pagination )
+            filt: Filter of the search
+        Returns:
+            It returns all the deployement for a machine.
+        """
+
         deploylog = session.query(Deploy)
         if uuidinventory:
             deploylog = deploylog.filter( Deploy.inventoryuuid == uuidinventory)
-        if duree:
-            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
+        if intervalsearch:
+            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=intervalsearch)))
         if state:
             deploylog = deploylog.filter( Deploy.state == state)
-        #else:
-            #deploylog = deploylog.filter( Deploy.state == "DEPLOYMENT START")
-
-        #if filt:
-    #deploylog = deploylog.filter( or_(  Deploy.state.like('%%%s%%'%(filt)),
-                                        #Deploy.pathpackage.like('%%%s%%'%(filt)),
-                                        #Deploy.start.like('%%%s%%'%(filt)),
-                                        #Deploy.login.like('%%%s%%'%(filt)),
-                                        #Deploy.host.like('%%%s%%'%(filt))))
 
         nb = self.get_count(deploylog)
 
-        lentaillerequette = session.query(func.count(distinct(Deploy.title)))[0]
-        ##deploylog = deploylog.group_by(Deploy.title)
-        #deploylog = deploylog.add_column(func.count(Deploy.title))
+        len_query = session.query(func.count(distinct(Deploy.title)))[0]
         deploylog = deploylog.order_by(desc(Deploy.id))
 
         nb = self.get_count(deploylog)
-        if min and max:
-            deploylog = deploylog.offset(int(min)).limit(int(max)-int(min))
+        if minium and maximum:
+            deploylog = deploylog.offset(int(minimum)).limit(int(maximum)-int(minimum))
         result = deploylog.all()
         session.commit()
         session.flush()
@@ -4400,10 +4429,9 @@ class XmppMasterDatabase(DatabaseHelper):
                              'title': []
                 }
         }
-        ret['lentotal'] = lentaillerequette[0]
+        ret['lentotal'] = len_query[0]
         ret['lenquery'] = nb
         for linedeploy in result:
-            #ret['tabdeploy']['len'].append(linedeploy[1])
             ret['tabdeploy']['state'].append(linedeploy.state)
             ret['tabdeploy']['pathpackage'].append(linedeploy.pathpackage.split("/")[-1])
             ret['tabdeploy']['sessionid'].append(linedeploy.sessionid)
@@ -4433,14 +4461,20 @@ class XmppMasterDatabase(DatabaseHelper):
         session.flush()
 
     @DatabaseHelper._sessionm
-    def get_lit_all_user(self, session, login ):
+    def get_teammembers_from_login(self, session, login):
         """
-            Cette fonction renvoit 1 liste de id user,
-            faisant partie de la/les même(s) equipe(s) que login.
+            This function is used to retrieve the id of the users of the 'login' team.
+            Args:
+                session: The SQL Alchemy session
+                login: The login of a user of the group we are searching.
+            Returns:
+                It returns a list with all the logins belonging to the group of 'login'
         """
+
         if login is None or login == "":
             return []
-        sql=""" SELECT DISTINCT
+
+        sql = """ SELECT DISTINCT
                     xmppmaster.pulse_users.login
                 FROM
                     xmppmaster.pulse_users
@@ -4457,45 +4491,54 @@ class XmppMasterDatabase(DatabaseHelper):
                                 xmppmaster.pulse_team_user ON
                                     xmppmaster.pulse_team_user.id_user = xmppmaster.pulse_users.id
                             WHERE
-                                xmppmaster.pulse_users.login = '%s');""" %(login)
+                                xmppmaster.pulse_users.login = '%s');""" % login
         result = session.execute(sql)
         session.commit()
         session.flush()
-        a = []
         if result:
             return [x[0] for x in result]
         else:
             return []
 
     @DatabaseHelper._sessionm
-    def getdeploy_by_team_user_recent(self,
-                                       session,
-                                       login ,
-                                       state,
-                                       duree,
-                                       min=None,
-                                       max=None,
-                                       filt=None):
-        pulse_usersid = self.get_lit_all_user(login)
-        llogin=','.join([ '"%s"'%x for x in  pulse_usersid] )
+    def get_deploy_by_team_member(self, session, login, state, intervalsearch,
+                                      minimum=None, maximum=None, filt=None):
+        """
+            This function is used to retrieve the deployements of a team.
+            This team is found based on the login of a member.
+
+            Args:
+                session: The SQL Alchemy session
+                login: The login of the user
+                state: State of the deployment (Started, Error, etc.)
+                intervalsearch: The interval on which we search the deploys.
+                minimum: Minimum value ( for pagination )
+                maximum: Maximum value ( for pagination )
+                filt: Filter of the search
+            Returns:
+                It returns all the deployement done by a specific team.
+                It can be done by time search too.
+        """
+        pulse_usersid = self.get_teammembers_from_login(login)
+        llogin=','.join(['"%s"' % x for x in  pulse_usersid])
 
         if len(pulse_usersid) <= 1:
-            return self.getdeploybyuserrecent(login , state, duree, min=None , max=None, filt=None)
+            return self.get_deploy_by_user_with_interval(login, state, intervalsearch, minimum=None, maximum=None, filt=None)
 
-        deploylog = session.query(Deploy).filter( Deploy.login.in_(pulse_usersid))
+        deploylog = session.query(Deploy).filter(Deploy.login.in_(pulse_usersid))
 
         if state:
-            deploylog = deploylog.filter( Deploy.state == state)
+            deploylog = deploylog.filter(Deploy.state == state)
 
-        if duree:
-            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
+        if intervalsearch:
+            deploylog = deploylog.filter(Deploy.start >= (datetime.now() - timedelta(seconds=intervalsearch)))
 
         if filt is not None:
-            deploylog = deploylog.filter( or_(  Deploy.state.like('%%%s%%'%(filt)),
-                                                Deploy.pathpackage.like('%%%s%%'%(filt)),
-                                                Deploy.start.like('%%%s%%'%(filt)),
-                                                Deploy.login.like('%%%s%%'%(filt)),
-                                                Deploy.host.like('%%%s%%'%(filt))))
+            deploylog = deploylog.filter(or_(Deploy.state.like('%%%s%%' % filt),
+                                             Deploy.pathpackage.like('%%%s%%' % filt),
+                                             Deploy.start.like('%%%s%%' % filt),
+                                             Deploy.login.like('%%%s%%' % filt),
+                                             Deploy.host.like('%%%s%%' % filt)))
             count = """select count(*) as nb from (
                             select count(id) as nb
                             from deploy
@@ -4517,9 +4560,9 @@ class XmppMasterDatabase(DatabaseHelper):
                             where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
                             AND login in (%s)
                             group by title
-                            ) as x;"""%(llogin)
+                            ) as x;""" % llogin
 
-        lentaillerequette = self.get_count(deploylog)
+        len_query = self.get_count(deploylog)
 
         result = session.execute(count)
         session.commit()
@@ -4528,33 +4571,34 @@ class XmppMasterDatabase(DatabaseHelper):
 
         deploylog = deploylog.group_by(Deploy.title).order_by(desc(Deploy.id))
 
-        if min is not None and max is not None:
-            deploylog = deploylog.offset(int(min)).limit(int(max)-int(min))
+        if minimum is not None and maximum is not None:
+            deploylog = deploylog.offset(int(minimum)).limit(int(maximum)-int(minimum))
+
         result = deploylog.all()
         session.commit()
         session.flush()
-        ret ={'total_of_rows' : 0,
-              'lentotal' : 0,
-              'tabdeploy' : {
-                                'state' : [],
-                                'pathpackage' : [],
-                                'sessionid' : [],
-                                'start' : [],
-                                'inventoryuuid' : [],
-                                'command' : [],
-                                'login' : [],
-                                'host' : [],
-                                'macadress' : [],
-                                'group_uuid' : [],
-                                'startcmd' : [],
-                                'endcmd' : [],
-                                'jidmachine' : [],
-                                'jid_relay' : [],
-                                'title' : []}}
+        ret = {'total_of_rows': 0,
+               'lentotal': 0,
+               'tabdeploy': {'state': [],
+                             'pathpackage': [],
+                             'sessionid': [],
+                             'start': [],
+                             'inventoryuuid': [],
+                             'command': [],
+                             'login': [],
+                             'host': [],
+                             'macadress': [],
+                             'group_uuid': [],
+                             'startcmd': [],
+                             'endcmd': [],
+                             'jidmachine': [],
+                             'jid_relay': [],
+                             'title': []}}
 
-        ret['lentotal'] = lentaillerequette#[0]
+        ret['lentotal'] = len_query
         ret['total_of_rows'] = lenrequest[0][0]
         reg = "(.*)\.(.*)@(.*)\/(.*)"
+
         for linedeploy in result:
             if re.match(reg, linedeploy.host):
                 # New jid : name.salt@relay/macaddress
@@ -4565,6 +4609,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     hostname = linedeploy.host.split('/')[1]
                 except Exception as e:
                     hostname = linedeploy.host.split('.')[0]
+
             ret['tabdeploy']['state'].append(linedeploy.state)
             ret['tabdeploy']['pathpackage'].append(linedeploy.pathpackage.split("/")[-1])
             ret['tabdeploy']['sessionid'].append(linedeploy.sessionid)
@@ -4584,15 +4629,30 @@ class XmppMasterDatabase(DatabaseHelper):
 
 
     @DatabaseHelper._sessionm
-    def getdeploybyuserrecent(self, session, login, state, duree, min=None , max=None, filt=None):
+    def get_deploy_by_user_with_interval(self, session, login, state, intervalsearch, minimum=None , maximum=None, filt=None):
+        """
+        This function is used to retrive the recent deployment done by a user.
+
+        Args:
+            session: The SQL Alchemy session
+            login: The login of the user
+            intervalsearch: The interval on which we search the deploys.
+            minimum: Minimum value ( for pagination )
+            maximum: Maximum value ( for pagination )
+            filt: Filter of the search
+
+        Returns:
+            It returns all the deployment done by a user.
+            If intervalsearch is not used it is by default in the last 24 hours.
+        """
         deploylog = session.query(Deploy)
         if login:
             deploylog = deploylog.filter( Deploy.login == login)
         if state:
             deploylog = deploylog.filter( Deploy.state == state)
 
-        if duree:
-            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
+        if intervalsearch:
+            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=intervalsearch)))
 
         if filt is not None:
             deploylog = deploylog.filter( or_(  Deploy.state.like('%%%s%%'%(filt)),
@@ -4644,21 +4704,21 @@ class XmppMasterDatabase(DatabaseHelper):
                                         group by title
                                     ) as x;"""
 
-        lentaillerequette = self.get_count(deploylog)
+        len_query = self.get_count(deploylog)
 
         result = session.execute(count)
         session.commit()
         session.flush()
         lenrequest = [x for x in result]
 
-        #lentaillerequette = session.query(func.count(distinct(Deploy.title)))[0]
+        #len_query = session.query(func.count(distinct(Deploy.title)))[0]
         deploylog = deploylog.group_by(Deploy.title)
 
         deploylog = deploylog.order_by(desc(Deploy.id))
 
         ##deploylog = deploylog.add_column(func.count(Deploy.title))
-        if min is not None and max is not None:
-            deploylog = deploylog.offset(int(min)).limit(int(max)-int(min))
+        if minimum is not None and maximum is not None:
+            deploylog = deploylog.offset(int(minimum)).limit(int(maximum)-int(minimum))
         result = deploylog.all()
         session.commit()
         session.flush()
@@ -4681,7 +4741,7 @@ class XmppMasterDatabase(DatabaseHelper):
                                 'jid_relay' : [],
                                 'title' : []}}
 
-        ret['lentotal'] = lentaillerequette#[0]
+        ret['lentotal'] = len_query#[0]
         ret['total_of_rows'] = lenrequest[0][0]
         reg = "(.*)\.(.*)@(.*)\/(.*)"
         for linedeploy in result:
@@ -4713,12 +4773,23 @@ class XmppMasterDatabase(DatabaseHelper):
 
 
     @DatabaseHelper._sessionm
-    def getdeploybyuserpast(self, session, login, duree, min=None, max=None, filt=None):
+    def get_deploy_by_user_finished(self, session, login, intervalsearch, minimum=None, maximum=None, filt=None):
         """
-            3 cas pour le parameter login
-            login est vide on cherche toute les deployement passes de tout le monde.
-            login est 1 user string. on cherche tout les deploiement de ce user
-            login est 1 list, on cherche tout les deployement passe de la team de user.
+        This function is used to retrieve all the deployments done by a user (or a team).
+
+        Args:
+            session: The SQL Alchemy session
+            login: The login of the user
+            state: State of the deployment (Started, Error, etc.)
+            intervalsearch: The interval on which we search the deploys.
+            minimum: Minimum value ( for pagination )
+            maximum: Maximum value ( for pagination )
+            filt: Filter of the search
+        Returns:
+            There is 3 scenario.
+                If login is empty, this returns all the past deploys for everyone
+                If login is a string, this returns all the past deploys for this user
+                If login is a list, this returns all the past deploys for the group this user belong to.
         """
         deploylog = session.query(Deploy)
         if login:
@@ -4727,8 +4798,8 @@ class XmppMasterDatabase(DatabaseHelper):
             else:
                 deploylog = deploylog.filter( Deploy.login.like(login))
 
-        if duree:
-            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=duree)))
+        if intervalsearch:
+            deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=intervalsearch)))
 
         if filt is not None:
             deploylog = deploylog.filter( or_(  Deploy.state.like('%%%s%%'%(filt)),
@@ -4741,7 +4812,7 @@ class XmppMasterDatabase(DatabaseHelper):
                                             Deploy.state.startswith('ERROR'),
                                             Deploy.state.startswith('ABORT')))
 
-        lentaillerequette = session.query(func.count(distinct(Deploy.title)))[0]
+        len_query = session.query(func.count(distinct(Deploy.title)))[0]
 
         # It is the same as deploylog, but for unknown reason, the count doesn't works with ORM
         if login:
@@ -4799,8 +4870,8 @@ class XmppMasterDatabase(DatabaseHelper):
 
         nbfilter =  self.get_count(deploylog)
 
-        if min is not None and max is not None:
-            deploylog = deploylog.offset(int(min)).limit(int(max)-int(min))
+        if minimum is not None and maximum is not None:
+            deploylog = deploylog.offset(int(minimum)).limit(int(maximum)-int(minimum))
         result = deploylog.all()
         session.commit()
         session.flush()
@@ -5136,7 +5207,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     `has_relayserverrules` ON  `relayserver`.`id` = `has_relayserverrules`.`relayserver_id`
             where
                 `has_relayserverrules`.`rules_id` = %d
-                    AND `has_relayserverrules`.`subject` = '%s'
+                    AND '%s' REGEXP `has_relayserverrules`.`subject`
                     AND `relayserver`.`enabled` = %d
                     AND `relayserver`.`moderelayserver` = 'static'
                     AND `relayserver`.`classutil` = '%s'
@@ -5149,7 +5220,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     `has_relayserverrules` ON  `relayserver`.`id` = `has_relayserverrules`.`relayserver_id`
             where
                 `has_relayserverrules`.`rules_id` = %d
-                    AND `has_relayserverrules`.`subject` = '%s'
+                    AND '%s' REGEXP `has_relayserverrules`.`subject`
                     AND `relayserver`.`enabled` = %d
                     AND `relayserver`.`moderelayserver` = 'static'
                     AND (`relayserver`.`switchonoff` OR `relayserver`.`mandatory`)
@@ -5163,15 +5234,21 @@ class XmppMasterDatabase(DatabaseHelper):
     def algoruleadorganisedbymachines(self,
                                       session,
                                       machineou,
-                                      classutilMachine = "both",
-                                      rule = 7,
+                                      classutilMachine="both",
+                                      rule=7,
                                       enabled=1):
         """
-            Field "rule_id" : This information allows you to apply the search only to the rule pointed. rule_id = 7 by organization machine
-            Field "subject" is used to define the organisation by machine OU eg Computers/HeadQuarter/Locations
-            Field "relayserver_id" is used to define the Relayserver associe a this organization
-            enabled = 1 Only on active relayserver.
-            If classutilMachine is deprived then the choice of relayserver will be in the relayserver reserve to a use of the private machine.
+            This is used to assign an ARS to a machine based on the machine's OU of the AD.
+            Args:
+                session: The SQL Alchemy session
+                machineou: The OU where the machine is located.
+                classutilMachine: Type of ARS ( can be private, public, both )
+                rule: the number of the rule to proceed
+                enabled: Tell if the relayserver is enabled or not.
+                         1 means the relayserver is enabled, 0 otherwise
+
+            Returns:
+                It returns the ID of the relay server matching this SQL Request.
         """
         if classutilMachine == "private":
             sql = """select `relayserver`.`id`
@@ -5220,7 +5297,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     `has_relayserverrules` ON  `relayserver`.`id` = `has_relayserverrules`.`relayserver_id`
             where
                 `has_relayserverrules`.`rules_id` = %d
-                    AND `has_relayserverrules`.`subject` = '%s'
+                    AND '%s' REGEXP `has_relayserverrules`.`subject`
                     AND `relayserver`.`enabled` = %d
                     AND `relayserver`.`moderelayserver` = 'static'
                     AND `relayserver`.`classutil` = '%s'
@@ -5232,7 +5309,7 @@ class XmppMasterDatabase(DatabaseHelper):
                     `has_relayserverrules` ON  `relayserver`.`id` = `has_relayserverrules`.`relayserver_id`
             where
                 `has_relayserverrules`.`rules_id` = %d
-                    AND `has_relayserverrules`.`subject` = '%s'
+                    AND '%s' REGEXP `has_relayserverrules`.`subject`
                     AND `relayserver`.`enabled` = %d
                     AND `relayserver`.`moderelayserver` = 'static'
             limit 1;""" % (rule, username, enabled)
@@ -7014,7 +7091,18 @@ class XmppMasterDatabase(DatabaseHelper):
         return result
 
     @DatabaseHelper._sessionm
-    def get_machine_doublon_uuidinventory(self, session, uuid, enable=1):
+    def get_machine_with_dupplicate_uuidinventory(self, session, uuid, enable=1):
+        """
+        This function is used to retrieve computers with dupplicate uuids.
+        Args:
+            session: The SQL Alchemy session
+            uuid: The uuid we are looking for
+            enable: Used to search for enabled or disabled only machines
+
+        Returns:
+            It return machines with dupplicate UUIDs.
+            We can search for enabled/disabled or all machines.
+        """
         try:
             querymachine = session.query(Machines)
             if enable == None:
@@ -7023,23 +7111,23 @@ class XmppMasterDatabase(DatabaseHelper):
                 querymachine = querymachine.filter(and_(Machines.uuid_inventorymachine == uuid,
                                                         Machines.enabled == enable))
             machine = querymachine.all()
-            resultdata=[]
+            resultdata = []
             if machine:
                 for t in machine:
-                    result = {  "uuid": uuid,
-                                "jid": t.jid,
-                                "groupdeploy": t.groupdeploy,
-                                "urlguacamole": t.urlguacamole,
-                                "subnetxmpp": t.subnetxmpp,
-                                "hostname": t.hostname,
-                                "platform": t.platform,
-                                "macaddress": t.macaddress,
-                                "archi": t.archi,
-                                "uuid_inventorymachine": t.uuid_inventorymachine,
-                                "ip_xmpp": t.ip_xmpp,
-                                "agenttype": t.agenttype,
-                                "keysyncthing":  t.keysyncthing,
-                                "enabled": t.enabled}
+                    result = {"uuid": uuid,
+                              "jid": t.jid,
+                              "groupdeploy": t.groupdeploy,
+                              "urlguacamole": t.urlguacamole,
+                              "subnetxmpp": t.subnetxmpp,
+                              "hostname": t.hostname,
+                              "platform": t.platform,
+                              "macaddress": t.macaddress,
+                              "archi": t.archi,
+                              "uuid_inventorymachine": t.uuid_inventorymachine,
+                              "ip_xmpp": t.ip_xmpp,
+                              "agenttype": t.agenttype,
+                              "keysyncthing":  t.keysyncthing,
+                              "enabled": t.enabled}
                     for i in result:
                         if result[i] == None:
                             result[i] = ""
@@ -7047,27 +7135,27 @@ class XmppMasterDatabase(DatabaseHelper):
             session.commit()
             session.flush()
         except Exception as e:
-            logging.getLogger().error("get_machine_doublon_uuidinventory  %s for enables %s :%s"%(uuid,
-                                                                                                       enable,                                                                                                                            str(e)))
+            logging.getLogger().error("We failed to search the computers having %s as uuid" % uuid)
+            logging.getLogger().error("The backtrace we trapped is: \n %s" % str(e))
         return resultdata
 
     @DatabaseHelper._sessionm
     def getGuacamoleRelayServerMachineUuid(self, session, uuid, enable=1):
-        result = {      'error' : "noresult",
-                        "uuid": uuid,
-                        "jid": "",
-                        "groupdeploy": "",
-                        "urlguacamole": "",
-                        "subnetxmpp": "",
-                        "hostname": "",
-                        "platform": "",
-                        "macaddress": "",
-                        "archi": "",
-                        "uuid_inventorymachine": "",
-                        "ip_xmpp": "",
-                        "agenttype": "",
-                        "keysyncthing":  "",
-                        "enabled": enable }
+        result = {'error': "noresult",
+                  "uuid": uuid,
+                  "jid": "",
+                  "groupdeploy": "",
+                  "urlguacamole": "",
+                  "subnetxmpp": "",
+                  "hostname": "",
+                  "platform": "",
+                  "macaddress": "",
+                  "archi": "",
+                  "uuid_inventorymachine": "",
+                  "ip_xmpp": "",
+                  "agenttype": "",
+                  "keysyncthing":  "",
+                  "enabled": enable }
         try:
             querymachine = session.query(Machines)
             if enable == None:
@@ -7080,39 +7168,52 @@ class XmppMasterDatabase(DatabaseHelper):
             session.commit()
             session.flush()
 
-            result = {  'error' : 'noerror',
-                        "uuid": uuid,
-                        "jid": machine.jid,
-                        "groupdeploy": machine.groupdeploy,
-                        "urlguacamole": machine.urlguacamole,
-                        "subnetxmpp": machine.subnetxmpp,
-                        "hostname": machine.hostname,
-                        "platform": machine.platform,
-                        "macaddress": machine.macaddress,
-                        "archi": machine.archi,
-                        "uuid_inventorymachine": machine.uuid_inventorymachine,
-                        "ip_xmpp": machine.ip_xmpp,
-                        "agenttype": machine.agenttype,
-                        "keysyncthing":  machine.keysyncthing,
-                        "enabled": machine.enabled
-                        }
+            result = {'error' : 'noerror',
+                      "uuid": uuid,
+                      "jid": machine.jid,
+                      "groupdeploy": machine.groupdeploy,
+                      "urlguacamole": machine.urlguacamole,
+                      "subnetxmpp": machine.subnetxmpp,
+                      "hostname": machine.hostname,
+                      "platform": machine.platform,
+                      "macaddress": machine.macaddress,
+                      "archi": machine.archi,
+                      "uuid_inventorymachine": machine.uuid_inventorymachine,
+                      "ip_xmpp": machine.ip_xmpp,
+                      "agenttype": machine.agenttype,
+                      "keysyncthing":  machine.keysyncthing,
+                      "enabled": machine.enabled
+                     }
             for i in result:
-                if result[i] == None:
+                if result[i] is None:
                     result[i] = ""
+
         except NoResultFound as e:
             result['error'] = 'NoResultFound'
-            logging.getLogger().error("NoResultFound getGuacamoleRelayServerMachineUuid uuid %s for enables %s :%s"%(uuid,
-                                                                                                                     enable,
-                                                                                                                     str(e)))
+            if enable is None:
+                logging.getLogger().error("We found no machines with the UUID %s" % uuid)
+            else:
+                logging.getLogger().error("We found no machines with the UUID %s, and with enabled: %s" % uuid, enable)
+
+            logging.getLogger().error("We encountered the following error:\n %s" % str(e))
         except MultipleResultsFound as e:
             result['error'] = 'MultipleResultsFound'
-            logging.getLogger().error("MultipleResultsFound getGuacamoleRelayServerMachineUuid uuid %s for enables %s :%s"%(uuid,
-                                                                                                                            enable,
-                                                                                                                            str(e)))
+            if enable is None:
+                logging.getLogger().error("We found multiple machines with the UUID %s" % uuid)
+            else:
+                logging.getLogger().error("We found multiple machines with the UUID %s, and with enabled: %s" % uuid, enable)
+
+            logging.getLogger().error("We encountered the following error:\n %s" % str(e))
+
         except Exception as e:
             result['error'] = str(e)
-            logging.getLogger().error("getGuacamoleRelayServerMachineUuid uuid %s for enables %s :%s"%(uuid,
-                                                                                                       enable,                                                                                                                            str(e)))
+            if enable is None:
+                logging.getLogger().error("We were searching for machines with the UUID %s" % uuid)
+            else:
+                logging.getLogger().error("We were searching for machines with the UUID %s, and with enabled: %s" % uuid, enable)
+
+            logging.getLogger().error("We encountered the following error:\n %s" % str(e))
+
         return result
 
     @DatabaseHelper._sessionm
@@ -7616,7 +7717,11 @@ class XmppMasterDatabase(DatabaseHelper):
             .join(RelayServer, RelayServer.jid == Machines.groupdeploy)\
             .outerjoin(Has_cluster_ars, Has_cluster_ars.id_ars == RelayServer.id)\
             .outerjoin(Cluster_ars, Cluster_ars.id == Has_cluster_ars.id_cluster)\
-            .filter(Machines.agenttype == 'machine', Machines.uuid_inventorymachine == None)
+            .filter(
+                and_(Machines.agenttype == 'machine',
+                    or_(Machines.uuid_inventorymachine == "", Machines.uuid_inventorymachine == None)
+                )
+            )
 
         if presence == 'nopresence':
             query = query.filter(Machines.enabled != 1)

@@ -28,50 +28,80 @@ SET FOREIGN_KEY_CHECKS=0;
 -- Database xmppmaster
 -- ----------------------------------------------------------------------
 -- ----------------------------------------------------------------------
--- Creation table update_machine
--- cette table nous renseigne sur l'état de mise a jour d'une machine. 
-- ----------------------------------------------------------------------
-drop table if exists `update_machine`;
-CREATE  TABLE IF NOT EXISTS  `update_machine` (
+-- Creation table pulse_users
+-- This table is used to define users. We attribute them preferences and permissions to allow to visualize shares
+-- ----------------------------------------------------------------------
+CREATE TABLE `pulse_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `hostname` varchar(120) NOT NULL,
-  `jid` varchar(255) NOT NULL,
-  `status` varchar(15) NOT NULL DEFAULT 'ready',
-  `descriptor` text NOT NULL DEFAULT '""',
-  `md5` varchar(45) NOT NULL,
-  `date_creation` timestamp NOT NULL DEFAULT current_timestamp(),
-  `ars` varchar(255) DEFAULT NULL COMMENT 'cette information doit etre initialise si la machine doit utiliser 1 ars pour ce mettre a jour\n',
+  `login` varchar(255) NOT NULL,
+  `comment` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `jid_UNIQUE` (`jid`),
-  KEY `ind_jid` (`jid`),
-  KEY `ind_status` (`status`),
-  KEY `ind_hostname` (`hostname`),
-  KEY `ind_date` (`date_creation`),
-  KEY `ind_ars` (`ars`)
-) ENGINE=InnoDB AUTO_INCREMENT=93368 DEFAULT CHARSET=utf8 COMMENT='Cette table permet de definir l etat de mise a jour d une machine.'
+  UNIQUE KEY `login_UNIQUE` (`login`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- ----------------------------------------------------------------------
+-- Creation table pulse_teams
+-- This table is used to define the teams
+-- ----------------------------------------------------------------------
+CREATE TABLE `pulse_teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Define the team',
+  `name` varchar(120) NOT NULL,
+  `comment` varchar(1024) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------------------------------------------------
--- Creation table ban_machines
--- cette table nous renseigne sur les machine bannir. 
-- ----------------------------------------------------------------------
-drop table if exists `ban_machines`;
-CREATE TABLE if not exists `ban_machines` (
-  `id` int(11) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`id`),
-  `jid` varchar(100) DEFAULT NULL COMMENT 'Allow to know the account name,\nBanned machine\'s jid.',
-  `ars_server` varchar(100) DEFAULT NULL COMMENT 'define the ars where the ejabberd command have to be executed.',
-  `reason` varchar(100) DEFAULT NULL COMMENT 'Specify the reason why the machine is banned',
-  `start_date` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'The datetime when the machine started to be banned',
-  `end_date` timestamp NULL COMMENT 'If specified, the datetime of the end of the ban for the machine.\nIf not specified: permanantly ban',
-  
-  UNIQUE KEY `jid_UNIQUE` (`jid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='This table give the possibility to exclude machines from relay. To reallow banned machines on the relay we must delete its account on the xmpp server';
+-- Creation table pulse_preferences
+-- This table allow to attribute preferences in a key/value format to one user
+-- ----------------------------------------------------------------------
+
+CREATE TABLE `pulse_preferences` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(120) NOT NULL,
+  `value` text DEFAULT '""',
+  `id_user` int(11) NOT NULL,
+  `domain` varchar(80) DEFAULT NULL COMMENT 'This field can set preferences to a domain ( a domain can be a web page for ex. )',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_UNIQUE` (`key`,`id_user`,`domain`),
+  KEY `fk_pulse_preferences_1_idx` (`id_user`),
+  CONSTRAINT `fk_pulse_preferences_1` FOREIGN KEY (`id_user`) REFERENCES `pulse_users` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------------------------------------------------
+-- Creation table pulse_team_user
+-- This table is used to create teams
+-- ----------------------------------------------------------------------
+
+ CREATE TABLE `pulse_team_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_user` int(11) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
+  `comment` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unix_team_user` (`id_user`,`id_team`),
+  KEY `fk_pulse_team_user_1_idx` (`id_user`),
+  KEY `fk_pulse_team_user_2_idx` (`id_team`),
+  CONSTRAINT `fk_pulse_team_user_1` FOREIGN KEY (`id_user`) REFERENCES `pulse_users` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE,
+  CONSTRAINT `fk_pulse_team_user_2` FOREIGN KEY (`id_team`) REFERENCES `pulse_teams` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-  
+-- ----------------------------------------------------------------------
+-- create use root
+-- ----------------------------------------------------------------------
+
+INSERT INTO `xmppmaster`.`pulse_users` (`login`) VALUES ('root');
+
+
 SET FOREIGN_KEY_CHECKS=1;
 -- ----------------------------------------------------------------------
 -- Database version
 -- ----------------------------------------------------------------------
-UPDATE version SET Number = 60;
+UPDATE version SET Number = 63;
 
 COMMIT;

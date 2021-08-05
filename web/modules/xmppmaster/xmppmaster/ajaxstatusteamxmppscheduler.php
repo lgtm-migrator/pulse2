@@ -30,7 +30,7 @@ $filter  = isset($_GET['filter'])?$_GET['filter']:"";
 $start = isset($_GET['start'])?$_GET['start']:0;
 $end   = (isset($_GET['end'])?$_GET['end']:$maxperpage-1);
 
-$arraydeploy = xmlrpc_get_deployxmppteamscheduler( $_GET['login'] , $start, $end, $filter);
+$arraydeploy = xmlrpc_get_deploy_xmpp_teamscheduler( $_GET['login'] , $start, $end, $filter);
 
 $etat="";
 $LastdeployINsecond = 3600 * 72;

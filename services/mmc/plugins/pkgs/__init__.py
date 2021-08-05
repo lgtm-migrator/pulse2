@@ -1501,13 +1501,15 @@ def xmpp_packages_list():
 
 def remove_xmpp_package(package_uuid):
     """
-    Remove the specified xmpp package. If it is ok, return true, else return false
+    Remove the specified package from both the filesystem and the database.
 
     Args:
-    package_uuid: uuid of the package
+        package_uuid: uuid of the package
 
     Returns:
-    success | failure
+        Returns True if it deletes correctly the package.
+                False otherwise.
+
     """
 
     # If the package exists, delete it and return true
@@ -1565,6 +1567,25 @@ def get_xmpp_package(package_uuid):
     else:
         return False
 
+def get_pkg_name_from_uuid(uuids):
+    """
+        Retrieve the name of the package based on the uuids
+        Args:
+            uuids: uuids of the packages
+        Return:
+            It returns the name of the package
+    """
+    return PkgsDatabase().get_pkg_name_from_uuid(uuids)
+
+def get_pkg_creator_from_uuid(uuids):
+    """
+        Retrieve the creator of the package based on the uuids
+        Args:
+            uuids: uuids of the packages
+        Return:
+            It returns the name of the creator of the package
+    """
+    return PkgsDatabase().get_pkg_creator_from_uuid(uuids)
 
 def get_meta_from_xmpp_package(package_uuid):
     """
@@ -1604,6 +1625,24 @@ def package_exists(uuid):
         return True
     else:
         return False
+
+def get_files_infos(uuid, filename=""):
+    """
+        This is used to retrieve informations about a package.
+        Args:
+            uuid: uuid of the package
+            filename: name of the file to analyze
+        Return:
+            Return informations about the package:
+                - Name
+                - Size
+                - Mime
+                - Fullpath
+                - Content
+    """
+
+    result = PkgsDatabase().get_files_infos(uuid, filename)
+    return result
 
 class getCommand(object):
     def __init__(self, file):
