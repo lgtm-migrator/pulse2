@@ -57,7 +57,7 @@ CREATE  TABLE IF NOT EXISTS  `update_machine` (
 drop table if exists `ban_machines`;
 CREATE TABLE if not exists `ban_machines` (
   `id` int(11) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`id`),
-  `jid` varchar(100) DEFAULT NULL COMMENT 'Allow to know the account name,\nBanned machine\'s jid.',
+  `jid` varchar(100) DEFAULT NULL COMMENT 'Allow to know the account name,\nBanned machines jid.',
   `ars_server` varchar(100) DEFAULT NULL COMMENT 'define the ars where the ejabberd command have to be executed.',
   `reason` varchar(100) DEFAULT NULL COMMENT 'Specify the reason why the machine is banned',
   `start_date` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'The datetime when the machine started to be banned',
@@ -65,8 +65,6 @@ CREATE TABLE if not exists `ban_machines` (
   
   UNIQUE KEY `jid_UNIQUE` (`jid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='This table give the possibility to exclude machines from relay. To reallow banned machines on the relay we must delete its account on the xmpp server';
-
-
   
 SET FOREIGN_KEY_CHECKS=1;
 -- ----------------------------------------------------------------------
