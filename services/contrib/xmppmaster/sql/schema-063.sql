@@ -348,8 +348,6 @@ DELIMITER ;
 
 INSERT INTO `xmppmaster`.`support_help_command` (`id`, `name`, `description`, `example`, `type`, `result`) VALUES ('', 'fs_tablefilds', 'cette function renvoila list des champs de la table xmppmaster passee', 'select fs_tablefilds(\'logs\');', 'F', '+----------------------------------------------------------------------------------+\n| fs_tablefilds(\'logs\')                                                            |\n+----------------------------------------------------------------------------------+\n| id,date,type,module,text,fromuser,touser,action,sessionname,how,why,priority,who |\n+----------------------------------------------------------------------------------+\n');
 
-
-
 -- /#####################################################################\
 -- | View vs_stats_ars                                                   |
 -- | cette vue permet de voir la repartition des machine des ars         |
@@ -493,6 +491,39 @@ VIEW `vs_stats_ars` AS
 
 
     INSERT INTO `xmppmaster`.`support_help_command` (`name`, `description`, `example`, `type`, `result`) VALUES ('vs_stats_ars', 'cette vue donne la répartition des machines pour les ars', ' select * from vs_stats_ars; ', 'V', '*************************** 1. row ***************************\n          groupdeploy: rspulse@pulse/000c29f61ff6\n       nblinuxmachine: 2\n            nbwindows: 1\n             nbdarwin: 0\n              mach_on: 1\n             mach_off: 2\n        uninventoried: 0\n          inventoried: 3\n uninventoried_online: 0\nuninventoried_offline: 0\n   inventoried_online: 1\n  inventoried_offline: 2\n            nbmachine: 3\n     with_uuid_serial: 3\n            bothclass: 3\n          publicclass: 0\n         privateclass: 0\n           nb_ou_user: 0\n           nb_OU_mach: 0\n              kioskon: 0\n             kioskoff: 3\n      nbmachinereconf: 0\n');
+
+
+-- /#####################################################################\
+-- | View vs_list_obj_siveo                                              |
+-- | cette vue permet de voir les object dispo pour le support           |
+-- | exemple select * from vs_list_obj_siveo;                            |
+-- \#####################################################################/
+ USE `xmppmaster`;
+CREATE
+     OR REPLACE ALGORITHM = UNDEFINED
+    DEFINER = `root`@`localhost`
+    SQL SECURITY DEFINER
+VIEW `vs_list_obj_siveo` AS
+    SELECT
+        `support_help_command`.`type` AS `T`,
+        `support_help_command`.`name` AS `name`,
+        `support_help_command`.`description` AS `description`,
+        `support_help_command`.`example` AS `example`
+    FROM
+        `support_help_command`
+    ORDER BY `support_help_command`.`type`;
+
+
+
+INSERT INTO `xmppmaster`.`support_help_command` (`name`, `description`, `example`, `type`, `result`) VALUES ('vs_list_obj_siveo', 'cette vue permet de voir les object dispo pour le support   ', 'select * from vs_list_obj_siveo\\G; ', 'V', ' select * from vs_list_obj_siveo\\G; \n*************************** 1. row ***************************\n          T: F\n       name: fs_tablefilds\ndescription: cette function renvoila list des champ de la table xmppmaster passee\n    example: select fs_tablefilds(\'logs\');\n*************************** 2. row ***************************\n          T: F\n       name: fs_jidusertrue\ndescription: cette function renvoi domain d\'un jid sans le .xxx de user \n    example: select fs_jidusertrue(\"jfk.xya@pulse/ressource1\");\n');
+UPDATE `xmppmaster`.`support_help_command` SET `example` = ' select * from vs_stats_ars\\G; ' WHERE (`id` = '8');
+UPDATE `xmppmaster`.`support_help_command` SET `example` = 'select fs_tablefilds(\'logs\')\\G;' WHERE (`id` = '3');
+UPDATE `xmppmaster`.`support_help_command` SET `example` = 'select fs_jidusertrue(\"jfk.xya@pulse/ressource1\")\\G;' WHERE (`id` = '4');
+UPDATE `xmppmaster`.`support_help_command` SET `example` = 'select fs_jiddomain(\"jfk.xya@pulse/ressource1\")\\G;' WHERE (`id` = '5');
+UPDATE `xmppmaster`.`support_help_command` SET `example` = 'select fs_jidresource(\"jfk@pulse/ressource1\")\\G;    ' WHERE (`id` = '6');
+UPDATE `xmppmaster`.`support_help_command` SET `example` = 'select fs_help(\"%restart_deploy%\" )\\G; ' WHERE (`id` = '7');
+
+
 
 
 SET FOREIGN_KEY_CHECKS=1;
