@@ -293,7 +293,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
         self.confaccount=[] #list des account for clear
         #clear conf compte.
         logger.debug('Delete old ejabberd accounts')
-        cmd = "ejabberdctl delete_old_users 1"
+        cmd = "ejabberdctl --no-timeout delete_old_users 1"
         try:
             a = simplecommandstr(cmd)
             logger.debug(a['result'])
@@ -301,7 +301,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
             pass
         #del old message offline
         logger.debug('Delete old offline ejabberd messages')
-        cmd = "ejabberdctl delete_old_messages 1"
+        cmd = "ejabberdctl --no-timeout delete_old_messages 1"
         try:
             a = simplecommandstr(cmd)
             logger.debug(a['result'])
@@ -783,7 +783,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
             pass
         #listobjnoexist = []
         listobjsupp = []
-        #search deploy to rumming
+        #search deploy to running
         try:
             # Search deploy to running
             nb_machine_select_for_deploy_cycle, resultdeploymachine = MscDatabase().deployxmpp(limitnbr=100)
@@ -792,21 +792,18 @@ class MUCBot(sleekxmpp.ClientXMPP):
         if nb_machine_select_for_deploy_cycle == 0:
             return
 
-        uuidlist=[]
+        uuidlist = []
         for deployobject in resultdeploymachine:
             uuidlist.append(deployobject['UUID'])
         resultpresence = XmppMasterDatabase().getPresenceExistuuids(uuidlist)
 
-
         for deployobject in resultdeploymachine:
-            msg = []
             # creation deployment
             UUID = deployobject['UUID']
             UUIDSTR = UUID.replace('UUID', "")
-            #resultpresence = XmppMasterDatabase().getPresenceExistuuids(UUID)
             re_search = []
-            if resultpresence[UUID][1] == 0:
-                ## il n'y a pas de uuid glpi
+            if resultpreseince[UUID][1] == 0:
+                # There is no GLPI UUID
                 re_search = XmppMasterDatabase().getMachinedeployexistonHostname(deployobject['name'])
                 if self.Recover_GLPI_Identifier_from_name and len(re_search) == 1:
                     update_result = XmppMasterDatabase().update_uuid_inventory(re_search[0]['id'], UUID)
@@ -817,16 +814,16 @@ class MUCBot(sleekxmpp.ClientXMPP):
                     reloadresultpresence_uuid = XmppMasterDatabase().getPresenceExistuuids(UUID)
                     resultpresence[UUID]=reloadresultpresence_uuid[UUID]
                     self.xmpplog("Attaching GLPI identifier [%s] in xmppmaster machine [%s]" % (UUID, deployobject['name']),
-                                type='deploy',
-                                sessionname="no_session",
-                                priority=-1,
-                                action="xmpplog",
-                                why=self.boundjid.bare,
-                                module="Deployment | Start | Creation| Notify",
-                                date=None,
-                                fromuser=deployobject['login'])
+                                 type='deploy',
+                                 sessionname="no_session",
+                                 priority=-1,
+                                 action="xmpplog",
+                                 why=self.boundjid.bare,
+                                 module="Deployment | Start | Creation| Notify",
+                                 date=None,
+                                 fromuser=deployobject['login'])
 
-            if resultpresence[UUID][1] == 0:#verify si reinitialiser presence
+            if resultpresence[UUID][1] == 0:
                 if re_search:
                     msg.append( "<span class='log_err'>Consolidation GLPI XMPP ERROR for machine %s. " \
                                 "Deployment impossible : GLPI ID is %s</span>" % (deployobject['name'],

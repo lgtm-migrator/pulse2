@@ -79,6 +79,7 @@ import re
 import uuid
 import random
 import copy
+from sqlalchemy.ext.automap import automap_base
 
 Session = sessionmaker()
 
@@ -130,14 +131,23 @@ class XmppMasterDatabase(DatabaseHelper):
 
     def activate(self, config):
         self.logger = logging.getLogger()
+        Base = automap_base()
         if self.is_activated:
             return None
+<<<<<<< HEAD
+=======
+        # This is used to automatically create the mapping
+>>>>>>> origin/integration
         Base = automap_base()
         self.config = config
         self.db = create_engine(self.makeConnectionPath(),
                                 pool_recycle=self.config.dbpoolrecycle,
                                 pool_size=self.config.dbpoolsize,
                                 pool_timeout=self.config.dbpooltimeout)
+
+        Base.prepare(self.db, reflect=True)
+        self.Ban_machines = Base.classes.ban_machines
+
         if not self.db_check():
             return False
         self.metadata = MetaData(self.db)
@@ -2802,22 +2812,45 @@ class XmppMasterDatabase(DatabaseHelper):
             return -1
 
     @DatabaseHelper._sessionm
+<<<<<<< HEAD
     def wolbroadcastadressmacadress(self, session, listmacadress):
         """
             analyse l'ensemble des adresse mac a reveiller.
             return ces adressmac grouper par leur adresse de broacast
         """
         grp_wol_broadcast_adress={}
+=======
+    def wolbroadcastadressmacaddress(self, session, listmacaddress):
+        """
+            We monitor the mac addresses to check.
+
+            Args:
+                session: The SQL Alchemy session
+                listmacaddress: The mac addressesses to follow
+
+            Return:
+                We return those mac addresses grouped by the broadcast address.
+        """
+        grp_wol_broadcast_adress = {}
+>>>>>>> origin/integration
         result = session.query(Network.broadcast,
                                Network.mac).distinct(Network.mac).\
                 filter(
                     and_(Network.broadcast != "",
                          Network.broadcast.isnot(None),
+<<<<<<< HEAD
                          Network.mac.in_(listmacadress))
                        ).all()
         for t in result:
             if t.broadcast not in grp_wol_broadcast_adress:
                 grp_wol_broadcast_adress[t.broadcast]=[]
+=======
+                         Network.mac.in_(listmacaddress))
+                       ).all()
+        for t in result:
+            if t.broadcast not in grp_wol_broadcast_adress:
+                grp_wol_broadcast_adress[t.broadcast] = []
+>>>>>>> origin/integration
             grp_wol_broadcast_adress[t.broadcast].append(t.mac)
         return grp_wol_broadcast_adress
 
@@ -6333,14 +6366,21 @@ class XmppMasterDatabase(DatabaseHelper):
         listqueryxmppmaster[2] = listqueryxmppmaster[2].lower()
         Regexpression = False
         if listqueryxmppmaster[2] in [ "ou user", "ou machine"]:
+<<<<<<< HEAD
             # on test si expression relationel
+=======
+>>>>>>> origin/integration
             if listqueryxmppmaster[3][:1] == "/" and  listqueryxmppmaster[3][-1:] == "/":
                 Regexpression = True
                 fl = listqueryxmppmaster[3][1:-1]
         if not Regexpression:
             # SQL Wildcards
+<<<<<<< HEAD
             # % : le symbole pourcentage représente zéro, un ou plusieurs caractères joker.
             # dans l'ecriture shell on utilise wilcard * est %
+=======
+            # % : The percentage symbol represent zero, one or several wildcard caracters.
+>>>>>>> origin/integration
             fl = listqueryxmppmaster[3].replace('*',"%")
 
         if listqueryxmppmaster[2] == "ou user":
@@ -10317,65 +10357,274 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
         return arsListInfos
 
 
-# ----------udate machine scheduling
+    @DatabaseHelper._sessionm
+    def get_machines_for_ban(self, session, jid_ars, start=0, end=-1, filter=""):
 
-    def __updatemachine(self, object_update_machine):
         try:
-            ret = { 'id' : object_update_machine.id,
-                    'jid' : object_update_machine.jid,
-                    'ars' : object_update_machine.ars,
-                    'status' : object_update_machine.status,
-                    'descriptor' : object_update_machine.descriptor,
-                    'md5' : object_update_machine.md5 ,
-                    'date_creation' : object_update_machine.date_creation}
+            start = int(start)
+        except:
+            start=0
+
+        try:
+            end = int(end)
+        except:
+            end=-1
+
+        subquery = session.query(self.Ban_machines.jid)\
+            .filter(self.Ban_machines.ars_server == jid_ars)\
+            .subquery()
+
+        query = session.query(Machines.jid, Machines.hostname)
+
+        if filter != "":
+            query = query.filter(
+                and_(
+                    Machines.agenttype == "machine",
+                    Machines.groupdeploy == jid_ars,
+                    Machines.hostname.contains(filter),
+                    not_(Machines.jid.in_(subquery))
+                )
+            )
+
+        else:
+            query = query.filter(
+                and_(
+                    Machines.agenttype == "machine",
+                    Machines.groupdeploy == jid_ars,
+                    not_(Machines.jid.in_(subquery))
+                )
+            )
+
+        count = query.count()
+
+        query = query.offset(start)
+        if end > 0:
+            query = query.limit(end)
+
+        query = query.all()
+
+        result = {
+            "total": count,
+            "datas": []
+        }
+
+        if query is not None:
+            for element in query:
+                result['datas'].append({"jid": element.jid, "name" : element.hostname})
+
+        return result
+
+    @DatabaseHelper._sessionm
+    def get_machines_to_unban(self, session, jid_ars, start=0, end=-1, filter=""):
+
+        try:
+            start = int(start)
+        except:
+            start = 0
+
+        try:
+            end = int(end)
+        except:
+            end = -1
+
+
+        subquery = session.query(self.Ban_machines.jid)\
+            .filter(self.Ban_machines.ars_server == jid_ars)\
+            .subquery()
+
+        query = session.query(Machines.jid, Machines.hostname)
+
+        if filter != "":
+            query = query.filter(
+                and_(
+                    Machines.agenttype == "machine",
+                    Machines.groupdeploy == jid_ars,
+                    Machines.hostname.contains(filter),
+                    Machines.jid.in_(subquery)
+                )
+            )
+
+        else:
+            query = query.filter(
+                and_(
+                    Machines.agenttype == "machine",
+                    Machines.groupdeploy == jid_ars,
+                    Machines.jid.in_(subquery)
+                )
+            )
+
+        count = query.count()
+
+        query = query.offset(start)
+        if end > 0:
+            query = query.limit(end)
+
+        query = query.all()
+
+        result = {
+            "total": count,
+            "datas": []
+        }
+
+        if query is not None:
+            for element in query:
+                result['datas'].append({"jid": element.jid, "name" : element.hostname})
+
+        return result
+
+    @DatabaseHelper._sessionm
+    def ban_machines(self, session, jid_ars, machines, dates=[], reasons=[]):
+        if machines != "all" or type(machines) is list and 'all' not in machines:
+            _list = machines
+
+        else:
+            subquery = session.query(self.Ban_machines.jid)\
+                .filter(self.Ban_machines.ars_server == jid_ars)\
+                .subquery()
+
+            machines_list = session.query(Machines.jid)\
+                .filter(
+                    and_(
+                        Machines.groupdeploy == jid_ars,
+                        Machines.agenttype == "machine",
+                        not_(Machines.jid.in_(subquery))
+                    )
+                )\
+                .all()
+
+            _list = []
+            if machines_list is not None:
+                _list = [element.jid for element in machines_list]
+
+        for machine in _list:
+            new_ban = self.Ban_machines()
+            new_ban.jid = machine
+            new_ban.ars_server = jid_ars
+            try:
+                session.add(new_ban)
+            except:
+                continue
+        try:
+            session.commit()
+            session.flush()
+        except:
+            pass
+
+        return {'jid_ars': jid_ars, 'jid_machines':_list}
+
+    @DatabaseHelper._sessionm
+    def unban_machines(self, session, jid_ars, machines, dates=[], reasons=[]):
+        if machines != "all" or type(machines) is list and 'all' not in machines:
+            _list = machines
+
+        else:
+            _list = machines
+        query = session.query(self.Ban_machines)\
+            .filter(self.Ban_machines.ars_server == jid_ars)
+
+        # Before deleting, we need to select machines info to send to the relay
+        machines_list = query.all()
+        if machines_list is not None:
+            _list = [element.jid for element in machines_list]
+
+        try:
+            query.delete()
+        except:
+            pass
+        finally:
+            session.commit()
+            session.flush()
+
+        return {'jid_ars': jid_ars, 'jid_machines':_list}
+
+# Update machine scheduling
+    def __updatemachine(self, object_update_machine):
+        """
+            This function create a dictionnary with the informations of the
+            machine that need to be updated.
+
+            Args:
+                object_update_machine: An object with the informations of the machine.
+            Returns:
+                A dicth with the informations of the machine.
+        """
+        try:
+            ret = {'id': object_update_machine.id,
+                   'jid': object_update_machine.jid,
+                   'ars': object_update_machine.ars,
+                   'status': object_update_machine.status,
+                   'descriptor': object_update_machine.descriptor,
+                   'md5': object_update_machine.md5 ,
+                   'date_creation': object_update_machine.date_creation}
             return ret
-        except Exception as e:
-            logging.getLogger().error(str(e))
+
+        except Exception as error_creating:
+            logging.getLogger().error("We failed to retrieve the informations of the machine to update")
+            logging.getLogger().error("We got the error \n : %s" % str(error_creating))
             return None
 
     @DatabaseHelper._sessionm
     def update_update_machine(self,
-                        session,
-                        hostname,
-                        jid,
-                        ars = "",
-                        status = "ready",
-                        descriptor="",
-                        md5="",
-                        date_creation=None):
+                              session,
+                              hostname,
+                              jid,
+                              ars="",
+                              status="ready",
+                              descriptor="",
+                              md5="",
+                              date_creation=None):
         """
-            this functions addition a updating machine
+            We create the informations of the machines in the update SQL table
+            Args:
+                session: The SQL Alchemy session
+                hostname: The hostname of the machine to update
+                jid: The jid of the machine to update
+                ars: The ARS on which the machine is connected
+                status: The status of the update (ready, updating, ... )
+                descriptor: All the md5sum of files that needs to be updated.
+                md5: md5 of the md5 of files ( that helps to see quickly if an update is needed )
+                date_creation: Date when it has been added on the update table.
         """
         try:
             query = session.query(self.Update_machine).\
                        filter(self.Update_machine.jid.like(jid)).one()
 
 
-            query.hostname=hostname
-            query.ars=ars
-            query.status=status
-            query.descriptor=descriptor
-            query.md5=md5
+            query.hostname = hostname
+            query.ars = ars
+            query.status = status
+            query.descriptor = descriptor
+            query.md5 = md5
             session.commit()
             session.flush()
             return self.__updatemachine(query)
         except Exception as e:
-            logging.getLogger().error(str(e))
-            self.logger.error("\n%s" % (traceback.format_exc()))
+            logging.getLogger().error("We failed to update the informations on the SQL Table")
+            logging.getLogger().error("We got the error %s " % str(e))
+            self.logger.error("We hit the backtrace \n%s" % (traceback.format_exc()))
             return None
 
     @DatabaseHelper._sessionm
     def setUpdate_machine(self,
-                        session,
-                        hostname,
-                        jid,
-                        ars = "",
-                        status = "ready",
-                        descriptor="",
-                        md5="",
-                        date_creation=None):
+                          session,
+                          hostname,
+                          jid,
+                          ars="",
+                          status="ready",
+                          descriptor="",
+                          md5="",
+                          date_creation=None):
         """
-            this functions addition a updating machine
+            We update the informations of the machines in the update SQL table
+            Args:
+                session: The SQL Alchemy session
+                hostname: The hostname of the machine to update
+                jid: The jid of the machine to update
+                ars: The ARS on which the machine is connected
+                status: The status of the update (ready, updating, ... )
+                descriptor: All the md5sum of files that needs to be updated.
+                md5: md5 of the md5 of files ( that helps to see quickly if an update is needed )
+                date_creation: Date when it has been added on the update table.
         """
         try:
             new_Update_machine = self.Update_machine()
@@ -10414,8 +10663,17 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
     @DatabaseHelper._sessionm
     def getUpdate_machine(self,
                           session,
-                          status = "updating",
-                          nblimit=1000):
+                          status="updating",
+                          nblimiti=1000):
+        """
+            This function is used to retrieve the machines in the pending list
+            for update.
+
+            Args:
+                session: The SQL Alchemy session
+                status: The status of the machine in the database ( ready, updating, ... )
+                nblimit: Number maximum of machines allowed to be updated at once.
+        """
 
         sql ="""SELECT
                     MIN(id) AS minid , MAX(id) AS maxid
@@ -10427,14 +10685,13 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                             status LIKE '%s'
                         LIMIT %s) AS dt;""" %(status,
                                               nblimit)
-        #self.logger.debug("sql = %s" %sql)
 
-        machines_jid_for_updating=[]
+        machines_jid_for_updating = []
         borne = session.execute(sql)
 
-        result=[x for x in borne][0]
-        minid=result[0]
-        maxid=result[0]
+        result = [x for x in borne][0]
+        minid = result[0]
+        maxid = result[0]
         if minid is not None:
             sql=""" SELECT
                         jid, ars
@@ -10445,9 +10702,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                             status LIKE '%s';"""%(minid,
                                                 maxid,
                                                 status)
-            #self.logger.debug("sql = %s" %sql)
             resultquery = session.execute(sql)
-
 
             for record_updating_machine in resultquery:
                 machines_jid_for_updating.append( (record_updating_machine.jid, record_updating_machine.ars,))
@@ -10460,7 +10715,6 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                             status LIKE '%s';"""%(minid,
                                                 maxid,
                                                 status)
-            #self.logger.debug("sql = %s" %sql)
             resultquery = session.execute(sql)
 
             session.commit()

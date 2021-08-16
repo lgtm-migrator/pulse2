@@ -547,14 +547,13 @@ class Glpi084(DyngroupDatabaseHelper):
         return result
 
     def __xmppmasterfilter(self, filt = None):
-        ret = {}#if filt['computerpresence'] == "presence":
+        ret = {}
         if "computerpresence" in filt:
             d = XmppMasterDatabase().getlistPresenceMachineid()
             listid = [x.replace("UUID", "") for x in d]
             ret["computerpresence"] = ["computerpresence","xmppmaster",filt["computerpresence"] , listid]
         elif "query" in filt and filt['query'][0] in ["AND", "OR", "NOT"]:
             for q in filt['query'][1]:
-                #if len(q) >=3: and  q[2].lower() in ["online computer", "ou user", "ou machine"]:
                 if len(q) >=3:
                     if  q[2].lower() in ["online computer",
                                          'ou machine',
@@ -1159,8 +1158,6 @@ class Glpi084(DyngroupDatabaseHelper):
                 except IndexError:
                     pass
 
-
-
             if self.fusionagents is not None:
                 join_query = join_query.outerjoin(self.fusionagents)
             if 'antivirus' in filt: # Used for Antivirus dashboard
@@ -1174,15 +1171,6 @@ class Glpi084(DyngroupDatabaseHelper):
             query = query.filter(self.machine.c.is_deleted == 0).filter(self.machine.c.is_template == 0)
             if PluginManager().isEnabled("xmppmaster"):
                 if ret:
-                    #if "Online computer" in ret:
-                        #if ret["Online computer"][2] == "True":
-                            #query = query.filter(Machine.id.in_(ret["Online computer"][3]))
-                        #else:
-                            #query = query.filter(Machine.id.notin_(ret["Online computer"][3]))
-                    #if "OU user" in ret:
-                        #query = query.filter(Machine.id.in_(ret["OU user"][3]))
-                    #if "OU machine" in ret:
-                        #query = query.filter(Machine.id.in_(ret["OU machine"][3]))
                     if "computerpresence" in ret:
                         if ret["computerpresence"][2] == "presence":
                             query = query.filter(Machine.id.in_(ret["computerpresence"][3]))

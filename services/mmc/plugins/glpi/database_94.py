@@ -544,7 +544,7 @@ class Glpi94(DyngroupDatabaseHelper):
         mapper(Peripherals, self.peripherals)
 
 
-    ##################### internal query generators
+    # internal query generators
     def __filter_on(self, query):
         """
         Use the glpi.ini conf parameter filter_on to filter machines on some parameters
@@ -612,7 +612,7 @@ class Glpi94(DyngroupDatabaseHelper):
 
 
     def __xmppmasterfilter(self, filt = None):
-        ret = {}#if filt['computerpresence'] == "presence":
+        ret = {}
         if "computerpresence" in filt:
             d = XmppMasterDatabase().getlistPresenceMachineid()
             listid = [x.replace("UUID", "") for x in d]
@@ -986,15 +986,6 @@ class Glpi94(DyngroupDatabaseHelper):
             query = query.filter(self.machine.c.is_deleted == 0).filter(self.machine.c.is_template == 0)
             if PluginManager().isEnabled("xmppmaster"):
                 if ret:
-                    #if "Online computer" in ret:
-                        #if ret["Online computer"][2] == "True":
-                            #query = query.filter(Machine.id.in_(ret["Online computer"][3]))
-                        #else:
-                            #query = query.filter(Machine.id.notin_(ret["Online computer"][3]))
-                    #if "OU user" in ret:
-                        #query = query.filter(Machine.id.in_(ret["OU user"][3]))
-                    #if "OU machine" in ret:
-                        #query = query.filter(Machine.id.in_(ret["OU machine"][3]))
                     if "computerpresence" in ret:
                         if ret["computerpresence"][2] == "presence":
                             query = query.filter(Machine.id.in_(ret["computerpresence"][3]))
