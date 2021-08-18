@@ -134,10 +134,7 @@ class XmppMasterDatabase(DatabaseHelper):
         Base = automap_base()
         if self.is_activated:
             return None
-<<<<<<< HEAD
-=======
         # This is used to automatically create the mapping
->>>>>>> origin/integration
         Base = automap_base()
         self.config = config
         self.db = create_engine(self.makeConnectionPath(),
@@ -2812,14 +2809,6 @@ class XmppMasterDatabase(DatabaseHelper):
             return -1
 
     @DatabaseHelper._sessionm
-<<<<<<< HEAD
-    def wolbroadcastadressmacadress(self, session, listmacadress):
-        """
-            analyse l'ensemble des adresse mac a reveiller.
-            return ces adressmac grouper par leur adresse de broacast
-        """
-        grp_wol_broadcast_adress={}
-=======
     def wolbroadcastadressmacaddress(self, session, listmacaddress):
         """
             We monitor the mac addresses to check.
@@ -2832,25 +2821,16 @@ class XmppMasterDatabase(DatabaseHelper):
                 We return those mac addresses grouped by the broadcast address.
         """
         grp_wol_broadcast_adress = {}
->>>>>>> origin/integration
         result = session.query(Network.broadcast,
                                Network.mac).distinct(Network.mac).\
                 filter(
                     and_(Network.broadcast != "",
                          Network.broadcast.isnot(None),
-<<<<<<< HEAD
-                         Network.mac.in_(listmacadress))
-                       ).all()
-        for t in result:
-            if t.broadcast not in grp_wol_broadcast_adress:
-                grp_wol_broadcast_adress[t.broadcast]=[]
-=======
                          Network.mac.in_(listmacaddress))
                        ).all()
         for t in result:
             if t.broadcast not in grp_wol_broadcast_adress:
                 grp_wol_broadcast_adress[t.broadcast] = []
->>>>>>> origin/integration
             grp_wol_broadcast_adress[t.broadcast].append(t.mac)
         return grp_wol_broadcast_adress
 
@@ -6366,21 +6346,12 @@ class XmppMasterDatabase(DatabaseHelper):
         listqueryxmppmaster[2] = listqueryxmppmaster[2].lower()
         Regexpression = False
         if listqueryxmppmaster[2] in [ "ou user", "ou machine"]:
-<<<<<<< HEAD
-            # on test si expression relationel
-=======
->>>>>>> origin/integration
             if listqueryxmppmaster[3][:1] == "/" and  listqueryxmppmaster[3][-1:] == "/":
                 Regexpression = True
                 fl = listqueryxmppmaster[3][1:-1]
         if not Regexpression:
             # SQL Wildcards
-<<<<<<< HEAD
-            # % : le symbole pourcentage représente zéro, un ou plusieurs caractères joker.
-            # dans l'ecriture shell on utilise wilcard * est %
-=======
             # % : The percentage symbol represent zero, one or several wildcard caracters.
->>>>>>> origin/integration
             fl = listqueryxmppmaster[3].replace('*',"%")
 
         if listqueryxmppmaster[2] == "ou user":

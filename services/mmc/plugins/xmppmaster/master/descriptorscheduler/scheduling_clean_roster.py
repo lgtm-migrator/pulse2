@@ -18,27 +18,6 @@
 # along with Pulse 2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
-<<<<<<< HEAD
-"""
-
-    this plugins nettoy les roters none none dans le roster.
-
-    file : xmppmaster/master/descriptorscheduler/scheduling_clean_roster.py
-    
-    # Pour utiliser ce plugin, il faut que le substitut subscribe soit sur la meme machine que ejabberd.
-    
-    # dans 1 cas different il faudrat prevoir 1 iq vers l ars de son dpmaine pour executer ce plugin.
-"""
-import json
-import logging
-import sys
-import traceback
-from utils import simplecommand
-
-plugin = {"VERSION" : "1.0", "NAME" : "scheduling_clean_roster",  "TYPE" : "all", "SCHEDULED" : True}
-
-SCHEDULE = {"schedule" : "5 0 * * *", "nb" : -1}# nb  -1 infinie
-=======
 
 """
     This plugin is used to clean the rosters.
@@ -54,7 +33,6 @@ from utils import simplecommand
 plugin = {"VERSION": "1.0", "NAME": "scheduling_clean_roster", "TYPE": "all", "SCHEDULED": True}
 
 SCHEDULE = {"schedule": "5 0 * * *", "nb": -1}
->>>>>>> origin/integration
 
 def schedule_main(objectxmpp):
     logging.getLogger().debug("==============Plugin scheduled==============")
