@@ -4393,7 +4393,7 @@ class XmppMasterDatabase(DatabaseHelper):
 
         Args:
             session: The SQL Alchemy session
-            uuidinventory: The login of the user
+            uuidinventory: The uuid inventory glpi
             state: The state of the deploy. (Started, Error, etc. ).
             intervalsearch: The interval on which we search the deploys.
             minimum: Minimum value ( for pagination )
@@ -4479,11 +4479,10 @@ class XmppMasterDatabase(DatabaseHelper):
             This function is used to retrieve the id of the users of the 'login' team.
             Args:
                 session: The SQL Alchemy session
-                login: The login of a user of the group we are searching.
+                login: The login of a user of the group we are searching.(rexexp)
             Returns:
                 It returns a list with all the logins belonging to the group of 'login'
         """
-
         if login is None or login == "":
             return []
 
@@ -4504,7 +4503,7 @@ class XmppMasterDatabase(DatabaseHelper):
                                 xmppmaster.pulse_team_user ON
                                     xmppmaster.pulse_team_user.id_user = xmppmaster.pulse_users.id
                             WHERE
-                                xmppmaster.pulse_users.login = '%s');""" % login
+                                xmppmaster.pulse_users.login REGEXP '%s');""" % login
         result = session.execute(sql)
         session.commit()
         session.flush()
@@ -4522,7 +4521,7 @@ class XmppMasterDatabase(DatabaseHelper):
 
             Args:
                 session: The SQL Alchemy session
-                login: The login of the user
+                login: The login of the user regexp
                 state: State of the deployment (Started, Error, etc.)
                 intervalsearch: The interval on which we search the deploys.
                 minimum: Minimum value ( for pagination )
@@ -4660,7 +4659,7 @@ class XmppMasterDatabase(DatabaseHelper):
         """
         deploylog = session.query(Deploy)
         if login:
-            deploylog = deploylog.filter( Deploy.login == login)
+            deploylog = deploylog.filter( Deploy.login.op('regexp')(login))
         if state:
             deploylog = deploylog.filter( Deploy.state == state)
 
@@ -4678,7 +4677,7 @@ class XmppMasterDatabase(DatabaseHelper):
                                     select count(id) as nb
                                     from deploy
                                     where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
-                                    AND login like "%s"
+                                    AND login REGEXP "%s"
                                     AND (state LIKE "%%%s%%"
                                     or pathpackage LIKE "%%%s%%"
                                     or start LIKE "%%%s%%"
@@ -4706,7 +4705,7 @@ class XmppMasterDatabase(DatabaseHelper):
                                     select count(id) as nb
                                         from deploy
                                         where start >= DATE_SUB(NOW(),INTERVAL 24 HOUR)
-                                        AND login like "%s"
+                                        AND login REGEXP "%s"
                                         group by title
                                     ) as x;""" % (login)
             else:
@@ -4809,7 +4808,7 @@ class XmppMasterDatabase(DatabaseHelper):
             if isinstance(login, list):
                 deploylog = deploylog.filter( Deploy.login.in_(login))
             else:
-                deploylog = deploylog.filter( Deploy.login.like(login))
+                deploylog = deploylog.filter( Deploy.login.op('regexp')(login))
 
         if intervalsearch:
             deploylog = deploylog.filter( Deploy.start >= (datetime.now() - timedelta(seconds=intervalsearch)))
@@ -4849,7 +4848,7 @@ class XmppMasterDatabase(DatabaseHelper):
                 select count(id) as nb
                 from deploy
                 where start >= DATE_SUB(NOW(),INTERVAL 3 MONTH)
-                AND login LIKE "%s"
+                AND login REGEXP "%s"
                 AND (state LIKE "%%%s%%"
                 or pathpackage LIKE "%%%s%%"
                 or start LIKE "%%%s%%"
@@ -4941,7 +4940,7 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def getdeploybyuser(self, session, login = None, numrow = None, offset=None):
         if login is not None:
-            deploylog = session.query(Deploy).filter(Deploy.login == login).order_by(desc(Deploy.id))
+            deploylog = session.query(Deploy).filter(Deploy.login.op('regexp')(login)).order_by(desc(Deploy.id))
         else:
             deploylog = session.query(Deploy).order_by(desc(Deploy.id))
         if numrow is not None:
@@ -5970,8 +5969,7 @@ class XmppMasterDatabase(DatabaseHelper):
         entity = " "
         if 'location' in ctx and ctx['location'] != "":
             if ctx['location'].strip() == "-1":
-                logger.error("AA location is %s" % ctx['location'])
-                logger.error("AA location is %s" % type(ctx['location']))
+                #logger.warning("location is %s" % ctx['location'])
                 pass
             else:
                 entitylist = [x.strip() \
