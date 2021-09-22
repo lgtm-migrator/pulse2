@@ -49,6 +49,9 @@ from mmc.plugins.xmppmaster.master.agentmaster import XmppSimpleCommand, getXmpp
     calllistremotefileedit, callremotefileeditaction,\
     callremoteXmppMonitoring
 from master.lib.manage_grafana import manage_grafana
+
+import traceback
+
 VERSION = "1.0.0"
 APIVERSION = "4:1:3"
 
@@ -797,11 +800,25 @@ def remotecommandshell(command, jidmachine, timeout):
 
 
 def remoteXmppMonitoring(subject, jidmachine, timeout):
-    data = callremoteXmppMonitoring(jidmachine,  subject, timeout=timeout)
-    result = json.loads(data)
-    resultdata = zlib.decompress(base64.b64decode(result['result']))
-    dataresult = [x for x in resultdata.split('\n')]
-    result['result'] = dataresult
+    resulterror = ""
+    try:
+        data = callremoteXmppMonitoring(jidmachine,  subject, timeout=timeout)
+        if 'err' in data:
+            logging.getLogger().warning("error iq monitoring")
+            logger.error("MESSAGE ERROR %s" % (data['err']))
+            return resulterror
+        result = json.loads(data)
+        resultdata = zlib.decompress(base64.b64decode(result['result']))
+        dataresult = [x for x in resultdata.split('\n')]
+        result['result'] = dataresult
+    except KeyError:
+        logging.getLogger().warning("error iq monitoring")
+        logger.error("MESSAGE ERROR %s" % (data))
+        logging.getLogger().error("\n%s" % (traceback.format_exc()))
+        return resulterror
+    except Exception:
+        logging.getLogger().error("\n%s" % (traceback.format_exc()))
+        return resulterror
     return result
 
 
