@@ -36,12 +36,12 @@
 -- \#####################################################################/
 USE `xmppmaster`;
 DROP VIEW IF EXISTS `xmppmaster`.`vs_updatingmachine` ;
-CREATE 
-     OR REPLACE ALGORITHM = UNDEFINED 
-    DEFINER = `root`@`localhost` 
+CREATE
+     OR REPLACE ALGORITHM = UNDEFINED
+    DEFINER = `root`@`localhost`
     SQL SECURITY DEFINER
 VIEW `vs_updatingmachine_updating` AS
-    SELECT 
+    SELECT
         `update_machine`.`jid` AS `jid`,
         `update_machine`.`ars` AS `ars`,
         `update_machine`.`status` AS `status`,
@@ -68,12 +68,12 @@ INSERT INTO `xmppmaster`.`support_help_command` (`id`, `name`, `description`, `e
 
 USE `xmppmaster`;
 DROP VIEW IF EXISTS `xmppmaster`.`vs_updatingmachine_ready` ;
-CREATE 
-     OR REPLACE ALGORITHM = UNDEFINED 
-    DEFINER = `root`@`localhost` 
+CREATE
+     OR REPLACE ALGORITHM = UNDEFINED
+    DEFINER = `root`@`localhost`
     SQL SECURITY DEFINER
 VIEW `vs_updatingmachine_ready` AS
-    SELECT 
+    SELECT
         `update_machine`.`jid` AS `jid`,
         `update_machine`.`ars` AS `ars`,
         `update_machine`.`status` AS `status`,
@@ -109,11 +109,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `support_enableupdating`(IN P_ars VA
 BEGIN
     IF P_ars = "ALL" or P_ars = ""  THEN
         -- updating tout les enregistrement
-        UPDATE `xmppmaster`.`update_machine` 
-        SET 
+        UPDATE `xmppmaster`.`update_machine`
+        SET
             `status` = new_status
         WHERE
-            `id` in (SELECT 
+            `id` in (SELECT
                     xmppmaster.update_machine.id
                 FROM
                     xmppmaster.machines
@@ -121,14 +121,14 @@ BEGIN
                     xmppmaster.update_machine ON SUBSTRING_INDEX(xmppmaster.machines.jid, '@', 1) = SUBSTRING_INDEX(xmppmaster.update_machine.jid,'@',1)
                 WHERE
                     xmppmaster.machines.enabled = 1
-                        AND xmppmaster.update_machine.status LIKE old_status);       
+                        AND xmppmaster.update_machine.status LIKE old_status);
     ELSE
         -- updating les machine pour ars determine.
-        UPDATE `xmppmaster`.`update_machine` 
-        SET 
+        UPDATE `xmppmaster`.`update_machine`
+        SET
             `status` = new_status
         WHERE
-            `id` in (SELECT 
+            `id` in (SELECT
                     xmppmaster.update_machine.id
                 FROM
                     xmppmaster.machines
@@ -138,7 +138,7 @@ BEGIN
                     xmppmaster.machines.enabled = 1
                         AND xmppmaster.update_machine.status LIKE old_status
                         and substring_index(xmppmaster.update_machine.ars, '@', 1) LIKE P_ars );
-    END IF;	
+    END IF;
 END$$
 
 DELIMITER ;
@@ -147,3 +147,40 @@ DELIMITER ;
 UPDATE `xmppmaster`.`support_help_command` SET `description` = 'Cette Procedure permet de remplacer lel\'ancien status par le nouveau\n3 parametres.  :\n   -1)  le nom de ars ( La mise à jour ne consernera que les machines affiliées a cet ARS.  Si valeurs \"ALL\" ou \"\" pour tout les ars)\n   -2) le nouveau status\n   -3) l\'ancien status' WHERE (`id` = '8');
 
 
+
+
+-- /################################################################################\
+-- | procedure support_get_machine_restart                                          |
+-- | cette procedure sert a recherche les machines redémarrant en boucle.           |
+-- | non compte les machine avec 1 tres petit uptime                                |
+-- | exemple call support_get_machine_restart(10,24);                               |
+-- | l'exemple renvoi les machines avec aux moins 10 restart les dernier 24 heures. |
+-- \################################################################################/
+USE `xmppmaster`;
+DROP procedure IF EXISTS `support_get_machine_restart`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `support_get_machine_restart` (in in_nbstart int, in  in_nb_hour int)
+BEGIN
+    SELECT
+        COUNT(*) AS restart, hostname
+    FROM
+        xmppmaster.uptime_machine
+    WHERE
+        status = 1 AND updowntime < 100
+            AND date > (NOW() - INTERVAL in_nb_hour HOUR)
+    GROUP BY hostname
+    HAVING restart > in_nbstart;
+END$$
+
+DELIMITER ;
+INSERT INTO `xmppmaster`.`support_help_command` (`name`, `description`, `example`, `type`) VALUES ('support_get_machine_restart', 'cette procedure sert a recherche les machines redémarrant en boucle.\non compte les machine avec 1 tres petit uptime.\nl\'exemple renvoi les machines avec aux moins 10 restart les dernier 24 heures. ', 'call support_get_machine_restart(10,24);', 'P');
+
+
+
+-- /############################################################################\
+-- | add device typre alertmonitoring                                           |
+-- \############################################################################/
+ALTER TABLE `xmppmaster`.`mon_devices`
+CHANGE COLUMN `device_type` `device_type` ENUM('thermalPrinter', 'nfcReader', 'opticalReader', 'cpu', 'memory', 'storage', 'network', 'system', 'alertmonitoring') NOT NULL ;
