@@ -965,23 +965,39 @@ def get_xmppmachines_list(start, limit, filter, presence):
 def get_xmpprelays_list(start, limit, filter, presence):
     return XmppMasterDatabase().get_xmpprelays_list(start, limit, filter, presence)
 
-def get_list_ars_from_sharing(sharings, start, limit, userlogin,  filter):
+
+def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
     """
         cette fonction renvoi la structure des ars avec les statstiques sur les machines.
         sharing les structure des partage de utilisateur
     """
+    try:
+        a = PkgsDatabase().config.centralizedmultiplesharing
+        if not a:
+            return XmppMasterDatabase().get_xmpprelays_list(start, limit,  filter, 'all')
+    except Exception:
+        pass
     listidars = []
     arslistextend = []
     objsearch = {}
     if userlogin != "":
         objsearch['login'] = userlogin
+        if sharings in ["", None]:
+            sharings1 = PkgsDatabase().pkgs_search_share(objsearch,)
+            if 'datas' in sharings1:
+                sharings = sharings1['datas']
         arslistextend = PkgsDatabase().pkgs_search_ars_list_from_cluster_rules(objsearch)
         # on utilise la table rules global pour etendre ou diminuer les droits d'admins sur les ars.
+
     for share in sharings:
         if "r" in share['permission']:
             listidars.append(share['ars_id'])
+
     if arslistextend:
         listidars.extend([x[0] for x in arslistextend])
+
+    listidars.append(share['ars_id'])
+
     ars_list = {}
     ars_list = XmppMasterDatabase().get_ars_list_belongs_cluster(listidars, start, limit, filter)
     if not ars_list or ars_list['count']== 0:

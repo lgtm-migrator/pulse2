@@ -18,6 +18,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with MMC.  If not, see <http://www.gnu.org/licenses/>.
+ * file : /mmc/modules/admin/admin/ajaxRelaysList.php
  */
 
 require_once("modules/xmppmaster/includes/html.inc.php");
@@ -34,12 +35,14 @@ $end   = (isset($_GET['end'])?$_GET['start']+$maxperpage:$maxperpage);
 if ($_SESSION["login"] == "root"){
   $relays = xmlrpc_get_xmpprelays_list($start, $maxperpage, $filter, 'all');
 }else{
-  $sharings = xmlrpc_pkgs_search_share(["login"=> $_SESSION["login"]]);
-  if($sharings['config']['centralizedmultiplesharing'] == 1){
-      $relays = get_list_ars_from_sharing($sharings['datas'],$start, $maxperpage,$_SESSION["login"],  $filter);
-  }else{
-    $relays = xmlrpc_get_xmpprelays_list($start, $maxperpage, $filter, 'all');
-  }
+    $relays = get_list_ars_from_sharing("",$start, $maxperpage,$_SESSION["login"],  $filter);
+//     $sharings = xmlrpc_pkgs_search_share(["login"=> $_SESSION["login"]]);
+//   if($sharings['config']['centralizedmultiplesharing'] == 1){
+//      // $relays = get_list_ars_from_sharing($sharings['datas'],$start, $maxperpage,$_SESSION["login"],  $filter);
+//        $relays = get_list_ars_from_sharing("",$start, $maxperpage,$_SESSION["login"],  $filter);
+//   }else{
+//     $relays = xmlrpc_get_xmpprelays_list($start, $maxperpage, $filter, 'all');
+//   }
 }
 
 //$editremoteconfigurationempty = new EmptyActionItem1(_("Edit config files"),"listconffile", "configg","computers","xmppmaster", "xmppmaster");
