@@ -6519,6 +6519,66 @@ class XmppMasterDatabase(DatabaseHelper):
         return resulttypemachine
 
     @DatabaseHelper._sessionm
+    def delMachineXmppPresenceHostname(self, session, hostname):
+        """
+            del machine of table machine
+        """
+        result = ['-1']
+        typemachine = "machine"
+        try:
+            sql = """SELECT
+                        id, hostname, agenttype
+                    FROM
+                        xmppmaster.machines
+                    WHERE
+                        xmppmaster.machines.hostname  like '%s';""" % hostname
+            id = session.execute(sql)
+            session.commit()
+            session.flush()
+            result=[x for x in id][0]
+            sql  = """DELETE FROM `xmppmaster`.`machines`
+                    WHERE
+                        `xmppmaster`.`machines`.`id` = '%s';""" % result[0]
+            if result[2] == "relayserver":
+                typemachine = "relayserver"
+                sql2 = """UPDATE `xmppmaster`.`relayserver`
+                            SET
+                                `enabled` = '0'
+                            WHERE
+                                `xmppmaster`.`relayserver`.`nameserver` = '%s';""" % result[1]
+                session.execute(sql2)
+            session.execute(sql)
+            session.commit()
+            session.flush()
+        except IndexError:
+            logging.getLogger().warning("Configuration agent machine uuidglpi [%s]. no uuid in base for configuration" % uuidinventory)
+            return {}
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return {}
+        resulttypemachine={"type" : typemachine }
+        return resulttypemachine
+
+    @DatabaseHelper._sessionm
+    def get_machine_from_hostname(self, session, hostname):
+        """
+        Select the machines with from hostname
+        Returns:
+            List of dict. The dict contains all the machines founded.
+        """
+        sql = """
+        SELECT
+            *
+        FROM
+            machines
+        WHERE
+            hostname like "%s%%";"""%hostname
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        return [{column: value for column, value in rowproxy.items()} for rowproxy in result]
+
+    @DatabaseHelper._sessionm
     def SetPresenceMachine(self, session, jid, presence=0):
         """
             chang presence in table machines
