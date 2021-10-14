@@ -1615,7 +1615,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
             return False
         descript = managepackage.loadjsonfile(os.path.join(path, 'xmppdeploy.json'))
 
-        self.parsexmppjsonfile(os.path.join(path, 'xmppdeploy.json'))
+        #self.parsexmppjsonfile(os.path.join(path, 'xmppdeploy.json'))
         if descript is None:
             XmppMasterDatabase().adddeploy(idcommand,
                                             jidmachine,
