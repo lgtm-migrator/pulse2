@@ -382,6 +382,64 @@ class MUCBot(sleekxmpp.ClientXMPP):
         self.add_event_handler('changed_status', self.changed_status)
         self.RSA = MsgsignedRSA("master")
 
+        self.add_event_handler('presence_unavailable', self.presence_unavailable)
+        self.add_event_handler('presence_available', self.presence_available)
+
+        self.add_event_handler('presence_subscribe', self.presence_subscribe)
+        self.add_event_handler('presence_subscribed', self.presence_subscribed)
+
+        self.add_event_handler('presence_unsubscribe', self.presence_unsubscribe)
+        self.add_event_handler('presence_unsubscribed', self.presence_unsubscribed)
+
+        self.add_event_handler('changed_subscription', self.changed_subscription)
+
+
+    def presence_unavailable(self, presence):
+        try:
+            if presence['from'].bare  !=  self.boundjid.bare:
+                logger.debug("**********   presence_unavailable %s %s"%(presence['from'],
+                                                                        presence['type'] ))
+        except Exception:
+            logger.error("%s" % (traceback.format_exc()))
+
+
+    def presence_subscribe(self, presence):
+        if presence['from'].bare  !=  self.boundjid.bare:
+            logger.debug("**********   presence_subscribe %s %s"%(presence['from'],
+                                                                  presence['type'] ))
+
+    def presence_subscribed(self, presence):
+        if presence['from'].bare  !=  self.boundjid.bare:
+            logger.debug("**********   presence_subscribed %s %s"%(presence['from'],
+                                                                   presence['type'] ))
+
+    def changed_subscription(self, presence):
+        if presence['from'].bare  !=  self.boundjid.bare:
+            logger.debug("**********   changed_subscription %s %s"%(presence['from'],
+                                                                    presence['type'] ))
+
+
+    def presence_available(self, presence):
+        if presence['from'].bare  !=  self.boundjid.bare:
+            logger.debug("**********   presence_available %s %s"%(presence['from'],
+                                                                  presence['type'] ))
+
+    def presence_unsubscribe(self, presence):
+        if presence['from'].bare  !=  self.boundjid.bare:
+            logger.debug("**********   presence_unsubscribe %s %s"%(presence['from'],
+                                                                    presence['type'] ))
+
+    def presence_unsubscribed(self, presence):
+        try:
+            if presence['from'].bare  !=  self.boundjid.bare:
+                self.update_roster(presence['from'], subscription='remove')
+                logger.debug("**********   presence_unsubscribed %s %s"%(presence['from'],
+                                                                        presence['type'] ))
+                logger.debug("**********   update_roster %s"%(presence['from']))
+
+        except Exception:
+            logger.error("%s" % (traceback.format_exc()))
+
     def schedulerfunction(self):
         self.manage_scheduler.process_on_event()
 
