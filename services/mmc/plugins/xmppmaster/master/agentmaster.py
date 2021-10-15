@@ -1617,7 +1617,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
                                             name,
                                             uuidmachine,
                                             title,
-                                            "ABORT PACKAGE VERSION MISSING",
+                                            "ERROR CORRUPTED PACKAGE",
                                             sessiondeployementless,
                                             user=login,
                                             login=login,
