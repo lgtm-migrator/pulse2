@@ -2446,7 +2446,6 @@ class MUCBot(sleekxmpp.ClientXMPP):
                         logger.debug("AD organized by User rule selects relay server for machine %s user %s \n %s" % (
                             data['information']['info']['hostname'], data['information']['users'][0], result))
                         break
-
             # Network Rule : 9
             elif x[0] == 9:
                 # Associates relay server based on network address
