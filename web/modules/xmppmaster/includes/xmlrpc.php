@@ -175,7 +175,7 @@ function xmlrpc_addlogincommand($login,
                                 $commandid,
                                 $grpid = '',
                                 $nb_machine_in_grp = '',
-                                $instructions_nb_machine_for_exec,
+                                $instructions_nb_machine_for_exec = '',
                                 $instructions_datetime_for_exec = '',
                                 $parameterspackage = '',
                                 $rebootrequired = 0,
@@ -638,6 +638,10 @@ function xmlrpc_get_mon_events($start=-1, $maxperpage=-1, $filter=""){
   return xmlCall("xmppmaster.get_mon_events", [$start, $maxperpage, $filter]);
 }
 
+function xmlrpc_get_mon_events_history($start=-1, $maxperpage=-1, $filter=""){
+  return xmlCall("xmppmaster.get_mon_events_history", [$start, $maxperpage, $filter]);
+}
+
 function xmlrpc_acquit_mon_event($id, $user){
   return xmlCall("xmppmaster.acquit_mon_event", [$id, $user]);
 }
@@ -733,5 +737,17 @@ function xmlrpc_get_count_total_deploy_for_dashboard(){
 
 function xmlrpc_get_count_agent_for_dashboard(){
   return xmlCall("xmppmaster.get_count_agent_for_dashboard", []);
+}
+
+function xmlrpc_get_machines_for_ban($jid_ars, $start=0, $end=-1, $filter=""){
+  return xmlCall("xmppmaster.get_machines_for_ban", [$jid_ars, $start, $end, $filter]);
+}
+
+function xmlrpc_get_machines_to_unban($jid_ars, $start=0, $end=-1, $filter=""){
+  return xmlCall("xmppmaster.get_machines_to_unban", [$jid_ars, $start, $end, $filter]);
+}
+
+function xmlrpc_ban_machines($subaction, $jid_ars, $machines){
+  return xmlCall("xmppmaster.ban_machines", [$subaction, $jid_ars, $machines]);
 }
 ?>
