@@ -70,7 +70,7 @@ class apimanagepackagemsc:
             to the target in the local/global share
         """
         dirpackage = os.path.join("/", "var", "lib", "pulse2", "packages")
-        for package in search_list_package():
+        for package in apimanagepackagemsc.search_list_package():
             os.symlink(package , os.path.join(dirpackage, os.path.basename(package)))
 
     @staticmethod
