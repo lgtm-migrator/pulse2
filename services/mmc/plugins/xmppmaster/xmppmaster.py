@@ -49,25 +49,27 @@ class xmppMasterthread(threading.Thread):
         self.kwargs = kwargs
         self.disable = xmppMasterConfig().disable
         self.xmpp = None
+        self.reconnectxmpp = True
+
+    def debugvariable(self, tg):
+        choix={"NOTSET" : 0,
+               "DEBUG" : 10,
+               "INFO" : 20,
+               "LOG" : 25,
+               "DEBUGPULSE" : 25,
+               "WARNING" : 30,
+               "ERROR" : 40,
+               "CRITICAL" : 50}
+        if tg.debugmode in choix:
+            return choix[tg.debugmode]
+        else:
+            return 0
 
     def doTask(self):
         tg = xmppMasterConfig()
-        if tg.debugmode == "NOTSET":
-            tg.debugmode = 0
-        elif tg.debugmode == "DEBUG":
-            tg.debugmode = 10
-        elif tg.debugmode == "INFO":
-            tg.debugmode = 20
-        if tg.debugmode == "LOG" or tg.debugmode == "DEBUGPULSE":
-            tg.debugmode = 25
-        elif tg.debugmode == "WARNING":
-            tg.debugmode = 30
-        elif tg.debugmode == "ERROR":
-            tg.debugmode = 40
-        elif tg.debugmode == "CRITICAL":
-            tg.debugmode = 50
-        logging.basicConfig(level=tg.debugmode,
-                            format='[%(name)s.%(funcName)s:%(lineno)d] %(message)s')
+        tg.debugmode = self.debugvariable(tg)
+
+
         #logging.log(tg.debugmode,"=======================================test log")
         self.xmpp = MUCBot(tg)
         self.xmpp.register_plugin('xep_0030')  # Service Discovery
@@ -84,6 +86,36 @@ class xmppMasterthread(threading.Thread):
         # xmpp.register_plugin('xep_0095') # file transfer
         self.xmpp['xep_0077'].force_registration = False
         self.xmpp.register_plugin('xep_0279')
+        logging.basicConfig(level=tg.debugmode,
+                            format='[%(name)s.%(funcName)s:%(lineno)d] %(message)s')
+        self.reconnectxmpp=True
+        while self.reconnectxmpp:
+
+            tg = xmppMasterConfig()
+            tg.debugmode = self.debugvariable(tg)
+            if tg.Server == "" or tg.Port == "":
+                logger.error("Parameters connection server xmpp missing. (%s : %s)"%(tg.Server,
+                                                                                     tg.Port))
+                logger.error("reload config")
+            #jfkjfk
+            address=(tg.Server, tg.Port)
+            if self.xmpp.connect(address=address):
+                logger.info("Connection xmpp (%s %s)."%(tg.Server,
+                                                        tg.Port))
+                self.xmpp.process(block=True)
+                logger.warning("deconection xmpp agent")
+            else:
+                logger.info("Unable to connect.")
+                logger.warning("Parameters connection server xmpp error. (%s : %s)"%(tg.Server,
+                                                                                     tg.Port))
+                logger.warning("reload config")
+            if self.reconnectxmpp:
+                logger.warning("waitting 15 secondes before reconnection")
+                time.sleep(15)
+                logger.warning("reconection agent xmpp agent")
+                logger.warning("reload configuration xmpp")
+
+
         if tg.Server == "" or tg.Port == "":
             logger.error("Parameters connection server xmpp missing.")
         if self.xmpp.connect(address=(tg.Server, tg.Port)):
@@ -100,6 +132,7 @@ class xmppMasterthread(threading.Thread):
             self.xmpp.session.sessionstop()
             time.sleep(2)
             #xmpp.scheduler.remove("manage session")
+            self.reconnectxmpp = False
             self.xmpp.disconnect()
 
     def run(self):
