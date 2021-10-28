@@ -27,8 +27,62 @@ from master.agentmaster import MUCBot
 from mmc.plugins.xmppmaster.config import xmppMasterConfig
 from mmc.agent import PluginManager
 
+import subprocess
+import traceback
+
 logger = logging.getLogger()
 
+
+def simplecommand(cmd):
+    obj = {}
+    p = subprocess.Popen(cmd,
+                         shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    result = p.stdout.readlines()
+    obj['code'] = p.wait()
+    obj['result'] = result
+    return obj
+
+def test_compte_ejabberd(compte):
+    cmd_test_registerd_master ="ejabberdctl registered_users pulse | grep \"^%s$\""%compte
+    logger.debug("test compte %s" %  compte)
+    return simplecommand(cmd_test_registerd_master)
+
+def ejabberdOnOff():
+    cmd_ejabberd_service_start = "ps aux | grep ejabberd | grep -v grep"
+    eeee = simplecommand(cmd_ejabberd_service_start)
+    if not eeee['result']:
+        logger.warning("service ejabberd is stop")
+        return False
+    else:
+        return True
+
+def enregister_compte(compte, domaine, password):
+    cmd = "ejabberdctl register %s %s %s"%(compte, domaine, password)
+    eeee = simplecommand(cmd)
+    if eeee['code'] != 0:
+        logger.error("register compte missing %s : (%s)" % (compte,
+                                                            eeee['result']))
+    else:
+        logger.info("re register compte  %s" % (compte))
+
+def creation_compte_master(compte, password):
+    try:
+        result = test_compte_ejabberd(compte)
+        if result['code'] == 0 :
+            logger.debug("compte %s existe" % compte)
+            return
+        else:
+            # on verifie service ejabberd lancer
+            if not ejabberdOnOff():
+                logger.error("you must restart ejabberd")
+                return
+            else:
+                logger.warning("registration compte missing %s" % compte)
+                enregister_compte(compte, "pulse", password)
+    except:
+        logger.error("%s" % traceback.format_exc())
 
 def singleton(class_):
     instances = {}
@@ -38,7 +92,6 @@ def singleton(class_):
             instances[class_] = class_(*args, **kwargs)
         return instances[class_]
     return getinstance
-
 
 @singleton
 class xmppMasterthread(threading.Thread):
@@ -68,9 +121,6 @@ class xmppMasterthread(threading.Thread):
     def doTask(self):
         tg = xmppMasterConfig()
         tg.debugmode = self.debugvariable(tg)
-
-
-        #logging.log(tg.debugmode,"=======================================test log")
         self.xmpp = MUCBot(tg)
         self.xmpp.register_plugin('xep_0030')  # Service Discovery
         self.xmpp.register_plugin('xep_0045')  # Multi-User Chat
@@ -90,14 +140,12 @@ class xmppMasterthread(threading.Thread):
                             format='[%(name)s.%(funcName)s:%(lineno)d] %(message)s')
         self.reconnectxmpp=True
         while self.reconnectxmpp:
-
             tg = xmppMasterConfig()
             tg.debugmode = self.debugvariable(tg)
             if tg.Server == "" or tg.Port == "":
                 logger.error("Parameters connection server xmpp missing. (%s : %s)"%(tg.Server,
                                                                                      tg.Port))
                 logger.error("reload config")
-            #jfkjfk
             address=(tg.Server, tg.Port)
             if self.xmpp.connect(address=address):
                 logger.info("Connection xmpp (%s %s)."%(tg.Server,
@@ -111,9 +159,10 @@ class xmppMasterthread(threading.Thread):
                 logger.warning("reload config")
             if self.reconnectxmpp:
                 logger.warning("waitting 15 secondes before reconnection")
-                time.sleep(15)
+                time.sleep(1)
                 logger.warning("reconection agent xmpp agent")
                 logger.warning("reload configuration xmpp")
+                creation_compte_master("master", tg.passwordconnection)
 
 
         if tg.Server == "" or tg.Port == "":
