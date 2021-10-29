@@ -31,7 +31,7 @@ START TRANSACTION;
 USE `xmppmaster`;
 SET FOREIGN_KEY_CHECKS=0;
 
-ALTER TABLE `xmppmaster`.`machines` 
+ALTER IGNORE TABLE `xmppmaster`.`machines` 
 ADD INDEX `uuid_UNIQUE` (`uuid_inventorymachine` ASC) ;
 ;
 
