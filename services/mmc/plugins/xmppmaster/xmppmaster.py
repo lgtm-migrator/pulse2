@@ -160,16 +160,10 @@ class xmppMasterthread(threading.Thread):
                 time.sleep(1)
                 logger.warning("reconection agent xmpp agent")
                 logger.warning("reload configuration xmpp")
-                creation_compte_master("master", tg.passwordconnection)
+                creation_compte_master("master",
+                                       tg.passwordconnection)
+        logger.info("by xmppmaster")
 
-
-        if tg.Server == "" or tg.Port == "":
-            logger.error("Parameters connection server xmpp missing.")
-        if self.xmpp.connect(address=(tg.Server, tg.Port)):
-            self.xmpp.process(block=True)
-            logger.info("done")
-        else:
-            logger.info("Unable to connect.")
 
     # todo faire class
     def stopxmpp(self):
