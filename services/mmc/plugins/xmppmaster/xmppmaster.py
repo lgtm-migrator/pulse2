@@ -119,29 +119,27 @@ class xmppMasterthread(threading.Thread):
             return 0
 
     def doTask(self):
-        tg = xmppMasterConfig()
-        tg.debugmode = self.debugvariable(tg)
-        self.xmpp = MUCBot(tg)
-        self.xmpp.register_plugin('xep_0030')  # Service Discovery
-        self.xmpp.register_plugin('xep_0045')  # Multi-User Chat
-        self.xmpp.register_plugin('xep_0004')  # Data Forms
-        self.xmpp.register_plugin('xep_0050')  # Adhoc Commands
-        self.xmpp.register_plugin('xep_0199', {'keepalive': True,
-                                               'frequency': 300,
-                                               'interval': 300,
-                                               'timeout': 200})
-        self.xmpp.register_plugin('xep_0077')  # Registration
-        # xmpp.register_plugin('xep_0047') # In-band Registration
-        # xmpp.register_plugin('xep_0096') # file transfer
-        # xmpp.register_plugin('xep_0095') # file transfer
-        self.xmpp['xep_0077'].force_registration = False
-        self.xmpp.register_plugin('xep_0279')
-        logging.basicConfig(level=tg.debugmode,
-                            format='[%(name)s.%(funcName)s:%(lineno)d] %(message)s')
         self.reconnectxmpp=True
         while self.reconnectxmpp:
             tg = xmppMasterConfig()
             tg.debugmode = self.debugvariable(tg)
+            self.xmpp = MUCBot(tg)
+            self.xmpp.register_plugin('xep_0030')  # Service Discovery
+            self.xmpp.register_plugin('xep_0045')  # Multi-User Chat
+            self.xmpp.register_plugin('xep_0004')  # Data Forms
+            self.xmpp.register_plugin('xep_0050')  # Adhoc Commands
+            self.xmpp.register_plugin('xep_0199', {'keepalive': True,
+                                                'frequency': 300,
+                                                'interval': 300,
+                                                'timeout': 200})
+            self.xmpp.register_plugin('xep_0077')  # Registration
+            # xmpp.register_plugin('xep_0047') # In-band Registration
+            # xmpp.register_plugin('xep_0096') # file transfer
+            # xmpp.register_plugin('xep_0095') # file transfer
+            self.xmpp['xep_0077'].force_registration = False
+            self.xmpp.register_plugin('xep_0279')
+            logging.basicConfig(level=tg.debugmode,
+                                format='[%(name)s.%(funcName)s:%(lineno)d] %(message)s')
             if tg.Server == "" or tg.Port == "":
                 logger.error("Parameters connection server xmpp missing. (%s : %s)"%(tg.Server,
                                                                                      tg.Port))
@@ -158,7 +156,7 @@ class xmppMasterthread(threading.Thread):
                                                                                      tg.Port))
                 logger.warning("reload config")
             if self.reconnectxmpp:
-                logger.warning("waitting 15 secondes before reconnection")
+                logger.warning("waitting 1 secondes before reconnection")
                 time.sleep(1)
                 logger.warning("reconection agent xmpp agent")
                 logger.warning("reload configuration xmpp")
