@@ -37,6 +37,7 @@ logger = logging.getLogger()
 
 class apimanagepackagemsc:
     exclude_name_package = ["sharing", ".stfolder", ".stignore" ]
+    dirpackage = os.path.join("/", "var", "lib", "pulse2", "packages")
 
     @staticmethod
     def readjsonfile(namefile):
@@ -72,6 +73,65 @@ class apimanagepackagemsc:
         dirpackage = os.path.join("/", "var", "lib", "pulse2", "packages")
         for package in apimanagepackagemsc.search_list_package():
             os.symlink(package , os.path.join(dirpackage, os.path.basename(package)))
+
+    @staticmethod
+    def dependencies_list(pathfile):
+        pathfilejson = os.path.join(pathfile,
+                                "xmppdeploy.json")
+        if not os.path.exists(pathfilejson):
+            return None
+        try:
+            dependecies_packages = apimanagepackagemsc.readjsonfile(pathfilejson)['info']['Dependency']
+        except Exception:
+            errorstr = "%s" % traceback.format_exc()
+            logger.error("[dependencies_list] search dependencies in package %s\n%s " % (pathfile,
+                                                                                         errorstr))
+            return None
+        return dependecies_packages
+
+    @staticmethod
+    def __recursif_search_list_dependencies(uuidpackage,
+                                            list_dependencie):
+        if uuidpackage is not None and \
+            uuidpackage.strip() != "":
+            pathuuid = os.path.join(apimanagepackagemsc.dirpackage,
+                                    uuidpackage)
+            if os.path.exists(pathuuid) and  \
+                not uuidpackage in list_dependencie:
+                list_dependencie[uuidpackage] = apimanagepackagemsc.dependencies_list(pathuuid)
+                if list_dependencie[uuidpackage]:
+                    for uuid in list_dependencie[uuidpackage]:
+                        apimanagepackagemsc.__recursif_search_list_dependencies(uuid,
+                                                                                list_dependencie)
+
+    @staticmethod
+    def create_plan_deploiement(uuidpackage):
+        list_dependencie = apimanagepackagemsc.search_list_dependencies(uuidpackage)
+        logger.debug("start list_dependencie %s" % (list_dependencie))
+        plan=[uuidpackage]
+        # replace dans plan
+        while list_dependencie:
+            for index, value in enumerate(plan):
+                if value in  list_dependencie:
+                    list_dependencie[value].reverse()
+                    for i in range(len(list_dependencie[value])):
+                        if list_dependencie[value][i] not in plan:
+                            plan.insert(index, list_dependencie[value][i])
+                    del list_dependencie[value]
+                    break
+        logger.debug("plan for package %s is %s" % (uuidpackage, plan))
+        return plan
+
+
+    @staticmethod
+    def search_list_dependencies(uuidpackage):
+        """
+            This function searches toutes les dependances des packets de deploiements.
+        """
+        list_dependencie = {}
+        apimanagepackagemsc.__recursif_search_list_dependencies(uuidpackage,
+                                                                list_dependencie)
+        return list_dependencie
 
     @staticmethod
     def remove_symlinks():
@@ -314,6 +374,11 @@ class managepackage:
 
     @staticmethod
     def packagedir():
+        """
+        This function provide the path of the package folder.
+
+        @return: string: The path of the package folder.
+        """
         if sys.platform.startswith('linux'):
             return os.path.join("/", "var", "lib", "pulse2", "packages")
         elif sys.platform.startswith('win'):
@@ -330,7 +395,7 @@ class managepackage:
         Returns:
             It returns the list of the packages.
         """
-        listfolder = [ x for x in os.listdir(managepackage.packagedir()) if len(x) == 36] 
+        listfolder = [ x for x in os.listdir(managepackage.packagedir()) if len(x) == 36]
         return [ os.path.join(managepackage.packagedir(),x) for x in listfolder]
 
     @staticmethod
@@ -344,6 +409,65 @@ class managepackage:
             except Exception as e:
                 logger.error("filename %s error decodage [%s]" % (filename, str(e)))
         return None
+
+    @staticmethod
+    def dependencies_list(pathfile):
+        pathfilejson = os.path.join(pathfile,
+                                "xmppdeploy.json")
+        if not os.path.exists(pathfilejson):
+            return None
+        try:
+            dependecies_packages = managepackage.loadjsonfile(pathfilejson)['info']['Dependency']
+        except Exception:
+            errorstr = "%s" % traceback.format_exc()
+            logger.error("[dependencies_list] search dependencies in package %s\n%s " % (pathfile,
+                                                                                         errorstr))
+            return None
+        return dependecies_packages
+
+    @staticmethod
+    def __recursif_search_list_dependencies(uuidpackage,
+                                            list_dependencie):
+        if uuidpackage is not None and \
+            uuidpackage.strip() != "":
+            pathuuid = os.path.join(managepackage.packagedir(),
+                                    uuidpackage)
+            if os.path.exists(pathuuid) and  \
+                not uuidpackage in list_dependencie:
+                list_dependencie[uuidpackage] = managepackage.dependencies_list(pathuuid)
+                if list_dependencie[uuidpackage]:
+                    for uuid in list_dependencie[uuidpackage]:
+                        managepackage.__recursif_search_list_dependencies(uuid,
+                                                                                list_dependencie)
+
+    @staticmethod
+    def create_plan_deploiement(uuidpackage):
+        list_dependencie = managepackage.search_list_dependencies(uuidpackage)
+        logger.debug("start list_dependencie %s" % (list_dependencie))
+        plan=[uuidpackage]
+        # replace dans plan
+        while list_dependencie:
+            for index, value in enumerate(plan):
+                if value in  list_dependencie:
+                    list_dependencie[value].reverse()
+                    for i in range(len(list_dependencie[value])):
+                        if list_dependencie[value][i] not in plan:
+                            plan.insert(index, list_dependencie[value][i])
+                    del list_dependencie[value]
+                    break
+        logger.debug("plan for package %s is %s" % (uuidpackage, plan))
+        return plan
+
+
+    @staticmethod
+    def search_list_dependencies(uuidpackage):
+        """
+            This function searches toutes les dependances des packets de deploiements.
+        """
+        list_dependencie = {}
+        managepackage.__recursif_search_list_dependencies(uuidpackage,
+                                                                list_dependencie)
+        return list_dependencie
 
     @staticmethod
     def getdescriptorpackagename(packagename):
