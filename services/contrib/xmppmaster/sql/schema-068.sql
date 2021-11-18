@@ -118,7 +118,7 @@ CREATE EVENT IF NOT EXISTS purgeoldmachines
 
 
 
- -- ----------------------------------------------------------------------
+-- ----------------------------------------------------------------------
 -- PROCEDUE STOCKEE support_get_outdated_machine_hostname
 -- ----------------------------------------------------------------------
    CREATE OR REPLACE PROCEDURE `support_get_outdated_machine_hostname`(IN param_fingerprint VARCHAR(45))
@@ -137,6 +137,65 @@ END
 -- AIDE PROCEDURE
 -- ----------------------------------------------------------------------
 INSERT INTO `xmppmaster`.`support_help_command` (`name`, `description`, `example`, `type`, `result`) VALUES ('support_get_outdated_machine_hostname', 'cette procedure est a utilise pour resortir les machine qui n\'on pas le finger print defini en parametre.', 'call support_get_outdated_machine_hostname(\'8c8265f15b43521ca726628dbd5068e1\')', 'P', 'call support_get_outdated_machine_hostname(\'8c8265f15b43521ca726628dbd5068e1\');\n+---------+----------+----------------------------------+\n| MAX(id) | hostname | md5agentversion                  |\n+---------+----------+----------------------------------+\n|    6448 | deb10-90 | 8c8265f15b43521ca726628dbd5068e3 |\n|    6453 | deb10-91 | 8c8265f15b43521ca726628dbd5068e6 |\n|    6454 | deb10-92 | 8c8265f15b43521ca726628dbd5068ea |\n|    6459 | deb10-93 | 8c8265f15b43521ca726628dbd5068e2 |\n+---------+----------+----------------------------------+');
+
+-- ----------------------------------------------------------------------
+-- PROCEDUE STOCKEE support_base_size
+-- ----------------------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `support_base_size`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE OR REPLACE PROCEDURE `support_base_size` (IN param_name_base VARCHAR(45))
+BEGIN
+SELECT
+    table_name AS 'Tables',
+    table_rows AS 'lines',
+    ROUND(((data_length + index_length) / 1024 / 1024),
+            2) 'Size in MB'
+FROM
+    information_schema.TABLES
+WHERE
+    table_schema = param_name_base
+ORDER BY `lines` DESC;
+END$$
+
+DELIMITER ;
+
+-- ----------------------------------------------------------------------
+-- AIDE PROCEDURE
+-- ----------------------------------------------------------------------
+
+INSERT INTO `xmppmaster`.`support_help_command` (`name`, `description`, `example`, `type`, `result`) VALUES ('support_base_size', 'cette procedure renvoi les table d\'une base avec lenombre de d\'enregistrement et la taille en mb', 'call support_base_size(\'xmppmaster\');', 'P', 'call support_base_size(\'pkgs\');\n+----------------------------+-------+------------+\n| Tables                     | lines | Size in MB |\n+----------------------------+-------+------------+\n| pkgs_rules_global          |  1581 |       0.16 |\n| dependencies               |    15 |       0.02 |\n| packages                   |    15 |       0.05 |\n| extensions                 |     5 |       0.02 |\n| pkgs_rules_local           |     3 |       0.05 |\n| pkgs_rules_algos           |     3 |       0.02 |\n| pkgs_shares                |     2 |       0.03 |\n| pkgs_shares_ars            |     0 |       0.03 |\n| syncthingsync              |     0 |       0.02 |\n| package_pending_exclusions |     0 |       0.02 |\n| pkgs_shares_ars_web        |     0 |       0.06 |\n| version                    |     0 |       0.02 |\n+----------------------------+-------+------------+\n12 rows in set (0.001 sec)\n');
+
+
+-- ----------------------------------------------------------------------
+-- PROCEDUE STOCKEE support_size_all_table
+-- ----------------------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `support_size_all_table`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE OR REPLACE PROCEDURE `support_size_all_table` ()
+BEGIN
+SELECT
+    table_schema 'Databases',
+    SUM(data_length + index_length) / 1024 / 1024 'Size of DB in MB'
+FROM
+    information_schema.TABLES
+GROUP BY table_schema;
+END$$
+
+DELIMITER ;
+
+-- ----------------------------------------------------------------------
+-- AIDE PROCEDURE
+-- ----------------------------------------------------------------------
+INSERT INTO `xmppmaster`.`support_help_command` (`name`, `description`, `example`, `type`, `result`) VALUES ('support_size_all_table', 'cette procédure est utilisée pour voir la taille des toutes les bases en MB', 'call support_size_all_table();', 'P', 'call support_size_all_table();\n+--------------------+------------------+\n| Databases          | Size of DB in MB |\n+--------------------+------------------+\n| admin              |       0.01562500 |\n| backuppc           |       0.04376984 |\n| dyngroup           |       0.50000000 |\n| glpi               |       9.88636017 |\n| guacamole          |       0.59375000 |\n| imaging            |       1.31250000 |\n| information_schema |       0.17187500 |\n| inventory          |       0.52736950 |\n| kiosk              |       0.15625000 |\n| msc                |       0.09834194 |\n| mysql              |       0.94722652 |\n| performance_schema |       0.00000000 |\n| pkgs               |       0.46875000 |\n| pulse2             |       0.07812500 |\n| update             |       0.09375000 |\n| xmppmaster         |      15.90211105 |\n+--------------------+------------------+\n');
+
 
 
 SET FOREIGN_KEY_CHECKS=1;
