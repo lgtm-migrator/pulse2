@@ -186,7 +186,7 @@ SELECT
     SUM(data_length + index_length) / 1024 / 1024 'Size of DB in MB'
 FROM
     information_schema.TABLES
-GROUP BY table_schema;
+GROUP BY table_schema ORDER BY `Size of DB in MB` DESC;
 END$$
 
 DELIMITER ;
