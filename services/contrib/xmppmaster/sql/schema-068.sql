@@ -51,6 +51,71 @@ CREATE EVENT IF NOT EXISTS purgeuptimemachine
     WHERE
         date < DATE_SUB(NOW(), INTERVAL 4 WEEK);
 
+
+
+
+-- ----------------------------------------------------------------------
+-- PROCEDURE purgeoldmachines Purges les machines offline plus de 64 jours.
+-- ----------------------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `purgeoldmachines`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`purgeoldmachines`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE OR REPLACE PROCEDURE `purgeoldmachines`()
+BEGIN
+set @dayinterval =  60;
+DROP TABLE IF EXISTS mesdelete;
+CREATE TEMPORARY TABLE IF NOT EXISTS mesdelete AS (
+SELECT
+        machines.id AS idmach,
+            MAX(uptime_machine.id) as iduptime,
+            uptime_machine.hostname as mach
+    FROM
+        xmppmaster.machines
+    INNER JOIN xmppmaster.uptime_machine ON uptime_machine.hostname = SUBSTR(SUBSTRING_INDEX(machines.jid, '@', 1), 1, CHAR_LENGTH(SUBSTRING_INDEX(machines.jid, '@', 1)) - 4)
+    WHERE
+        enabled = 0 AND agenttype LIKE 'machine'
+            AND uptime_machine.status = 0
+            AND date <= CURDATE() - INTERVAL @dayinterval DAY
+    GROUP BY uptime_machine.hostname);
+
+delete
+FROM
+    uptime_machine
+WHERE
+    uptime_machine.hostname IN (SELECT
+            mesdelete.mach
+        FROM
+            mesdelete);
+delete
+FROM
+    machines
+WHERE
+    machines.id IN (SELECT
+            mesdelete.idmach
+        FROM
+            mesdelete);
+END$$
+
+DELIMITER ;
+;
+
+-- ----------------------------------------------------------------------
+-- PURGE old machine tout les jours
+-- ----------------------------------------------------------------------
+
+CREATE EVENT IF NOT EXISTS purgeoldmachines
+  ON SCHEDULE
+  AT
+  (CURRENT_TIMESTAMP + INTERVAL 1 DAY) ON COMPLETION PRESERVE ENABLE
+  DO
+   call purgeoldmachines() ;
+
 SET FOREIGN_KEY_CHECKS=1;
 -- ----------------------------------------------------------------------
 -- Database version
