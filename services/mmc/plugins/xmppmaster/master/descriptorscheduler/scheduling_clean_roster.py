@@ -50,4 +50,3 @@ def schedule_main(objectxmpp):
     except Exception as execution_error:
         logging.getLogger().error("The scheduling_clean_roster plugin failed to run with the error: %s" % execution_error)
         logging.getLogger().error("We encountered the backtrace %s" % traceback.format_exc())
-

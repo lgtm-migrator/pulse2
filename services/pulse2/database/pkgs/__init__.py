@@ -1243,8 +1243,8 @@ class PkgsDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def get_Cluster_list_rule(self,
-                              session,
-                              objsearch):
+                          session,
+                          objsearch):
         if 'login' in objsearch:
             sql ="""
                 SELECT

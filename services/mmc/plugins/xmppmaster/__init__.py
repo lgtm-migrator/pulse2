@@ -49,6 +49,9 @@ from mmc.plugins.xmppmaster.master.agentmaster import XmppSimpleCommand, getXmpp
     calllistremotefileedit, callremotefileeditaction,\
     callremoteXmppMonitoring
 from master.lib.manage_grafana import manage_grafana
+
+import traceback
+
 VERSION = "1.0.0"
 APIVERSION = "4:1:3"
 
@@ -626,7 +629,9 @@ def get_deploy_by_user_finished(login, intervalsearch, minimum=None, maximum=Non
     return XmppMasterDatabase().get_deploy_by_user_finished(login, intervalsearch, minimum, maximum, filt)
 
 
-def getdeploybyuser(login, numrow, offset):
+def getdeploybyuser(login,
+                    numrow,
+                    offset):
     if not numrow:
         numrow = None
     if not offset:
@@ -706,6 +711,20 @@ def callrestartbot(uuid):
     else:
         logging.getLogger().error("call restart bot for machine %s : jid xmpp missing" % uuid)
         return "jid missing"
+
+def callrestartbothostname(hostname):
+    machine = XmppMasterDatabase().get_machine_from_hostname(hostname)
+    if machine:
+        if len(machine) > 1:
+            logging.getLogger().warning("Several Machine have the same hostname %s" % hostname)
+        else:
+            if machine[0]['jid']:
+                logging.getLogger().debug("call restart bot for machine %s" % hostname)
+                callrestartbotbymaster(machine[0]['jid'])
+            else:
+                logging.getLogger().error("call restart bot for machine %s " % hostname)
+        return machine
+    return "machine %s missing" % hostname
 
 def createdirectoryuser(directory):
     if not os.path.exists(directory):
@@ -795,11 +814,25 @@ def remotecommandshell(command, jidmachine, timeout):
 
 
 def remoteXmppMonitoring(subject, jidmachine, timeout):
-    data = callremoteXmppMonitoring(jidmachine,  subject, timeout=timeout)
-    result = json.loads(data)
-    resultdata = zlib.decompress(base64.b64decode(result['result']))
-    dataresult = [x for x in resultdata.split('\n')]
-    result['result'] = dataresult
+    resulterror = ""
+    try:
+        data = callremoteXmppMonitoring(jidmachine,  subject, timeout=timeout)
+        if 'err' in data:
+            logging.getLogger().warning("error iq monitoring")
+            logger.error("MESSAGE ERROR %s" % (data['err']))
+            return resulterror
+        result = json.loads(data)
+        resultdata = zlib.decompress(base64.b64decode(result['result']))
+        dataresult = [x for x in resultdata.split('\n')]
+        result['result'] = dataresult
+    except KeyError:
+        logging.getLogger().warning("error iq monitoring")
+        logger.error("MESSAGE ERROR %s" % (data))
+        logging.getLogger().error("\n%s" % (traceback.format_exc()))
+        return resulterror
+    except Exception:
+        logging.getLogger().error("\n%s" % (traceback.format_exc()))
+        return resulterror
     return result
 
 
@@ -891,6 +924,15 @@ def xmppGetAllPackages(login, filter,  start, end):
 def xmpp_getPackageDetail(pid_package):
     return apimanagepackagemsc.getPackageDetail(pid_package)
 
+def runXmppWolforuuidsarray(uuids):
+    mach_infos = XmppMasterDatabase().getmachinesbyuuids(uuids)
+    macaddresslist=[]
+    # creation list mac address
+    for i in mach_infos:
+        macaddresslist.append(mach_infos[i]['macaddress'])
+    callXmppPlugin('wakeonlangroup', {'macadress': macaddresslist})
+    return True
+
 ############### synchro syncthing package #####################
 
 def pkgs_delete_synchro_package(uuidpackage):
@@ -933,9 +975,14 @@ def get_conf_master_agent():
 def get_list_of_users_for_shared_qa(namecmd):
     return XmppMasterDatabase().get_list_of_users_for_shared_qa(namecmd)
 
-def delcomputer(uuid):
-    callrestartbot(uuid)
-    return XmppMasterDatabase().delMachineXmppPresence(uuid)
+
+def delcomputer(uuid, hostname=""):
+    if uuid not in [None, ""] :
+        callrestartbot(uuid)
+        return XmppMasterDatabase().delMachineXmppPresence(uuid)
+    else:
+        callrestartbothostname(hostname)
+        return XmppMasterDatabase().delMachineXmppPresenceHostname(hostname)
 
 def get_log_status():
     return XmppMasterDatabase().get_log_status()
@@ -946,20 +993,39 @@ def get_xmppmachines_list(start, limit, filter, presence):
 def get_xmpprelays_list(start, limit, filter, presence):
     return XmppMasterDatabase().get_xmpprelays_list(start, limit, filter, presence)
 
+
 def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
+    """
+        cette fonction renvoi la structure des ars avec les statstiques sur les machines.
+        sharing les structure des partage de utilisateur
+    """
+    try:
+        a = PkgsDatabase().config.centralizedmultiplesharing
+        if not a:
+            return XmppMasterDatabase().get_xmpprelays_list(start, limit,  filter, 'all')
+    except Exception:
+        pass
     listidars = []
     arslistextend = []
     objsearch = {}
     if userlogin != "":
         objsearch['login'] = userlogin
+        if sharings in ["", None]:
+            sharings1 = PkgsDatabase().pkgs_search_share(objsearch,)
+            if 'datas' in sharings1:
+                sharings = sharings1['datas']
         arslistextend = PkgsDatabase().pkgs_search_ars_list_from_cluster_rules(objsearch)
         # on utilise la table rules global pour etendre ou diminuer les droits d'admins sur les ars.
 
     for share in sharings:
-        if "r" in share['permission'] :
+        if "r" in share['permission']:
             listidars.append(share['ars_id'])
+
     if arslistextend:
         listidars.extend([x[0] for x in arslistextend])
+
+    listidars.append(share['ars_id'])
+
     ars_list = {}
     ars_list = XmppMasterDatabase().get_ars_list_belongs_cluster(listidars, start, limit, filter)
     if not ars_list or ars_list['count']== 0:
@@ -968,7 +1034,6 @@ def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
             "partielcount" : 0
             }
         return res
-
     stat_ars_machine = XmppMasterDatabase().get_stat_ars_machine(ars_list['jid'])
     ars_list['total_machines'] = []
     ars_list['uninventoried'] = []
@@ -1042,6 +1107,7 @@ def get_list_ars_from_sharing(sharings, start, limit, userlogin, filter):
            "partielcount" : len(ars_list['jid'])
            }
     return res
+
 
 def get_clusters_list(start, limit, filter):
     return XmppMasterDatabase().get_clusters_list(start, limit, filter)

@@ -1847,6 +1847,8 @@ class Glpi95(DyngroupDatabaseHelper):
         if type(uuid) == list:
             return query.filter(self.machine.c.id.in_([int(str(a).replace("UUID", "")) for a in uuid]))
         else:
+            if uuid is None:
+                uuid = ""
             return query.filter(self.machine.c.id == int(str(uuid).replace("UUID", "")))
 
     ##################### Machine output format (for ldap compatibility)
@@ -4208,7 +4210,6 @@ class Glpi95(DyngroupDatabaseHelper):
             self.logger.error("We encountered the error %s" % str(e) )
             self.logger.error("\n with the backtrace \n%s" % (traceback.format_exc()))
         return resultrecord
-
 
 
     def _machineobject(self, ret):

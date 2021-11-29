@@ -206,6 +206,7 @@ foreach($statuslist as $element){
 }
 
 extract($statsfromdeploy);
+print_r($statsfromdeploy);
 $done = 0;
 $aborted = 0;
 $inprogress = 0;

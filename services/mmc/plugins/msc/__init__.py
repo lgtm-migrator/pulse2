@@ -947,3 +947,4 @@ def convergence_reschedule(all=False):
                 logger.warn("Error while fetching deploy_group_id and user for command %s: %s" % (cmd_id, e))
     else:
         logger.info("Convergence cron: no convergence commands will be rescheduled")
+

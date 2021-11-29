@@ -26,10 +26,10 @@ import json
 import logging
 import traceback
 from pulse2.database.xmppmaster import XmppMasterDatabase
+
 logger = logging.getLogger()
 
 plugin = {"VERSION": "1.3", "NAME": "vectormonitoringagent", "TYPE": "master"}
-
 
 def process_system(functionname,
                    xmppobject,
@@ -70,13 +70,14 @@ def process_system(functionname,
                                                   json.dumps(data['metriques']))
 
 def process_nfcreader(functionname,
+                      xmppobject,
+                      msg_from,
+                      sessionid,
                       data,
                       id_machine,
                       hostname,
                       id_mon_machine):
     device_type = functionname[8:]
-    logger.debug("===========================================================")
-    logger.debug("Device %s" % device_type)
     serial, status, firmware, alarm_msg = ["", "ready", "", []]
     if "serial" in data:
         serial = data['serial']
@@ -206,6 +207,9 @@ def action(xmppobject, action, sessionid, data, message, ret, dataobj):
                     if devicename.lower() in xmppobject.typelistMonitoring_device:
                         # globals()["process_%s"%element](data['opticalReader'])
                         callFunction(devicename,
+                                        xmppobject,
+                                        str(message['from']),
+                                        sessionid,
                                         element[devicename],
                                         machine['id'],
                                         machine['hostname'],

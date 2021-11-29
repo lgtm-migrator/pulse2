@@ -37,6 +37,7 @@ require_once('../includes/xmlrpc.php');
 
 require_once("../../pulse2/includes/locations_xmlrpc.inc.php");
 
+$groupewol=array();
 $typewol = "";
 if (isset($_GET['wol']) && $_GET['wol']){
     $typewol = "imaging";
@@ -51,22 +52,25 @@ switch($_GET['action']){
             else{
                 xmlrpc_synchroComputer($_GET['objectUUID'], false,  false);
             }
-            xmlrpc_runXmppWolforuuid($_GET['objectUUID']);
-
-            xmlrpc_setfromxmppmasterlogxmpp("QA : [user \"".$_SESSION["login"]."\"] send wol to presente [ Machine : \"".$_GET['cn']."\"]",
-                                            "QA",
-                                            '' ,
-                                            0,
-                                            $_GET['cn'],
-                                            'Manuel',
-                                            '',
-                                            '',
-                                            '',
-                                            "session user ".$_SESSION["login"],
-                                            'QuickAction | WOL sent');
+            //  xmlrpc_runXmppWolforuuid($_GET['objectUUID']);
+            $groupewol[]=$_GET['objectUUID'];
+            if (!empty($groupewol)) {
+                xmlrpc_runXmppWolforuuidsarray($groupewol);
+                xmlrpc_setfromxmppmasterlogxmpp("QA : [user \"".$_SESSION["login"]."\"] send wol to presente [ Machine : \"".$_GET['cn']."\"]",
+                                                "QA",
+                                                '' ,
+                                                0,
+                                                $_GET['cn'],
+                                                'Manuel',
+                                                '',
+                                                '',
+                                                '',
+                                                "session user ".$_SESSION["login"],
+                                                'QuickAction | WOL sent');
+            }
         break;
     case "deployquickgroup":
-        //work for all machines on group
+        // work for all machines on group
         header('Content-type: application/json');
         $uuid = array();
         $cn = array();
@@ -93,13 +97,13 @@ switch($_GET['action']){
             if( xmlrpc_getPresenceuuid($key) == 0 ){
                 $presence[] = 0;
                 $machine_not_present[] = $value[1]['cn'][0];
+                $groupewol[]=$key;
                 if ($_GET['wol']){
                     xmlrpc_synchroComputer($key, true,  false);
                 }
                 else{
                     xmlrpc_synchroComputer($key, false,  false);
                 }
-                xmlrpc_runXmppWolforuuid( $key );
                 xmlrpc_setfromxmppmasterlogxmpp("QA : [user : \"".$_SESSION["login"]."\"] ".
                                                     "[Group :\"".$_GET['groupname'].
                                                     "\"] sent Wol to absent [machine : \"".$value[1]['cn'][0]."\"]",
@@ -120,6 +124,8 @@ switch($_GET['action']){
             };
             $result = array($uuid, $cn, $presence,$machine_already_present, $machine_not_present );
         }
+        if (!empty($groupewol)) {
+            xmlrpc_runXmppWolforuuidsarray($groupewol); }
         echo json_encode($result);
     break;
 }

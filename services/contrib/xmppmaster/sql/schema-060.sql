@@ -25,20 +25,83 @@ USE `xmppmaster`;
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------------------------------------------------
--- Database add colunms in table mon_event
---    - parameter_other : Field reserved for 1 subsequent use 
---    - ack_user        : field used to indicate the user who acquitted the alarm
---    - ack_date        : field used to indicate when the alarm was acquired. 
+-- Database xmppmaster
+-- ----------------------------------------------------------------------
+-- ----------------------------------------------------------------------
+-- Creation table pulse_users
+-- cette table permet de definir des users et leur attribuer des preferences ou des droits pour visualiser les partages. 
+- ----------------------------------------------------------------------
+CREATE TABLE `pulse_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `login` varchar(255) NOT NULL,
+  `comment` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `login_UNIQUE` (`login`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- ----------------------------------------------------------------------
+-- Creation table pulse_teams
+-- cette table permet de definir les teams.. 
+-- ----------------------------------------------------------------------
+CREATE TABLE `pulse_teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'definie la team',
+  `name` varchar(120) NOT NULL,
+  `comment` varchar(1024) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------------------------------------------------
+-- Creation table pulse_preferences
+-- cette table permet d'attribuer des preference sous forme key value a 1 utilisateurs
 -- ----------------------------------------------------------------------
 
-ALTER TABLE `xmppmaster`.`mon_event`
-    ADD COLUMN `parameter_other` VARCHAR(1024) NULL DEFAULT NULL AFTER `id_device`,
-    ADD COLUMN `ack_user` VARCHAR(90) NULL DEFAULT NULL AFTER `parameter_other`;
-ALTER TABLE `xmppmaster`.`mon_event` 
-    ADD COLUMN `ack_date` TIMESTAMP NULL DEFAULT NULL AFTER `ack_user`;
+CREATE TABLE `pulse_preferences` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(120) NOT NULL,
+  `value` text DEFAULT '""',
+  `id_user` int(11) NOT NULL,
+  `domain` varchar(80) DEFAULT NULL COMMENT 'ce champ peut specialiser des preferences a 1 domaine. 1 domaine peut etre 1 pageweb par exemple.',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_UNIQUE` (`key`,`id_user`,`domain`),
+  KEY `fk_pulse_preferences_1_idx` (`id_user`),
+  CONSTRAINT `fk_pulse_preferences_1` FOREIGN KEY (`id_user`) REFERENCES `pulse_users` (`id`)
+  ON DELETE NO ACTION 
+  ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------------------------------------------------
+-- Creation table pulse_team_user
+-- cette table permet de crer des team
+-- ----------------------------------------------------------------------
+
+ CREATE TABLE `pulse_team_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_user` int(11) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
+  `comment` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unix_team_user` (`id_user`,`id_team`),
+  KEY `fk_pulse_team_user_1_idx` (`id_user`),
+  KEY `fk_pulse_team_user_2_idx` (`id_team`),
+  CONSTRAINT `fk_pulse_team_user_1` FOREIGN KEY (`id_user`) REFERENCES `pulse_users` (`id`) 
+  ON DELETE CASCADE 
+  ON UPDATE CASCADE,
+  CONSTRAINT `fk_pulse_team_user_2` FOREIGN KEY (`id_team`) REFERENCES `pulse_teams` (`id`) 
+  ON DELETE CASCADE 
+  ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+
+-- ----------------------------------------------------------------------
+-- create use root
+-- ----------------------------------------------------------------------
+
+INSERT INTO `xmppmaster`.`pulse_users` (`login`) VALUES ('root');
 
 
 SET FOREIGN_KEY_CHECKS=1;
+-- ----------------------------------------------------------------------
+-- Database version
+-- ----------------------------------------------------------------------
 UPDATE version SET Number = 60;
 
 COMMIT;

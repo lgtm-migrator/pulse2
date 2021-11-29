@@ -28,7 +28,7 @@ xmppmaster database handler
 
 # SqlAlchemy
 from sqlalchemy import create_engine, MetaData, func, and_, desc, or_,\
-                        distinct, not_  # cast, Date, select,
+                        distinct, not_ , exists # cast, Date, select,
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import DBAPIError
@@ -322,6 +322,31 @@ class XmppMasterDatabase(DatabaseHelper):
         except Exception as e:
             logging.getLogger().error(str(e))
             self.logger.error("\n%s" % (traceback.format_exc()))
+
+    @DatabaseHelper._sessionm
+    def update_count_subscription(self,
+                                  session,
+                                  agentsubtitutename,
+                                  countroster):
+        logging.getLogger().debug("update_count_subscription %s" % agentsubtitutename)
+        try:
+            result = session.query(Substituteconf).filter(Substituteconf.jidsubtitute == agentsubtitutename).all()
+            first_valeur=True
+            for t in result:
+                logging.getLogger().debug("countsub %s->%s ars %s" % (t.countsub,
+                                                                  t.jidsubtitute,
+                                                                  t.relayserver_id))
+                if first_valeur:
+                    first_valeur = False
+                    t.countsub = countroster
+                else:
+                    t.countsub = 0
+            session.commit()
+            session.flush()
+            return True
+        except Exception, e:
+            logging.getLogger().error("update_count_subscription %s" % str(e))
+            return False
 
     @DatabaseHelper._sessionm
     def update_enable_for_agent_subscription(self,
@@ -2036,6 +2061,7 @@ class XmppMasterDatabase(DatabaseHelper):
                                                     location_id_xmpp)
 
     @DatabaseHelper._sessionm
+    @DatabaseHelper._sessionm
     def updateGLPI_information_machine(self,
                                        session,
                                        id,
@@ -2054,6 +2080,32 @@ class XmppMasterDatabase(DatabaseHelper):
         try:
             entity_id_xmpp = None if entity_id_xmpp in ["NULL", ""] else entity_id_xmpp
             location_id_xmpp = None if location_id_xmpp in ["NULL",""] else location_id_xmpp
+
+
+            result =  session.query(Machines.id,Machines.hostname,Machines.jid, Machines.uuid_inventorymachine).\
+                                filter( Machines.uuid_inventorymachine == uuid_inventory).all()
+            if result:
+                # on met a null les uuidinventory
+                logging.getLogger().error("result : %s" % result)
+                for mach in result:
+                    msg="Bad GLPI ID (%s) for the machine : %s (jid %s,id %s)." \
+                        "It will be reconfigured."%(uuid_inventory,
+                                                    mach.hostname,
+                                                    mach.jid,
+                                                    mach.id)
+                    logging.getLogger().warning(msg)
+            session.commit()
+            obj = { Machines.uuid_inventorymachine : None,
+                    Machines.glpi_description :  "",
+                    Machines.glpi_entity_id :1,
+                    Machines.glpi_location_id : None,
+                    Machines.glpi_owner :"",
+                    Machines.glpi_owner_firstname :"",
+                    Machines.glpi_owner_realname : "",
+                    Machines.glpi_entity_id : 1,
+                    Machines.need_reconf : 1}
+            result = session.query(Machines).filter( Machines.uuid_inventorymachine == uuid_inventory).update( obj)
+            session.commit()
             obj = { Machines.uuid_inventorymachine : uuid_inventory ,
                               Machines.glpi_description : description_machine,
                               Machines.glpi_owner_firstname : owner_firstname,
@@ -2067,8 +2119,11 @@ class XmppMasterDatabase(DatabaseHelper):
             session.commit()
             session.flush()
             return 1
-        except Exception, e:
-            logging.getLogger().debug("updateMachines error %s->" % str(e))
+        except IntegrityError as e:
+            logging.getLogger().error("itegrity updateGLPI_information_machine : %s" % traceback.format_exc())
+            return -1
+        except Exception as e:
+            logging.getLogger().error("updateGLPI_information_machine : %s" % traceback.format_exc())
             return -1
 
     @DatabaseHelper._sessionm
@@ -2395,8 +2450,10 @@ class XmppMasterDatabase(DatabaseHelper):
                            glpi_location_id=None,
                            glpi_regkey_id=None):
 
-        if uuid_inventorymachine is None:
-            uuid_inventorymachine = ""
+        #if uuid_inventorymachine is None:
+            #uuid_inventorymachine = ""
+        if uuid_inventorymachine == "":
+            uuid_inventorymachine = None
         msg ="Create Machine"
         pe = -1
         if uuid_serial_machine != "":
@@ -5240,13 +5297,13 @@ class XmppMasterDatabase(DatabaseHelper):
                 jid:        The jid of the machine we want to determine the UUID
 
             Returns:
-                It returns the UUID based on the jid, False otherwise
+                It returns the UUID based on the jid if exist, False otherwise
         """
-        uuid_inventorymachine = session.query(Machines).filter_by(jid=jid).first().uuid_inventorymachine
-        if uuid_inventorymachine:
-            return uuid_inventorymachine.strip('UUID')
-
-        return False
+        query = session.query(Machines.uuid_inventorymachine).filter_by(jid=jid).first()
+        if query:
+            return query.uuid_inventorymachine.strip('UUID')
+        else:
+            return False
 
     @DatabaseHelper._sessionm
     def algoruleadorganisedbyusers(self, session, userou, classutilMachine = "both", rule = 8, enabled=1):
@@ -5837,6 +5894,7 @@ class XmppMasterDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def getjidMachinefromuuid(self, session, uuid):
+        if uuid is None or uuid.strip() == "": return ""
         try:
             sql = """SELECT
                         jid
@@ -6127,11 +6185,13 @@ class XmppMasterDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def getPresenceuuidenabled(self, session, uuid, enabled = 0):
+        if uuid is None or uuid == "": return False
         return session.query(exists().where (and_(Machines.uuid_inventorymachine == uuid,
                                                   Machines.enabled == enabled))).scalar()
 
     @DatabaseHelper._sessionm
     def getPresenceuuid(self, session, uuid):
+        if uuid is None or uuid == "": return False
         machinespresente = session.query(Machines.uuid_inventorymachine).\
             filter(and_( Machines.uuid_inventorymachine == uuid,
                          Machines.enabled == '1')).first()
@@ -6143,8 +6203,11 @@ class XmppMasterDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def getPresenceuuids(self, session, uuids):
+        if uuids == None : return {}
         if isinstance(uuids, basestring):
+            if uuids.strip() == "" : return {}
             uuids=[uuids]
+            uuids=[x.strip() for x in uuids if x.strip() != "" or x is not None]
         result = { }
         for uuidmachine in uuids:
             result[uuidmachine] = False
@@ -6168,23 +6231,23 @@ class XmppMasterDatabase(DatabaseHelper):
         Return: This fonction return a dictionnary:
                 {'UUID_GLPI': [presence of the machine, initialised glpi uuid]}
         """
-        result = { }
+        if uuids == None : return {}
         if isinstance(uuids, basestring):
-            if uuids == "":
-                return {}
+            if uuids.strip() == "" : return {}
             uuids = [uuids]
-        if uuids:
-            for uuidmachine in uuids:
-                result[uuidmachine] = [0,0]
-            machinespresente = session.query(Machines.uuid_inventorymachine,Machines.enabled).\
-                filter(Machines.uuid_inventorymachine.in_(uuids)).all()
-            session.commit()
-            session.flush()
-            for linemachine in machinespresente:
-                out = 0
-                if linemachine.enabled is True:
-                    out = 1
-                result[linemachine.uuid_inventorymachine] = [out, 1]
+            uuids=[x.strip() for x in uuids if x.strip() != ""]
+        result = { }
+        for uuidmachine in uuids:
+            result[uuidmachine] = [0,0]
+        machinespresente = session.query(Machines.uuid_inventorymachine,Machines.enabled).\
+            filter(Machines.uuid_inventorymachine.in_(uuids)).all()
+        session.commit()
+        session.flush()
+        for linemachine in machinespresente:
+            out = 0
+            if linemachine.enabled is True:
+                out = 1
+            result[linemachine.uuid_inventorymachine] = [out, 1]
         return result
 
     @DatabaseHelper._sessionm
@@ -6199,6 +6262,8 @@ class XmppMasterDatabase(DatabaseHelper):
         Return:
            It returns None if it failed to update the machine uuid_inventorymachine.
         """
+        if uuid is None or uuid.strip() == "":
+            uuid="NULL"
         try:
             sql = """UPDATE `xmppmaster`.`machines`
                     SET
@@ -6325,20 +6390,29 @@ class XmppMasterDatabase(DatabaseHelper):
             return []
 
     @DatabaseHelper._sessionm
-    def getlistPresenceMachineid(self, session, format=False):
+    def getlistPresenceMachineid(self,
+                                 session,
+                                 enabled=1,
+                                 agenttype='machine'):
         sql = """SELECT
                     uuid_inventorymachine
                  FROM
                     xmppmaster.machines
                  WHERE
-                    enabled = '1' and
-                    agenttype = 'machine' and (uuid_inventorymachine IS NOT NULL AND uuid_inventorymachine!='');"""
+                    enabled = %s
+                        AND
+                    agenttype = '%s'
+                        AND
+                    uuid_inventorymachine IS NOT NULL
+                        AND
+                    uuid_inventorymachine != '';"""%(enabled,
+                                                     agenttype)
 
         presencelist = session.execute(sql)
         session.commit()
         session.flush()
         try:
-            a=[]
+            a= []
             for t in presencelist:
                 a.append(t[0])
             return a
@@ -6346,7 +6420,10 @@ class XmppMasterDatabase(DatabaseHelper):
             return a
 
     @DatabaseHelper._sessionm
-    def getidlistPresenceMachine(self, session, presence=None):
+    def getidlistPresenceMachine(self,
+                                 session,
+                                 presence=None,
+                                 agenttype='machine'):
         """
         This function is used to retrieve the list of the machines based on the 'presence' argument.
 
@@ -6359,10 +6436,9 @@ class XmppMasterDatabase(DatabaseHelper):
             It returns the list of the machine based on the 'presence' argument.
         """
         strpresence = ""
-
         try:
             if presence is not None:
-                if presence == True:
+                if presence == True or presence == 1:
                     strpresence = " and enabled = 1"
                 else:
                     strpresence = " and enabled = 0"
@@ -6371,9 +6447,10 @@ class XmppMasterDatabase(DatabaseHelper):
                     FROM
                         xmppmaster.machines
                     WHERE
-                        agenttype = 'machine'
+                        agenttype = '%s'
                     and
-                        uuid_inventorymachine IS NOT NULL %s;""" % strpresence
+                        uuid_inventorymachine IS NOT NULL %s;"""%(agenttype,
+                                                                  strpresence)
             presencelist = session.execute(sql)
             session.commit()
             session.flush()
@@ -6400,20 +6477,20 @@ class XmppMasterDatabase(DatabaseHelper):
 
         if listqueryxmppmaster[2] == "ou user":
             machineid = session.query(Machines.uuid_inventorymachine).\
-                filter( Machines.uuid_inventorymachine.isnot(None))
+                filter(  or_(Machines.uuid_inventorymachine.isnot(None),
+                            Machines.uuid_inventorymachine.strip() != ""))
             if Regexpression:
                 machineid = machineid.filter(Machines.ad_ou_user.op('regexp')(fl))
             else:
                 machineid = machineid.filter(Machines.ad_ou_user.like(fl))
         elif listqueryxmppmaster[2]== "ou machine":
             machineid = session.query(Machines.uuid_inventorymachine).\
-                filter( Machines.uuid_inventorymachine.isnot(None))
+                filter( or_(Machines.uuid_inventorymachine.isnot(None),
+                            Machines.uuid_inventorymachine.strip() != ""))
             if Regexpression:
                 machineid = machineid.filter(Machines.ad_ou_machine.op('regexp')(fl))
             else:
                 machineid = machineid.filter(Machines.ad_ou_machine.like(fl))
-
-
         elif listqueryxmppmaster[2] == "online computer":
             d = XmppMasterDatabase().getlistPresenceMachineid()
             listid = [x.replace("UUID", "") for x in d]
@@ -6473,17 +6550,22 @@ class XmppMasterDatabase(DatabaseHelper):
         except:
             return -1
 
+
     @DatabaseHelper._sessionm
     def changStatusPresenceMachine(self, session, jid, enable = '0'):
         """
             update presence machine in table machine.
         """
-        machine = session.query(Machines).filter( Machines.jid == jid)
-        if machine:
-            machine.enabled = "%s"%enable
-            session.commit()
-            session.flush()
-        else:
+        try:
+            user = "%s%%"%str(jid).split("@")[0]
+            machine = session.query(Machines).filter( Machines.jid.like(user)).first()
+            if machine:
+                machine.enabled = "%s"%enable
+                session.commit()
+                session.flush()
+            else:
+                logger.warning("xmpp signal changement status on machine no exist %s" % jid)
+        except Exception:
             logger.warning("xmpp signal changement status on machine no exist %s" % jid)
 
     @DatabaseHelper._sessionm
@@ -6528,6 +6610,66 @@ class XmppMasterDatabase(DatabaseHelper):
         return resulttypemachine
 
     @DatabaseHelper._sessionm
+    def delMachineXmppPresenceHostname(self, session, hostname):
+        """
+            del machine of table machine
+        """
+        result = ['-1']
+        typemachine = "machine"
+        try:
+            sql = """SELECT
+                        id, hostname, agenttype
+                    FROM
+                        xmppmaster.machines
+                    WHERE
+                        xmppmaster.machines.hostname  like '%s';""" % hostname
+            id = session.execute(sql)
+            session.commit()
+            session.flush()
+            result=[x for x in id][0]
+            sql  = """DELETE FROM `xmppmaster`.`machines`
+                    WHERE
+                        `xmppmaster`.`machines`.`id` = '%s';""" % result[0]
+            if result[2] == "relayserver":
+                typemachine = "relayserver"
+                sql2 = """UPDATE `xmppmaster`.`relayserver`
+                            SET
+                                `enabled` = '0'
+                            WHERE
+                                `xmppmaster`.`relayserver`.`nameserver` = '%s';""" % result[1]
+                session.execute(sql2)
+            session.execute(sql)
+            session.commit()
+            session.flush()
+        except IndexError:
+            logging.getLogger().warning("Configuration agent machine uuidglpi [%s]. no uuid in base for configuration" % uuidinventory)
+            return {}
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return {}
+        resulttypemachine={"type" : typemachine }
+        return resulttypemachine
+
+    @DatabaseHelper._sessionm
+    def get_machine_from_hostname(self, session, hostname):
+        """
+        Select the machines with from hostname
+        Returns:
+            List of dict. The dict contains all the machines founded.
+        """
+        sql = """
+        SELECT
+            *
+        FROM
+            machines
+        WHERE
+            hostname like "%s%%";"""%hostname
+        result = session.execute(sql)
+        session.commit()
+        session.flush()
+        return [{column: value for column, value in rowproxy.items()} for rowproxy in result]
+
+    @DatabaseHelper._sessionm
     def SetPresenceMachine(self, session, jid, presence=0):
         """
             chang presence in table machines
@@ -6552,8 +6694,14 @@ class XmppMasterDatabase(DatabaseHelper):
     def updatedeployresultandstate(self, session, sessionid, state, result ):
             jsonresult = json.loads(result)
             jsonautre = copy.deepcopy(jsonresult)
-            del (jsonautre['descriptor'])
-            del (jsonautre['packagefile'])
+            try:
+                del jsonautre['descriptor']
+            except KeyError:
+                pass
+            try:
+                del jsonautre['packagefile']
+            except KeyError:
+                pass
             #DEPLOYMENT START
             try:
                 deploysession = session.query(Deploy).filter(Deploy.sessionid == sessionid).one()
@@ -6601,32 +6749,60 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def substituteinfo(self, session, listconfsubstitute, arsname):
         """
-            search  subtitute agent jid for agent machine
+           cette fonction crée les listes ordonnée de substitut pour configure les machines.
+           pour assure le load balancing sur les différents substituts elle utilise la somme totale de chaque substitut. et attribut celui le moin utilise.
+           Elle tient compte des ars associe au substitut.
+           Si la machine a 1 ars, les substitut agrege au ars sont participant.
         """
         try:
             exclud = 'master@pulse'
 
             incrementeiscount=[]
-            for t in listconfsubstitute['conflist']:
-                result = session.query(Substituteconf.id.label("id"),
-                                       Substituteconf.jidsubtitute.label("jidsubtitute"),
-                                       Substituteconf.countsub.label("countsub"),
-                                       RelayServer.jid.label("namerelayser")).\
-                    join(RelayServer, Substituteconf.relayserver_id == RelayServer.id).\
-                        filter( and_(not_(Substituteconf.jidsubtitute.like(exclud)),
-                                    Substituteconf.type.like(t),
-                                    RelayServer.jid == arsname)).order_by(Substituteconf.countsub).all()
-                listcommand = []
-                test = False
-                for y in result:
-                    listcommand.append(y.jidsubtitute)
-                    if not test:
-                        test = True
-                        incrementeiscount.append(str(y.id))
-                listcommand.append(exclud)
-                listconfsubstitute[t] = listcommand
-            if incrementeiscount:
-                # update contsub
+            for substituteinfo in listconfsubstitute['conflist']:
+                try:
+                    sql="""SELECT
+                                substituteconf.id AS id,
+                                substituteconf.jidsubtitute AS jidsubtitute,
+                                substituteconf.countsub AS countsub,
+                                substituteconf.type AS type,
+                                relayserver.jid AS namerelayser,
+                                SUM(substituteconf.countsub) AS totsub
+                            FROM
+                                substituteconf
+                                    JOIN
+                                relayserver ON substituteconf.relayserver_id = relayserver.id
+                            WHERE
+                                substituteconf.jidsubtitute NOT LIKE '%s'
+                                    AND substituteconf.type LIKE '%s'
+                                    AND (substituteconf.jidsubtitute IN (SELECT
+                                        substituteconf.jidsubtitute
+                                    FROM
+                                        substituteconf
+                                    WHERE
+                                        substituteconf.relayserver_id = (SELECT
+                                                id
+                                            FROM
+                                                relayserver
+                                            WHERE
+                                                relayserver.jid LIKE '%s')))
+                            GROUP BY substituteconf.jidsubtitute
+                            ORDER BY totsub;
+                            ;"""%(exclud,substituteinfo, arsname )
+                    resultproxy = session.execute(sql)
+                    listcommand = []
+                    infsub = [  { "id":x[0], "sub" : x[1] , "totalcount" : int(x[5])} for x in resultproxy ]
+                    self.logger.debug("%s -> %s" % (substituteinfo ,infsub))
+                    if infsub:
+                        incrementeiscount.append(str(infsub[0]['id']))
+                    for t in infsub:
+                        listcommand.append(t['sub'])
+                    listcommand.append(exclud)
+                    listconfsubstitute[substituteinfo] = listcommand
+                except Exception as e:
+                    self.logger.error("\n%s" % (traceback.format_exc()))
+
+            if len(incrementeiscount) != 0:
+                #update contsub
                 sql="""UPDATE `xmppmaster`.`substituteconf`
                     SET
                         `countsub` = `countsub` + '1'
@@ -6634,9 +6810,9 @@ class XmppMasterDatabase(DatabaseHelper):
                         `id` IN (%s);""" % ','.join([x for x in incrementeiscount])
                 result = session.execute(sql)
                 session.commit()
-                session.flush()
         except Exception, e:
             logging.getLogger().error("substituteinfo : %s" % str(e))
+        logging.getLogger().debug("substitute list : %s" %listconfsubstitute)
         return listconfsubstitute
 
     @DatabaseHelper._sessionm
@@ -7152,6 +7328,7 @@ class XmppMasterDatabase(DatabaseHelper):
             It return machines with dupplicate UUIDs.
             We can search for enabled/disabled or all machines.
         """
+        if uuid is None or uuid.strip() == "" : return []
         try:
             querymachine = session.query(Machines)
             if enable == None:
@@ -7191,7 +7368,7 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def getGuacamoleRelayServerMachineUuid(self, session, uuid, enable=1):
         result = {'error': "noresult",
-                  "uuid": uuid,
+                  "uuid": "",
                   "jid": "",
                   "groupdeploy": "",
                   "urlguacamole": "",
@@ -7205,6 +7382,7 @@ class XmppMasterDatabase(DatabaseHelper):
                   "agenttype": "",
                   "keysyncthing":  "",
                   "enabled": enable }
+        if uuid is None or uuid.strip() == "" : return result
         try:
             querymachine = session.query(Machines)
             if enable == None:
@@ -7391,6 +7569,7 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def getMachinefromuuid(self, session, uuid):
         """ information machine """
+        if uuid is None or uuid.strip() == "" : return {}
         machine = session.query(Machines).filter(Machines.uuid_inventorymachine == uuid).first()
         session.commit()
         session.flush()
@@ -8464,6 +8643,46 @@ where agenttype="machine" and groupdeploy in (
             return -1
 
     @DatabaseHelper._sessionm
+    def Update_version_agent_machine_md5(self,
+                                         session,
+                                         hostname,
+                                         md5,
+                                         version):
+        """
+        Cette function met a jour les champ md5 et version agent de l'agent.
+        Args:
+            session: The sqlalchemy session
+            hostname: The hostname of the machine
+            md5: agent fingerprint
+           version : agent version
+        """
+        try:
+            sql="""
+                UPDATE
+                    `xmppmaster`.`uptime_machine`
+                SET
+                    `md5agentversion` = '%s',
+                    `version` = '%s'
+                WHERE
+                    (id = (SELECT
+                            id
+                        FROM
+                            xmppmaster.uptime_machine
+                        WHERE
+                            hostname LIKE '%s' AND status = 1
+                        ORDER BY id DESC
+                        LIMIT 1));"""%(md5,
+                                       version,
+                                       hostname)
+            session.execute(sql)
+            session.commit()
+            session.flush()
+            return True
+        except Exception, e:
+            logging.getLogger().error(str(e))
+            return False
+
+    @DatabaseHelper._sessionm
     def last_event_presence_xmpp(self,
                                  session,
                                  jid,
@@ -8945,7 +9164,7 @@ where agenttype="machine" and groupdeploy in (
 <html>
 <head>
 <meta charset="utf-8" />
-<title></title>
+<title>Alert @mon_devices_device_type@</title>
 <style type="text/css">
 table {
 border:3px solid #6495ed;
@@ -8983,9 +9202,7 @@ font-family:sans-serif;
 </style>
 </head>
 <body>
-
-<h1>ALERT @mon_devices_device_type@ : e.
-</h1>
+<h1>ALERT @mon_devices_device_type@ : "%s"</h1>
 <h2>MAchine @mon_machine_hostname@</h2>
 
 <!-- DEVICE INFORMATION -->
@@ -9095,7 +9312,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
 </table>
 
 </body>
-</html>"""
+</html>""" % datetime.now().strftime("%a_%d%b%Y_%Hh%M")
         for t in dictresult:
             search="@%s@"%t
             templateevent = templateevent.replace(search, str(dictresult[t]))
@@ -9111,11 +9328,13 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                           doc,
                           status_event=1,
                           hostname=None):
+        hostname= str(msg_from).split("@")[0][:-4]
         if objectlist_local_rule:
             # apply binding to find out if an alert or event is defined
             for z in objectlist_local_rule:
-                self.logger.debug("event type : %s on device %s" %( str(z['type_event']),
-                                                                   str(z['device_type'])) )
+                self.logger.debug("rule %s : event type : %s on device %s" %( z['id'],
+                                                                             str(z['type_event']),
+                                                                             str(z['device_type'])) )
                 bindingcmd=""
                 msg, result = self.__binding_application_check(doc,
                                                                z['binding'],
@@ -9124,6 +9343,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                     if z['error_on_binding'] is None or \
                         z['error_on_binding'].strip() == "":
                         # aucun trairement sur error
+                        self.logger.error("No treatment on error  %s " %(z))
                         continue
                 elif result == 1:
                     # alert True
@@ -9131,6 +9351,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                     if z['succes_binding_cmd'] is None or \
                         z['succes_binding_cmd'].strip() == "":
                         # aucun trairement sur success binding
+                        self.logger.warning("No treatment on expected success  %s " %(z))
                         continue
                     # 1 event est a prendre en compte.
                     bindingcmd = z['succes_binding_cmd']
@@ -9139,6 +9360,8 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                     # create event if action associated to False
                     if z['no_success_binding_cmd'] is None or \
                         z['no_success_binding_cmd'].strip() == "":
+                        self.logger.warning("No treatment on"\
+                            " expected no success  %s " % (z))
                         continue
                     bindingcmd = z['no_success_binding_cmd']
                 else:
@@ -9153,6 +9376,9 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                                          bindingcmd,
                                          type_event=z['type_event'],
                                          status_event=1)
+                self.logger.debug("%s create event %s [%s]" %(z['device_type'],
+                                                              z['type_event'],
+                                                              idevent))
                 #traitement event
                 script_monitoring = os.path.join("/","var","lib","pulse2","script_monitoring")
                 if not os.path.exists(script_monitoring): os.makedirs(script_monitoring)
@@ -9163,10 +9389,14 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                                                 getRandomName(5, pref=datetime.now().strftime("%a_%d%b%Y_%Hh%M")),
                                                 bindingcmd)
                 dest_script = os.path.join(tmpprocessmonitoring, namescript)
-
                 if bindingcmd != "":
                     src_script = os.path.join(script_monitoring, bindingcmd)
-                    if z['type_event'] == "script_python" and \
+                    if z['type_event'] == "ack":
+                        continue
+                    elif z['type_event'] == "log":
+                        self.logger.debug("from %s log  %s" %(str(msg_from),
+                                                              z))
+                    elif z['type_event'] == "script_python" and \
                         os.path.isfile(src_script) and \
                                 bindingcmd.endswith("py"):
                         # on doit executer le script python
@@ -9179,7 +9409,8 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                         # le script possede toutes les donne pour pouvoir effectier 1 traitement
 
                         # on copy le script dans tmpprocessmonitoring le script python pour cet event.
-                        serializeinformation = self.get_info_event(idevent, outformat = "pickle_string")
+                        serializeinformation = self.get_info_event(idevent,
+                                                                   outformat = "pickle_string")
 
                         self.replace_in_file_template(src_script,
                                                       dest_script,
@@ -9193,20 +9424,17 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                                                             dest_script,
                                                             "@@@@@binding@@@@@",
                                                             str(bindingcmd))
-                        pid =subprocess.Popen(["python", dest_script], stdin=None, stdout=None, stderr=None).pid
-                        self.logger.debug("call script python pid %s : %s " %(pid,
-                                                                              dest_script))
+                        self.execute_script(idevent, "python %s"% dest_script, z['type_event'])
                         self.update_status_event(idevent)
-
                     elif z['type_event'] == "email" and \
                         os.path.isfile(src_script) and \
                                 bindingcmd.endswith("py"):
                         # on doit executer le script python
                         # le sript python doit contenir la texte suivant pour template.
                         # serialisationpickleevent = "@@@@@event@@@@@"
-
                         # on copy le script dans tmpprocessmonitoring le script python pour cet event.
-                        serializeinformation = self.get_info_event(idevent, outformat = "html_string")
+                        serializeinformation = self.get_info_event(idevent,
+                                                                   outformat = "html_string")
                         self.replace_in_file_template(src_script,
                                                       dest_script,
                                                      "@@@@@event@@@@@",
@@ -9224,14 +9452,14 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                                                             "@@@@@binding@@@@@",
                                                             str(bindingcmd))
                         ##pid =subprocess.Popen(["python", dest_script]).pid
-                        pid =subprocess.Popen(["python", dest_script], stdin=None, stdout=None, stderr=None).pid
-                        self.logger.debug("call script pid %s  : %s " %(pid,
-                                                                        dest_script))
-
-                    elif z['type_event'] == "json_string" and \
+                        self.execute_script(idevent,"python %s"% dest_script, z['type_event'])
+                        #pid =subprocess.Popen(["python", dest_script], stdin=None, stdout=None, stderr=None).pid
+                        self.update_status_event(idevent)
+                    elif z['type_event'] == "script_bash" and \
                         os.path.isfile(src_script):
                         serializeinformation_json =""
-                        serializeinformation_json = self.get_info_event(idevent, outformat = "json_string")
+                        serializeinformation_json = self.get_info_event(idevent,
+                                                                        outformat = "json_string")
                         self.replace_in_file_template(src_script,
                                                       dest_script,
                                                      "@@@@@event@@@@@",
@@ -9245,9 +9473,9 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                                                             "@@@@@binding@@@@@",
                                                             str(bindingcmd))
                         os.chmod(dest_script, stat.S_IEXEC)
-                        pid =subprocess.Popen( dest_script, stdin=None, stdout=None, stderr=None).pid
-                        self.logger.debug("call script python pid %s : %s " %(pid,
-                                                                              dest_script))
+                        self.execute_script(idevent, dest_script, z['type_event'])
+                        #pid =subprocess.Popen( dest_script, stdin=None, stdout=None, stderr=None).pid
+                        self.update_status_event(idevent)
                     elif z['type_event'] == "xmppmsg":
                         # send message user a jid reception
                         # comment le json du message a envoyer
@@ -9260,11 +9488,13 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                         else:
                             destinataire = str(msg_from)
                         if destinataire != "":
-                            serializeinformation = self.get_info_event(idevent, outformat = "pickle_string")
+                            serializeinformation = self.get_info_event(idevent,
+                                                                       outformat = "pickle_string")
                             datal = pickle.loads(serializeinformation)
                             datal['mon_rules_comment'] = ""
                             serializeinformation_json=json.dumps(datal, indent=4)
-                            z['comment'] = z['comment'].replace("@@@@@event@@@@@", serializeinformation_json)
+                            z['comment'] = z['comment'].replace("@@@@@event@@@@@",
+                                                                serializeinformation_json)
                             z['comment'] = z['comment'].replace("@@@@@session_id@@@@@", str(sessionid))
                             z['comment'] = z['comment'].replace("@@@@@msgfrom@@@@@", str(msg_from))
                             z['comment'] = z['comment'].replace("@@@@@binding@@@@@", bindingcmd)
@@ -9273,82 +9503,84 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                                                     mbody=z['comment'],
                                                     mtype='chat')
                             self.logger.debug("msg to %s" %(str(msg_from)))
+                            self.update_status_event(idevent)
+                    elif z['type_event'] == "cmd_terminal":
+                        cmd = bindingcmd
+                        if z['user'] is None or z['user'].strip() == "":
+                            z['user'] = "root"
+                        if  z['user'] != "root"  :
 
-    def __binding_application_check(self, datastring, bindingstring, device_type):
-        resultbinding = None
-        try:
-            data=json.loads(datastring)
-        except Exception as e:
-            msg =  "[binding error device rule %s] : data from message" \
-                " monitoring format json error %s" % (device_type, str(e))
-            logging.getLogger().error("%s" % msg)
-            return (msg, -1)
-        try:
-            logging.getLogger().debug("compile")
-            code = compile(bindingstring, '<string>', 'exec')
-            exec(code)
-        except KeyError as e:
-            msg = "[binding error device rule %s] : key %s in "\
-                "binding:\n%s\nis missing. Check your binding on data\n%s" % (
-                    device_type,
-                    str(e),
-                    bindingstring,
-                    json.dumps(data,indent=4))
-            logging.getLogger().error("%s" % msg)
-            return (msg, -1)
-        except Exception as e:
-            msg = "[binding device rule %s error %s] in binding:\n%s\ "\
-                "on data\n%s"%(device_type,
-                               str(e),
-                               bindingstring,
-                               json.dumps(data,indent=4))
-            logging.getLogger().error("%s" % msg)
-            return (msg, -1)
-        msg = "[ %s : result binding %s for binding:\n%s\ "\
-                "on data\n%s"%(device_type,
-                               resultbinding,
-                               bindingstring,
-                               json.dumps(data,indent=4))
-        logging.getLogger().debug("%s" % msg)
-        return (msg, resultbinding)
+                            cmd = bindingcmd.replace('"','\\"')
+                            cmd = """/bin/su - %s -c "%s" """ % (z['user'], cmd)
 
-    def __binding_application_check(self, datastring, bindingstring, device_type):
-        resultbinding = None
+
+                        cmd = cmd.replace("@@@@@hostname@@@@@", hostname)
+
+                        self.execute_script(idevent, cmd, z['user'], z['type_event'])
+                        self.update_status_event(idevent)
+                    else:
+                        #pas de type trouver
+                        self.update_status_event(idevent, 2)
+
+    def execute_script(self, idevent, cmd, type_event="",user="root"):
+        tmpprocessmonitoring = os.path.join("/", "var", "lib", "pulse2", "tmpprocessmonitoring")
+        #command = []
+        #if type_event == "email":
+            #command.append("python")
+        #command.append(cmd)
+
+
+        with open(os.path.join(tmpprocessmonitoring,
+                               "monitoring_cmd_terminal_stdout.txt"),"ab") as out:
+
+            out.write("\n--------------------------\n" \
+                        "date : %s \n" \
+                        "evenement : %s \n" \
+                        "command : %s\n" \
+                        "type event : %s\n" \
+                        "compte user : %s\n" % (datetime.now().strftime("%d %b %Y, %H:%M:%S"),
+                                                idevent,
+                                                cmd,
+                                                type_event,
+                                                user))
+            pid = subprocess.Popen([cmd],
+                                   shell=True,
+                                   stdin=None,
+                                   stdout=out,
+                                   stderr=out).pid
+
+
+        with open(os.path.join(tmpprocessmonitoring,
+                               "monitoring_cmd_terminal_stdout.txt"),"ab") as out:
+            out.write("process pid %s\n" \
+                "--------out cmd --------\n" % (pid))
+        self.logger.debug("call script pid %s event %s : %s " %(pid,
+                                                                idevent,
+                                                                cmd))
+
+    @DatabaseHelper._sessionm
+    def update_status_event(self,
+                            session,
+                            id_event,
+                            value_status=0):
+        """
+            this function update status event
+            1 event for process
+            0 event terminate.
+        """
         try:
-            data=json.loads(datastring)
+            sql=""" UPDATE `xmppmaster`.`mon_event`
+                    SET
+                        `status_event` = '%d'
+                    WHERE
+                        (`id` = '%d');""" % (value_status,
+                                             id_event)
+            result = session.execute(sql)
+            session.commit()
+            session.flush()
         except Exception as e:
-            msg =  "[binding error device rule %s] : data from message" \
-                " monitoring format json error %s" % (device_type, str(e))
-            logging.getLogger().error("%s" % msg)
-            return (msg, -1)
-        try:
-            logging.getLogger().debug("compile")
-            code = compile(bindingstring, '<string>', 'exec')
-            exec(code)
-        except KeyError as e:
-            msg = "[binding error device rule %s] : key %s in "\
-                "binding:\n%s\nis missing. Check your binding on data\n%s" % (
-                    device_type,
-                    str(e),
-                    bindingstring,
-                    json.dumps(data,indent=4))
-            logging.getLogger().error("%s" % msg)
-            return (msg, -1)
-        except Exception as e:
-            msg = "[binding device rule %s error %s] in binding:\n%s\ "\
-                "on data\n%s"%(device_type,
-                               str(e),
-                               bindingstring,
-                               json.dumps(data,indent=4))
-            logging.getLogger().error("%s" % msg)
-            return (msg, -1)
-        msg = "[ %s : result binding %s for binding:\n%s\ "\
-                "on data\n%s"%(device_type,
-                               resultbinding,
-                               bindingstring,
-                               json.dumps(data,indent=4))
-        logging.getLogger().debug("%s" % msg)
-        return (msg, resultbinding)
+            logging.getLogger().error(str(e))
+            return -1
 
     @DatabaseHelper._sessionm
     def remise_status_event(self,
@@ -9356,6 +9588,11 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                             id_rule,
                             status_event,
                             hostname):
+        """
+            this function update status event
+            1 event for process
+            0 event terminate.
+        """
         try:
             sql="""UPDATE `xmppmaster`.`mon_event`
                         JOIN
@@ -9368,7 +9605,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                         xmppmaster.mon_event.id_rule = %s;""" % (status_event,
                                                                  hostname,
                                                                  id_rule)
-
+            logging.getLogger().debug("update statuts for machine id %s "%sql)
             result = session.execute(sql)
             session.commit()
             session.flush()
@@ -9376,31 +9613,44 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
             logging.getLogger().error(str(e))
             return -1
 
-    def __binding_application(self, datastring, bindingstring, device_type):
+    def __binding_application_check(self, datastring, bindingstring, device_type):
         resultbinding = None
         try:
             data=json.loads(datastring)
         except Exception as e:
-            return "[binding error device rule %s] : data from message" \
+            msg =  "[binding error device rule %s] : data from message" \
                 " monitoring format json error %s" % (device_type, str(e))
+            logging.getLogger().error("%s" % msg)
+            return (msg, -1)
 
         try:
+            logging.getLogger().debug("compile")
             code = compile(bindingstring, '<string>', 'exec')
             exec(code)
         except KeyError as e:
-            resultbinding = "[binding error device rule %s] : key %s in "\
+            msg = "[binding error device rule %s] : key %s in "\
                 "binding:\n%s\nis missing. Check your binding on data\n%s" % (
                     device_type,
                     str(e),
                     bindingstring,
                     json.dumps(data,indent=4))
+            logging.getLogger().error("%s" % msg)
+            return (msg, -1)
         except Exception as e:
-            resultbinding = "[binding device rule %s error %s] in binding:\n%s\ "\
+            msg = "[binding device rule %s error %s] in binding:\n%s\ "\
                 "on data\n%s"%(device_type,
                                str(e),
                                bindingstring,
                                json.dumps(data,indent=4))
-        return resultbinding
+            logging.getLogger().error("%s" % msg)
+            return (msg, -1)
+        msg = "[ %s : result binding %s for binding:\n%s\ "\
+                "on data\n%s"%(device_type,
+                               resultbinding,
+                               bindingstring,
+                               json.dumps(data,indent=4))
+        logging.getLogger().debug("%s" % msg)
+        return (msg, resultbinding)
 
     @DatabaseHelper._sessionm
     def getlistMonitoring_devices_type(self,
@@ -9437,7 +9687,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                     WHERE
                         hostname LIKE '%s'
                             AND device_type LIKE '%s';''' % (hostname,
-                                                        device_type)
+                                                             device_type)
         else:
             sql = ''' SELECT
                         *
@@ -9472,6 +9722,7 @@ mon_rules_no_success_binding_cmd = @mon_rules_no_success_binding_cmd@ -->
                           doc):
         # search rule for device and machine
         pass
+
 
 
     @DatabaseHelper._sessionm

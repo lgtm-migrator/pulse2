@@ -53,6 +53,7 @@ class DyngroupDatabaseHelper(DatabaseHelper):
         try:
             if not filt.has_key('query'):
                 return (join_query, query_filter)
+            # on a 1 expression booleanne
             query_filter, join_tables = self.__treatQueryLevel(ctx, query, grpby, join_query, filt['query'])
             for table in join_tables:
                 join_query = join_query.join(table)
