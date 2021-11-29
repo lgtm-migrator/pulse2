@@ -192,7 +192,7 @@ $info = xmlrpc_getdeployfromcommandid($cmd_id, "UUID_NONE");
 
 
 if ($info['len'] == 0){
-    //refresh si aucun deploiement encore lancer
+    // Refresh if no deployment is started.
     installrefresh();
 }
 $timestampnow = time();
@@ -206,7 +206,6 @@ foreach($statuslist as $element){
 }
 
 extract($statsfromdeploy);
-print_r($statsfromdeploy);
 $done = 0;
 $aborted = 0;
 $inprogress = 0;
@@ -693,6 +692,9 @@ if ($info['len'] != 0){
   $params = [];
   foreach($info_from_machines[0] as $key => $value)
   {
+    $infomachine = xmlrpc_getdeployfromcommandid($cmd_id, 'UUID'.$value);
+    $sessionid = $infomachine['objectdeploy'][0]['sessionid'];
+
       if(isset($status['UUID'.$value]))
         $info_from_machines[7][] = '<span class="status">'.$status['UUID'.$value].'</span>';
       $info_from_machines[8][] = 'UUID'.$value;
@@ -709,10 +711,31 @@ if ($info['len'] != 0){
         'gid' => $_GET['gid'],
         'gr_cmd_id' => $_GET['cmd_id'],
         'gr_login' => $_GET['login'],
+        'sessionid' => $sessionid,
+        'title'=>$_GET['title'],
+        'start'=>$creation_date,
+        'startcmd'=>$start_date,
+        'endcmd'=>$end_date
       ];
 
   }
   $presencemachinexmpplist = xmlrpc_getPresenceuuids($info_from_machines[8]);
+
+  $action_log = new ActionItem(_T("Deployment Detail", 'xmppmaster'),
+                                      "viewlogs",
+                                      "logfile",
+                                      "logfile",
+                                      "xmppmaster",
+                                      "xmppmaster");
+
+
+  $reloadAction = new ActionPopupItem(_("reload"),
+                                  "popupReloadDeploy&previous=".$_GET['previous'],
+                                  "start",
+                                  "",
+                                  "xmppmaster",
+                                  "xmppmaster");
+
   $raw = 0;
   foreach($info_from_machines[8] as $key => $value)
   {
@@ -722,6 +745,8 @@ if ($info['len'] != 0){
     $info_from_machines[5][$raw] = '<span class="machine-inventory">'.$info_from_machines[5][$raw].'</span>';
     $info_from_machines[6][$raw] = '<span class="machine-inventory">'.$info_from_machines[6][$raw].'</span>';
     $info_from_machines[9][] = ($presencemachinexmpplist[$value] == "1") ? 'machineNamepresente' : 'machineName';
+    $actionsLog[] = $action_log;
+    $actionsReload[] = $reloadAction;
     $raw++;
   }
 
@@ -745,12 +770,6 @@ echo'
 </tbody>
 </table>';
 }else{
-$action_log = new ActionItem(_T("Deployment Detail", 'xmppmaster'),
-                                    "viewlogs",
-                                    "logfile",
-                                    "logfile",
-                                    "xmppmaster",
-                                    "xmppmaster");
   $n = new OptimizedListInfos($info_from_machines[1], _T("Machine Name", "xmppmaster"));
 
   $n->addExtraInfo($info_from_machines[2], _T("Description", "glpi"));
@@ -761,7 +780,8 @@ $action_log = new ActionItem(_T("Deployment Detail", 'xmppmaster'),
   $n->addExtraInfo($info_from_machines[6], _T("Entity", "glpi"));
 
   $n->setParamInfo($params);
-  $n->addActionItem($action_log);
+  $n->addActionItem($actionsLog);
+  $n->addActionItem($actionsReload);
   $n->setMainActionClasses($info_from_machines[9]);
   $n->setItemCount($count);
   $n->setNavBar(new AjaxNavBar($count, $filter));

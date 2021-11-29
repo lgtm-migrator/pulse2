@@ -1,6 +1,6 @@
 <?php
 /**
- * (c) 2015-2017 Siveo, http://www.siveo.net
+ * (c) 2015-2021 Siveo, http://www.siveo.net
  *
  * $Id$
  *
@@ -392,6 +392,16 @@ $submod->addPage($page);
 $page = new Page("ajaxmonconfig", _T("Monitoring Configuration", "xmppmaster"));
 $page->setFile("modules/xmppmaster/xmppmaster/monitoring/ajaxmonconfig.php");
 $page->setOptions(array("AJAX" => true, "visible" => false));
+$submod->addPage($page);
+
+$page = new Page("popupReloadDeploy", _T("Reload Deploy", "xmppmaster"));
+$page->setFile("modules/xmppmaster/xmppmaster/popupReloadDeploy.php");
+$page->setOptions(array("visible" => False, "noHeader" => True));
+$submod->addPage($page);
+
+$page = new Page("reloaddeploy",_T('Reload Deploy', 'xmppmaster'));
+$page->setFile("modules/xmppmaster/xmppmaster/reloaddeploy.php");
+//$page->setOptions(array("visible" => True, "noHeader" => False));
 $submod->addPage($page);
 
 $mod->addSubmod($submod);
