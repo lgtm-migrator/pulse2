@@ -750,4 +750,30 @@ function xmlrpc_get_machines_to_unban($jid_ars, $start=0, $end=-1, $filter=""){
 function xmlrpc_ban_machines($subaction, $jid_ars, $machines){
   return xmlCall("xmppmaster.ban_machines", [$subaction, $jid_ars, $machines]);
 }
+
+function xmlrpc_reload_deploy( $uuid,
+                               $cmd_id,
+                               $gid,
+                               $sessionid,
+                               $hostname,
+                               $login,
+                               $title,
+                               $start,
+                               $endcmd,
+                               $startcmd,
+                               $force_redeploy,
+                               $rechedule){
+    return xmlCall("xmppmaster.reload_deploy",  array($uuid,
+                                                      $cmd_id,
+                                                      $gid,
+                                                      $sessionid,
+                                                      $hostname,
+                                                      $login,
+                                                      $title,
+                                                      $start,
+                                                      $endcmd,
+                                                      $startcmd,
+                                                      $force_redeploy,
+                                                      $rechedule));
+}
 ?>
