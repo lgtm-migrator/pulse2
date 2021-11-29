@@ -547,16 +547,20 @@ class Glpi084(DyngroupDatabaseHelper):
         return result
 
     def __xmppmasterfilter(self, filt = None):
-        ret = {}#if filt['computerpresence'] == "presence":
+        ret = {}
         if "computerpresence" in filt:
             d = XmppMasterDatabase().getlistPresenceMachineid()
             listid = [x.replace("UUID", "") for x in d]
             ret["computerpresence"] = ["computerpresence","xmppmaster",filt["computerpresence"] , listid]
-        elif "query" in filt and filt['query'][0] == "AND":
+        elif "query" in filt and filt['query'][0] in ["AND", "OR", "NOT"]:
             for q in filt['query'][1]:
-                if len(q) >=3 and (q[2] == "Online computer" or q[2] == "OU user" or q[2] == "OU machine"):
-                    listid = XmppMasterDatabase().getxmppmasterfilterforglpi(q)
-                    ret[q[2]] = [q[1], q[2], q[3], listid]
+                if len(q) >=3:
+                    if  q[2].lower() in ["online computer",
+                                         'ou machine',
+                                         'ou user']:
+                        listid = XmppMasterDatabase().getxmppmasterfilterforglpi(q)
+                        q.append(listid)
+                        ret[q[2]] = [q[1], q[2], q[3], listid]
         return ret
 
     def _machineobjectdymresult(self, ret, encode='iso-8859-1'):
@@ -587,10 +591,10 @@ class Glpi084(DyngroupDatabaseHelper):
                                 else:
                                     strre = getattr(ret, keynameresult)
                                     if isinstance(strre, basestring):
-                                        if encode != "utf8":
-                                            resultrecord[keynameresult] =  "%s"%strre.decode(encode).encode('utf8')
+                                        if encode == "utf8":
+                                            resultrecord[keynameresult] = str(strre)
                                         else:
-                                            resultrecord[keynameresult] =  "%s"%strre.encode('utf8')
+                                            resultrecord[keynameresult] =  strre.decode(encode).encode('utf8')
                                     else:
                                         resultrecord[keynameresult] = strre
                     except AttributeError:
@@ -639,20 +643,20 @@ class Glpi084(DyngroupDatabaseHelper):
             contains = ctx["contains"]
 
         query = session.query(Machine.id.label('uuid')).distinct(Machine.id)\
-        .join(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
+        .outerjoin(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
         .outerjoin(self.user, Machine.users_id == self.user.c.id)\
         .join(Entities, Entities.id == Machine.entities_id)\
         .outerjoin(self.locations, Machine.locations_id == self.locations.c.id)\
         .outerjoin(self.manufacturers, Machine.manufacturers_id == self.manufacturers.c.id)\
-        .join(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)#\
+        .outerjoin(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)#\
         #.outerjoin(self.regcontents, Machine.id == self.regcontents.c.computers_id)
 
         if field != "":
-            query = query.join(Computersitems, Machine.id == Computersitems.computers_id)
+            query = query.outerjoin(Computersitems, Machine.id == Computersitems.computers_id)
             if field != "type":
-                query = query.join(Peripherals, and_(Computersitems.items_id == Peripherals.id,
+                query = query.outerjoin(Peripherals, and_(Computersitems.items_id == Peripherals.id,
                                    Computersitems.itemtype == "Peripheral"))\
-                    .join(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
+                    .outerjoin(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
         if 'cn' in self.config.summary:
             query = query.add_column(Machine.name.label("cn"))
 
@@ -749,9 +753,9 @@ class Glpi084(DyngroupDatabaseHelper):
 
         if debugfunction:
             try:
-                logger.info("@@@DEBUG@@@ %s"%literalquery(query))
+                self.logger.info("@@@DEBUG@@@ %s"%literalquery(query))
             except Exception as e:
-                logger.error("display @@@DEBUG@@@ sql literal from alchemy error : %s" % e)
+                self.logger.error("display @@@DEBUG@@@ sql literal from alchemy error : %s" % e)
 
         machines = query.all()
 
@@ -836,19 +840,19 @@ class Glpi084(DyngroupDatabaseHelper):
             if online_machines is not None:
                 online_machines = [int(id.replace("UUID", "")) for id in online_machines if id !=""]
         query = session.query(Machine.id.label('uuid')).distinct(Machine.id)\
-            .join(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
+            .outerjoin(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
             .outerjoin(self.user, Machine.users_id == self.user.c.id)\
             .join(Entities, Entities.id == Machine.entities_id)\
             .outerjoin(self.locations, Machine.locations_id == self.locations.c.id)\
             .outerjoin(self.manufacturers, Machine.manufacturers_id == self.manufacturers.c.id)\
-            .join(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)
+            .outerjoin(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)
 
         if field != "":
-            query = query.join(Computersitems, Machine.id == Computersitems.computers_id)
+            query = query.outerjoin(Computersitems, Machine.id == Computersitems.computers_id)
             if field != "type":
-                query = query.join(Peripherals, and_(Computersitems.items_id == Peripherals.id,
+                query = query.outerjoin(Peripherals, and_(Computersitems.items_id == Peripherals.id,
                                    Computersitems.itemtype == "Peripheral"))\
-                    .join(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
+                    .outerjoin(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
         # fild always exist
         query = query.add_column(Machine.name.label("cn"))
         if uuidsetup != "" or idmachine != "":
@@ -997,7 +1001,7 @@ class Glpi084(DyngroupDatabaseHelper):
                     result['data'][columns_name[indexcolum]].append(machine[indexcolum])
                     #
             else:
-                recordmachinedict = self._machineobjectdymresult(machine)
+                recordmachinedict = self._machineobjectdymresult(machine, encode='utf8')
                 for recordmachine in recordmachinedict:
                     result['data'][recordmachine] = [ recordmachinedict[recordmachine]]
 
@@ -1074,7 +1078,10 @@ class Glpi084(DyngroupDatabaseHelper):
 
             query_filter = None
 
-            filters = [self.machine.c.is_deleted == 0, self.machine.c.is_template == 0, self.__filter_on_filter(query), self.__filter_on_entity_filter(query, ctx)]
+            filters = [self.machine.c.is_deleted == 0,
+                       self.machine.c.is_template == 0,
+                       self.__filter_on_filter(query),
+                       self.__filter_on_entity_filter(query, ctx)]
 
             join_query, query_filter = self.filter(ctx, self.machine, filt, session.query(Machine), self.machine.c.id, filters)
 
@@ -1148,8 +1155,6 @@ class Glpi084(DyngroupDatabaseHelper):
                 except IndexError:
                     pass
 
-
-
             if self.fusionagents is not None:
                 join_query = join_query.outerjoin(self.fusionagents)
             if 'antivirus' in filt: # Used for Antivirus dashboard
@@ -1163,15 +1168,6 @@ class Glpi084(DyngroupDatabaseHelper):
             query = query.filter(self.machine.c.is_deleted == 0).filter(self.machine.c.is_template == 0)
             if PluginManager().isEnabled("xmppmaster"):
                 if ret:
-                    if "Online computer" in ret:
-                        if ret["Online computer"][2] == "True":
-                            query = query.filter(Machine.id.in_(ret["Online computer"][3]))
-                        else:
-                            query = query.filter(Machine.id.notin_(ret["Online computer"][3]))
-                    if "OU user" in ret:
-                        query = query.filter(Machine.id.in_(ret["OU user"][3]))
-                    if "OU machine" in ret:
-                        query = query.filter(Machine.id.in_(ret["OU machine"][3]))
                     if "computerpresence" in ret:
                         if ret["computerpresence"][2] == "presence":
                             query = query.filter(Machine.id.in_(ret["computerpresence"][3]))
@@ -1409,7 +1405,7 @@ class Glpi084(DyngroupDatabaseHelper):
         """
         Map a name and request parameters on a sqlalchemy request
         """
-        if len(query) == 4:
+        if len(query) >= 4:
             # in case the glpi database is in latin1, don't forget dyngroup is in utf8
             # => need to convert what comes from the dyngroup database
             query[3] = self.encode(query[3])

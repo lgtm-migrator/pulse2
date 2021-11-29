@@ -766,11 +766,9 @@ class Mon_event(Base, XmppMasterDBObj):
     machines_id = Column(Integer, nullable=False)
     id_rule = Column(Integer, nullable=False)
     id_device = Column(Integer, nullable=False)
-    parameter_other=  Column(String(1025), default=None)
-    ack_user =  Column(String(90), default=None)
-    ack_date = Column(DateTime,  default=None)
-
-
+    parameter_other = Column(String(1024), nullable=True)
+    ack_user = Column(String(90), nullable=True)
+    ack_date = Column(DateTime, default=datetime.datetime.now)
 
 class Mon_panels_template(Base, XmppMasterDBObj):
     # ====== Table name =========================
@@ -784,3 +782,32 @@ class Mon_panels_template(Base, XmppMasterDBObj):
     parameters = Column(String(1024), default="{}")
     status = Column(Boolean, default=True)
     comment = Column(String(1024), default="")
+
+"""
+This code is kept here as a comment, "if" we need to use it
+and not use the automatic table anymore.
+DO NOT REMOVE.
+class Update_machine(Base, XmppMasterDBObj):
+    # ====== Table name =========================
+    __tablename__ = 'update_machine'
+    # ====== Fields =============================
+    # Here we define columns for the table update_machine.
+    # Notice that each column is also a normal Python instance attribute.
+    hostname = Column(String(120), nullable=False)
+    jid = Column(String(255), nullable=False)
+    status  = Column(String(255), nullable=False, default="ready")
+    descriptor = Column(Text, nullable=False)
+    md5 = Column(String(255), nullable=False)
+    date_creation  =  Column(DateTime, default=datetime.datetime.now)
+    ars = Column(String(255), nullable=False,default="")
+
+class Ban_machines(Base, XmppMasterDBObj):
+    # ====== Table name =========================
+    __tablename__ = 'ban_machines'
+    # ====== Fields =============================
+    # Here we define columns for the table ban_machines.
+    # Notice that each column is also a normal Python instance attribute.
+    jid = Column(String(255), nullable=False)
+    date  =  Column(DateTime, default=datetime.datetime.now)
+    ars_server     = Column(String(255), nullable=False,default="")
+"""
