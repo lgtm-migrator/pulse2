@@ -51,6 +51,10 @@ IF new.timetempunix IS NULL then SET new.timetempunix =  UNIX_TIMESTAMP(new.date
 END$$
 DELIMITER ;
 
+ALTER TABLE `xmppmaster`.`uptime_machine` 
+ADD INDEX `ind_time_unix` (`timetempunix` ASC);
+;
+
 -- ----------------------------------------------------------------------
 -- PURGE uptime_machine OLD RECORD  Weeks
 -- ----------------------------------------------------------------------
