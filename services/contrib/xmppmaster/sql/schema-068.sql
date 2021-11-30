@@ -38,8 +38,9 @@ ADD COLUMN `md5agentversion` VARCHAR(32) NULL AFTER `timetempunix`,
 ADD COLUMN `version` VARCHAR(10) NULL AFTER `md5agentversion`,
 ADD INDEX `ind_md5agent` (`md5agentversion` ASC) ,
 ADD INDEX `ind_agenntversion` (`version` ASC) ,
-ADD INDEX `ind_date` (`date` ASC) ;
-;
+ADD INDEX `ind_date` (`date` ASC),
+ADD INDEX `ind_time_unix` (`timetempunix` ASC);
+
 
 DROP TRIGGER IF EXISTS `xmppmaster`.`uptime_machine_BEFORE_INSERT`;
 
@@ -50,10 +51,6 @@ BEGIN
 IF new.timetempunix IS NULL then SET new.timetempunix =  UNIX_TIMESTAMP(new.date);END IF;
 END$$
 DELIMITER ;
-
-ALTER TABLE `xmppmaster`.`uptime_machine` 
-ADD INDEX `ind_time_unix` (`timetempunix` ASC);
-;
 
 -- ----------------------------------------------------------------------
 -- PURGE uptime_machine OLD RECORD  Weeks
