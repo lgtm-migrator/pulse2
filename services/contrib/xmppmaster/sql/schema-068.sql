@@ -33,12 +33,24 @@ USE `xmppmaster`;
 SET FOREIGN_KEY_CHECKS=0;
 
 ALTER TABLE `xmppmaster`.`uptime_machine`
+ADD COLUMN `timetempunix` int(11) DEFAULT NULL AFTER `date`,
 ADD COLUMN `md5agentversion` VARCHAR(32) NULL AFTER `timetempunix`,
 ADD COLUMN `version` VARCHAR(10) NULL AFTER `md5agentversion`,
 ADD INDEX `ind_md5agent` (`md5agentversion` ASC) ,
 ADD INDEX `ind_agenntversion` (`version` ASC) ,
 ADD INDEX `ind_date` (`date` ASC) ;
 ;
+
+DROP TRIGGER IF EXISTS `xmppmaster`.`uptime_machine_BEFORE_INSERT`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE TRIGGER `xmppmaster`.`uptime_machine_BEFORE_INSERT` BEFORE INSERT ON `uptime_machine` FOR EACH ROW
+BEGIN
+IF new.timetempunix IS NULL then SET new.timetempunix =  UNIX_TIMESTAMP(new.date);END IF;
+END$$
+DELIMITER ;
+
 -- ----------------------------------------------------------------------
 -- PURGE uptime_machine OLD RECORD  Weeks
 -- ----------------------------------------------------------------------
