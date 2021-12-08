@@ -554,6 +554,14 @@ class MUCBot(sleekxmpp.ClientXMPP):
                             module="Deployment | Start | Creation",
                             date=None,
                             fromuser=machine['login'])
+
+            # change status des machine en deployement start qui sont off on les remet en attente.
+            XmppMasterDatabase().update_status_waiting_for_machine_off_in_state_deploy_start()
+
+
+            """ selectionne machine data et session  deployement rester bloque sur starting plus de 60 secondes"""
+            XmppMasterDatabase().update_status_waiting_for_deploy_on_mochine_restart_or_stop()
+
             msglog=[]
             #########################################################################
             machines_scheduled_deploy = XmppMasterDatabase().search_machines_from_state("DEPLOY TASK SCHEDULED")
@@ -585,6 +593,11 @@ class MUCBot(sleekxmpp.ClientXMPP):
                             module="Deployment | Start | Creation",
                             date=None,
                             fromuser=machine['login'])
+            ########### Plan with blocked deployments again ############
+            #############################################################
+            XmppMasterDatabase().restart_blocked_deployments()
+            #############################################################
+
             msglog=[]
             ###########################################################################
             machines_wol3 = XmppMasterDatabase().search_machines_from_state("WOL 3")

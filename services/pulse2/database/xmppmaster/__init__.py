@@ -3223,7 +3223,8 @@ class XmppMasterDatabase(DatabaseHelper):
                   endcmd = None,
                   macadress = None,
                   result = None,
-                  syncthing = None
+                  syncthing = None,
+                  subdep = None
                   ):
         """
         parameters
@@ -3268,6 +3269,8 @@ class XmppMasterDatabase(DatabaseHelper):
                 new_deploy.result = result
             if syncthing is not None:
                 new_deploy.syncthing = syncthing
+            if subdep is not None:
+                new_deploy.subdep = subdep
             session.add(new_deploy)
             session.commit()
             session.flush()
@@ -3925,22 +3928,40 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def updatedeploystate1(self, session, sessionid, state):
         try:
-            sql="""UPDATE `xmppmaster`.`deploy`
-                SET
-                    `state` = '%s'
-                WHERE
-                    (deploy.sessionid = '%s'
-                        AND ( `state` NOT IN ('DEPLOYMENT SUCCESS' ,
-                                              'ABORT DEPLOYMENT CANCELLED BY USER')
-                                OR
-                              `state` REGEXP '^(\?!ERROR)^(\?!SUCCESS)^(\?!ABORT)'));
-                """ % (state, sessionid)
+            if "DEPLOYMENT PENDING (REBOOT/SHUTDOWN/...)":
+                sql="""UPDATE `xmppmaster`.`deploy`
+                            SET
+                                `state` = '%s'
+                            WHERE
+                                (deploy.sessionid = '%s'
+                                    AND ( `state` NOT IN ('DEPLOYMENT SUCCESS' ,
+                                                        'ABORT DEPLOYMENT CANCELLED BY USER',
+                                                        "WOL 1",
+                                                        "WOL 2",
+                                                        "WOL 3",
+                                                        "WAITING MACHINE ONLINE"
+                                                        )
+                                            OR
+                                        `state` REGEXP '^(?!ERROR)^(?!SUCCESS)^(?!ABORT)'));
+                        """ % (state, sessionid)
+            else:
+                sql="""UPDATE `xmppmaster`.`deploy`
+                        SET
+                            `state` = '%s'
+                        WHERE
+                            (deploy.sessionid = '%s'
+                                AND ( `state` NOT IN ('DEPLOYMENT SUCCESS' ,
+                                                    'ABORT DEPLOYMENT CANCELLED BY USER')
+                                        OR
+                                    `state` REGEXP '^(?!ERROR)^(?!SUCCESS)^(?!ABORT)'));
+                        """ % (state, sessionid)
             result = session.execute(sql)
             session.commit()
             session.flush()
         except Exception, e:
             logging.getLogger().error(str(e))
             return -1
+
 
     @DatabaseHelper._sessionm
     def updatemachineAD(self, session, idmachine, lastuser, ou_machine, ou_user):
@@ -6852,20 +6873,87 @@ class XmppMasterDatabase(DatabaseHelper):
         return resulttypemachine
 
     @DatabaseHelper._sessionm
-    def search_machines_from_state(self, session, state):
+    def update_status_waiting_for_machine_off_in_state_deploy_start(self, session):
+        try:
+            sql = """UPDATE `xmppmaster`.`deploy`
+                        SET
+                            `state` = 'WAITING MACHINE ONLINE'
+                        WHERE
+                            deploy.sessionid IN (SELECT
+                                    sessionid
+                                FROM
+                                    xmppmaster.deploy
+                                        JOIN
+                                    xmppmaster.machines ON FS_JIDUSERTRUE(machines.jid) = FS_JIDUSERTRUE(deploy.jidmachine)
+                                WHERE
+                                    deploy.state = 'DEPLOYMENT START'
+                                        AND (NOW() BETWEEN deploy.startcmd AND deploy.endcmd)
+                                        AND machines.enabled = 0);"""
+            session.execute(sql)
+            session.commit()
+            session.flush()
+        except Exception:
+            logger.error("%s" % (traceback.format_exc()))
+
+    @DatabaseHelper._sessionm
+    def update_status_waiting_for_deploy_on_mochine_restart_or_stop(self, session):
+        """ selectionne machine data et session  deployement rester bloque sur starting plus de " seconde"""
+        try:
+            sql = """UPDATE `xmppmaster`.`deploy`
+                        SET
+                            `state` = 'WAITING MACHINE ONLINE'
+                        WHERE
+                            `deploy`.sessionid IN (SELECT DISTINCT
+                                    `xmppmaster`.`deploy`.sessionid
+                                FROM
+                                    xmppmaster.deploy
+                                        JOIN
+                                    logs ON logs.sessionname = deploy.sessionid
+                                WHERE
+                                    deploy.state = 'DEPLOYMENT START'
+                                        AND (NOW() BETWEEN deploy.startcmd AND deploy.endcmd)
+                                        AND logs.text LIKE '%online. Starting deployment%'
+                                        AND logs.date < DATE_ADD(NOW(), INTERVAL - 60 SECOND)
+                                        AND NOT EXISTS( SELECT
+                                            *
+                                        FROM
+                                            logs
+                                        WHERE
+                                            logs.text LIKE 'File transfer is enabled'
+                                                AND sessionname = deploy.sessionid)
+                                GROUP BY deploy.sessionid);"""
+            session.execute(sql)
+            session.commit()
+            session.flush()
+        except Exception:
+            logger.error("%s" % (traceback.format_exc()))
+
+
+    @DatabaseHelper._sessionm
+    def search_machines_from_state(self, session, state,subdep_user=None):
         dateend = datetime.now()
-        sql= """SELECT
-                    *
-                FROM
-                    xmppmaster.deploy
-                WHERE
-                    state LIKE '%s%%' AND
-                    '%s' BETWEEN startcmd AND
-                    endcmd;""" % (state, dateend)
+        if subdep_user:
+             sql = """SELECT
+                        *
+                    FROM
+                        xmppmaster.deploy
+                    WHERE
+                        state LIKE '%s%%' AND subdep = '%s' AND
+                        '%s' BETWEEN startcmd AND
+                        endcmd;""" % (state, subdep_user, dateend)
+        else:
+            sql = """SELECT
+                        *
+                    FROM
+                        xmppmaster.deploy
+                    WHERE
+                        state LIKE '%s%%' AND
+                        '%s' BETWEEN startcmd AND
+                        endcmd;""" % (state, dateend)
         machines = session.execute(sql)
         session.commit()
         session.flush()
-        result =  [x for x in machines]
+        result = [x for x in machines]
         resultlist = []
         for t in result:
             listresult = {"id": t[0],
@@ -6948,16 +7036,63 @@ class XmppMasterDatabase(DatabaseHelper):
             return resultlist
 
     @DatabaseHelper._sessionm
-    def update_state_deploy(self, session, id, state):
+    def update_state_deploy(self, session, id, state, subdep_user=None):
         try:
-            sql = """UPDATE `xmppmaster`.`deploy`
-                     SET `state`='%s'
-                     WHERE `id`='%s';""" % (state, id)
+            if subdep_user:
+                sql = """UPDATE `xmppmaster`.`deploy`
+                        SET `state`='%s'
+                        WHERE `id`='%s' and `subdep` = '%s' ;""" % (state, id, subdep_user)
+            else:
+                sql = """UPDATE `xmppmaster`.`deploy`
+                        SET `state`='%s'
+                        WHERE `id`='%s';""" % (state, id)
             session.execute(sql)
             session.commit()
             session.flush()
         except Exception, e:
             logging.getLogger().error(str(e))
+
+    @DatabaseHelper._sessionm
+    def replaydeploysessionid(self, session, sessionid, force_redeploy=0,rechedule=0):
+        """ call procedure stockee remise deploy pour"""
+        
+        connection = self.engine_xmppmmaster_base.raw_connection()
+        try:
+                self.logger.info("call procedure stockee mmc_restart_deploy_sessionid( %s,%s,%s) "%(sessionid,
+                                                                                                force_redeploy,
+                                                                                                rechedule))
+                cursor = connection.cursor()
+                cursor.callproc("mmc_restart_deploy_sessionid", [sessionid,
+                                                                force_redeploy,
+                                                                rechedule])
+                results = list(cursor.fetchall())
+                cursor.close()
+                connection.commit()
+        finally:
+            connection.close()
+        return
+
+
+    def restart_blocked_deployments(self, nb_reload=50):
+        """
+        Plan with blocked deployments again
+        call procedure mmc_restart_blocked_deployments
+        """
+        connection = self.db.raw_connection()
+        results = None
+        try:
+                cursor = connection.cursor()
+                cursor.callproc("mmc_restart_blocked_deployments", [nb_reload])
+                results = list(cursor.fetchall())
+                cursor.close()
+                connection.commit()
+        finally:
+            connection.close()
+        results = "%s"%results[0]
+        if int(results) != 0:
+            self.logger.info("call procedure stockee mmc_restart_blocked_deployments(%s)" % nb_reload)
+            self.logger.info("restart %s deployements" % results)
+        return results
 
     @DatabaseHelper._sessionm
     def updatedeploytosessionid(self, session, status, sessionid):
