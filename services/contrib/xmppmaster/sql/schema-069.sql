@@ -133,6 +133,17 @@ END$$
 DELIMITER ;
 ;
 
+-- ----------------------------------------------------------------------
+-- ADD ccolunm    subdep table deploy
+-- ADD index ind_sub_dep table deploy
+- ----------------------------------------------------------------------
+
+ALTER TABLE `xmppmaster`.`deploy`
+ADD COLUMN `subdep` VARCHAR(45) NULL AFTER `result`;
+ALTER TABLE `xmppmaster`.`deploy`
+ADD INDEX `ind_sub_dep` (`subdep` ASC) ;
+;
+
 
 SET FOREIGN_KEY_CHECKS=1;
 -- ----------------------------------------------------------------------

@@ -184,7 +184,7 @@ class Glpi_entity(Base, XmppMasterDBObj):
 
     def __repr__(self):
         return "<entity('%s','%s', '%s')>" % (self.name, self.complete_name, self.glpi_id)
-    
+
     def get_data(self):
         return{ 'id' : self.id,
                 'complete_name' : self.complete_name,
@@ -205,7 +205,7 @@ class Glpi_location(Base, XmppMasterDBObj):
 
     def __repr__(self):
         return "<location('%s','%s', '%s')>" % (self.name, self.complete_name, self.glpi_id)
-    
+
     def get_data(self):
         return{ 'id' : self.id,
                 'complete_name' : self.complete_name,
@@ -273,7 +273,7 @@ class Glpi_Register_Keys(Base, XmppMasterDBObj):
 
     def __repr__(self):
         return "<register_keys('%s','%s', '%s', '%s')>" % (self.name, self.value, self.comment, self.machines_id)
-    
+
     def get_data(self):
         return{ 'id' : self.id,
                 'name' : self.name,
@@ -444,7 +444,7 @@ class Deploy(Base, XmppMasterDBObj):
     command = Column(Integer)
     macadress = Column(String(255))
     syncthing = Column(Integer)
-
+    subdep = Column(String(45))
 
 class Cluster_resources(Base, XmppMasterDBObj):
     # ====== Table name =========================
@@ -668,7 +668,7 @@ class Uptime_machine(Base, XmppMasterDBObj):
     timetempunix = Column(Integer, default=None)
     md5agentversion = Column(String(32), default=None)
     version =Column(String(10), default=None)
- 
+
 class MyTypeenum(enum.Enum):
     """
         This class defines the device type domain

@@ -3279,7 +3279,8 @@ class XmppMasterDatabase(DatabaseHelper):
                   endcmd = None,
                   macadress = None,
                   result = None,
-                  syncthing = None
+                  syncthing = None,
+                  subdep = None
                   ):
         """
         parameters
@@ -3324,6 +3325,8 @@ class XmppMasterDatabase(DatabaseHelper):
                 new_deploy.result = result
             if syncthing is not None:
                 new_deploy.syncthing = syncthing
+            if subdep is not None:
+                new_deploy.subdep = subdep
             session.add(new_deploy)
             session.commit()
             session.flush()
@@ -7027,20 +7030,30 @@ class XmppMasterDatabase(DatabaseHelper):
         return resulttypemachine
 
     @DatabaseHelper._sessionm
-    def search_machines_from_state(self, session, state):
+    def search_machines_from_state(self, session, state,subdep_user=None):
         dateend = datetime.now()
-        sql= """SELECT
-                    *
-                FROM
-                    xmppmaster.deploy
-                WHERE
-                    state LIKE '%s%%' AND
-                    '%s' BETWEEN startcmd AND
-                    endcmd;""" % (state, dateend)
+        if subdep_user:
+             sql = """SELECT
+                        *
+                    FROM
+                        xmppmaster.deploy
+                    WHERE
+                        state LIKE '%s%%' AND subdep = '%s' AND
+                        '%s' BETWEEN startcmd AND
+                        endcmd;""" % (state, subdep_user, dateend)
+        else:
+            sql = """SELECT
+                        *
+                    FROM
+                        xmppmaster.deploy
+                    WHERE
+                        state LIKE '%s%%' AND
+                        '%s' BETWEEN startcmd AND
+                        endcmd;""" % (state, dateend)
         machines = session.execute(sql)
         session.commit()
         session.flush()
-        result =  [x for x in machines]
+        result = [x for x in machines]
         resultlist = []
         for t in result:
             listresult = {"id": t[0],
@@ -7123,11 +7136,16 @@ class XmppMasterDatabase(DatabaseHelper):
             return resultlist
 
     @DatabaseHelper._sessionm
-    def update_state_deploy(self, session, id, state):
+    def update_state_deploy(self, session, id, state, subdep_user=None):
         try:
-            sql = """UPDATE `xmppmaster`.`deploy`
-                     SET `state`='%s'
-                     WHERE `id`='%s';""" % (state, id)
+            if subdep_user:
+                sql = """UPDATE `xmppmaster`.`deploy`
+                        SET `state`='%s'
+                        WHERE `id`='%s' and `subdep` = '%s' ;""" % (state, id, subdep_user)
+            else:
+                sql = """UPDATE `xmppmaster`.`deploy`
+                        SET `state`='%s'
+                        WHERE `id`='%s';""" % (state, id)
             session.execute(sql)
             session.commit()
             session.flush()
