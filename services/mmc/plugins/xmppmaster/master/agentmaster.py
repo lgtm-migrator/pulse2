@@ -455,7 +455,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
                 end_iq=time.time()
                 conditionxmppiq = ""
                 try:
-                    conditionxmppiq = err_resp['error']['condition'] 
+                    conditionxmppiq = err_resp['error']['condition']
                 except Exception:
                     pass
                 try:
@@ -535,7 +535,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
         logger.error("STANZA MESSAGE ERROR IQ")
         messagestanza=""
         for t in msgkey:
-            
+
             if t != 'error' and t != "lang":
                 e = str(msg[t])
                 if e != "":
@@ -645,6 +645,10 @@ class MUCBot(sleekxmpp.ClientXMPP):
                             module="Deployment | Start | Creation",
                             date=None,
                             fromuser=machine['login'])
+
+            # change status des machine en deployement start qui sont off on les remet en attente.
+            XmppMasterDatabase().update_status_waiting_for_machine_off_in_state_deploy_start()
+
             msglog=[]
             #########################################################################
             machines_scheduled_deploy = XmppMasterDatabase().search_machines_from_state("DEPLOY TASK SCHEDULED")
