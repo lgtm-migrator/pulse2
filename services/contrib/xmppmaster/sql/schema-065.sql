@@ -45,7 +45,9 @@ END$$
 DELIMITER ;
 ;
 
-
+-- ----------------------------------------------------------------------
+-- procedure stockee  mmc_restart_deploy_sessionid
+- -----------------------------------------------------------------------
 USE `xmppmaster`;
 DROP procedure IF EXISTS `mmc_restart_deploy_sessionid`;
 
@@ -88,7 +90,9 @@ END$$
 
 DELIMITER ;
 ;
-
+-- ----------------------------------------------------------------------
+-- procedure stockee  mmc_restart_deploy_cmdid
+- -----------------------------------------------------------------------
 USE `xmppmaster`;
 DROP procedure IF EXISTS `mmc_restart_deploy_cmdid`;
 
@@ -143,6 +147,109 @@ DEALLOCATE PREPARE stmt;
   END IF;
 drop table IF EXISTS list_sessio_id;
 drop table IF EXISTS commands_on_host_id;
+END$$
+
+DELIMITER ;
+;
+
+
+-- ----------------------------------------------------------------------
+-- procedure stockee  mmc_restart_blocked_deployments
+- -----------------------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `mmc_restart_blocked_deployments`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`mmc_restart_blocked_deployments`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `mmc_restart_blocked_deployments`( in nombre_reload integer)
+BEGIN
+DECLARE finished INTEGER DEFAULT 0;
+DECLARE session_string varchar(100) DEFAULT "";
+DECLARE machine_name varchar(50) DEFAULT "";
+DECLARE ars_name varchar(50) DEFAULT "";
+DECLARE title_deploy varchar(100) DEFAULT "";
+DECLARE history_log_msg varchar (1024) default "";
+DECLARE message_log varchar (1024) default "";
+DECLARE limit_deploy integer default 10000000;
+DECLARE nombreselect INTEGER DEFAULT 0;
+DECLARE cursor_session_reload CURSOR FOR
+-- deploy list fields :'id,title,jidmachine,jid_relay,pathpackage,state,sessionid,start,startcmd,endcmd,inventoryuuid,host,user,command,group_uuid,login,macadress,syncthing,result,subdep'
+-- logs list fields :' id,date,type,module,text,fromuser,touser,action,sessionname,how,why,priority,who'
+
+SELECT DISTINCT
+    `xmppmaster`.`deploy`.sessionid,
+	`xmppmaster`.`deploy`.title,
+     fs_jidusertrue( `xmppmaster`.`deploy`.jidmachine),
+     fs_jidusertrue( `xmppmaster`.`deploy`.jid_relay),
+     `xmppmaster`.`logs`.text
+FROM
+    xmppmaster.deploy
+        JOIN
+    logs ON logs.sessionname = deploy.sessionid
+WHERE
+    deploy.state = 'DEPLOYMENT START'
+        AND (NOW() BETWEEN deploy.startcmd AND deploy.endcmd)
+        AND sessionname = deploy.sessionid
+        AND ((logs.text REGEXP '^First WOL|^Second WOL|^Third WOL|.*Trying to continue deployment|Starting deployment$|^Key successfully present'
+        AND logs.date < DATE_ADD(NOW(), INTERVAL - 600 SECOND))
+        OR (logs.text REGEXP '^Client generated transfer command is'
+        AND logs.date < DATE_ADD(NOW(), INTERVAL - 1 DAY)))
+GROUP BY deploy.sessionid limit nombre_reload;
+-- declare NOT FOUND handler
+	DECLARE CONTINUE HANDLER
+        FOR NOT FOUND SET finished = 1;
+ if  nombre_reload != -1 then
+        set limit_deploy = nombre_reload;
+end if;
+# pour chaque result appeler reload deploy
+OPEN cursor_session_reload;
+nextsessionid: LOOP
+		FETCH cursor_session_reload INTO session_string, title_deploy,machine_name, ars_name,history_log_msg;
+		IF finished = 1 THEN
+			LEAVE nextsessionid;
+		END IF;
+        -- count
+        set nombreselect = nombreselect + 1;
+		-- call reload deployement
+		call `mmc_restart_deploy_sessionid`(session_string, 1, 0);
+        -- create message log
+        select concat("Restarting deployment [",
+                       title_deploy,
+                       "] previous session  ",
+                       session_string,
+                       " on machine ",
+                       machine_name ,
+                       " via relay ",
+                       ars_name,
+                       " [blocked on message :",
+                       history_log_msg,
+                       " ]"
+                       ) into  message_log;
+         INSERT INTO `xmppmaster`.`logs` (`type`,
+										 `module`,
+										 `text`,
+										 `fromuser`,
+										 `touser`,
+										 `action`,
+										 `sessionname`,
+										 `priority`,
+										 `who`) VALUES
+										 ('deploy',
+										 'Deployment | Restart | Notify',
+										 message_log,
+										 'mysql',
+										 'admin',
+										 'xmpplog',
+										 'command...',
+										 '-1',
+										 'mysql');
+	END LOOP nextsessionid;
+	CLOSE cursor_session_reload;
+    select nombreselect;
 END$$
 
 DELIMITER ;
