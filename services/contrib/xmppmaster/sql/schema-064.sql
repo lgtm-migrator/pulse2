@@ -71,6 +71,12 @@ CREATE TABLE IF NOT EXISTS `ban_machines` (
   KEY `jud_ars` (`ars_server`)
 ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COMMENT='This table give the possibility to exclude machines from relay. To reallow banned machines on the relay we must delete its account on the xmpp server';
 
+-- ----------------------------------------------------------------------
+-- add column subdep in table deploy
+-- ----------------------------------------------------------------------
+ALTER TABLE `xmppmaster`.`deploy`
+ADD COLUMN `subdep` VARCHAR(45) NULL DEFAULT NULL AFTER `result`;
+
 SET FOREIGN_KEY_CHECKS=1;
 -- ----------------------------------------------------------------------
 -- Database version
