@@ -76,7 +76,9 @@ CREATE TABLE IF NOT EXISTS `ban_machines` (
 -- ----------------------------------------------------------------------
 ALTER TABLE `xmppmaster`.`deploy`
 ADD COLUMN `subdep` VARCHAR(45) NULL DEFAULT NULL AFTER `result`;
-
+ALTER TABLE `xmppmaster`.`deploy`
+ADD INDEX `ind_sub_dep` (`subdep` ASC) ;
+;
 SET FOREIGN_KEY_CHECKS=1;
 -- ----------------------------------------------------------------------
 -- Database version
