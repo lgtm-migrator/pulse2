@@ -4549,8 +4549,12 @@ class Glpi084(DyngroupDatabaseHelper):
         @return: True if the machine successfully deleted
         @rtype: bool
         """
+        try:
+            id = fromUUID(uuid)
+        except Exception:
+            return False
         session = create_session()
-        id = fromUUID(uuid)
+
 
         machine = session.query(Machine).filter(self.machine.c.id == id).first()
 

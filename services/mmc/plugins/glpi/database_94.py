@@ -4795,6 +4795,10 @@ class Glpi94(DyngroupDatabaseHelper):
         @return: True if the machine successfully deleted
         @rtype: bool
         """
+        try:
+            id = str(fromUUID(uuid))
+        except Exception:
+            return False
         authtoken =  base64.b64encode(GlpiConfig.webservices['glpi_username']+":"+GlpiConfig.webservices['glpi_password'])
         headers = {'content-type': 'application/json',
                    'Authorization': "Basic " + authtoken
@@ -4805,14 +4809,14 @@ class Glpi94(DyngroupDatabaseHelper):
         if r.status_code == 200 :
             sessionwebservice =  str(json.loads(r.text)['session_token'])
             self.logger.debug("session %s"%sessionwebservice)
-            url = GlpiConfig.webservices['glpi_base_url'] + "Computer/" + str(fromUUID(uuid))
+            url = GlpiConfig.webservices['glpi_base_url'] + "Computer/" + id
             headers = {'content-type': 'application/json',
                         'Session-Token': sessionwebservice
             }
             parameters = {'force_purge': '1'}
             r = requests.delete(url, headers=headers, params=parameters)
             if r.status_code == 200 :
-                self.logger.debug("Machine %s deleted"%str(fromUUID(uuid)))
+                self.logger.debug("Machine %s deleted"%id)
                 self._killsession(sessionwebservice)
                 return True
         self._killsession(sessionwebservice)
