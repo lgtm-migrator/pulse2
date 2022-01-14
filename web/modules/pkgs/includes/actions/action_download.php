@@ -1,6 +1,6 @@
 <?php
 /**
- * (c) 2020 Siveo, http://www.siveo.net/
+ * (c) 2020-2022 Siveo, http://www.siveo.net/
  *
  * $Id$
  *
@@ -126,7 +126,7 @@ $idclass =  "#".$tableToggle.' tr.'.$toggleable;
 
         echo '<th width="16%">'._T('Download File:', 'pkgs').'</th>
                 <th>
-                    <input type="text" name="url" value="'.$url.'"/>
+                    <input type="text" id="url" name="url" value="'.$url.'" onchange="checkProtocol(this)" onclick="checkProtocol(this)" onkeypress="checkProtocol(this)" mousedown="checkProtocol(this)" onblur="checkProtocol(this)"/>
                 </th>
             </table>';
             ?>
@@ -137,7 +137,14 @@ $idclass =  "#".$tableToggle.' tr.'.$toggleable;
 </div>
 
 <script type="text/javascript">
+function checkProtocol(element){
+
+  if(element.value != "" && element.value.startsWith("\\\\")){
+    element.value = element.value.replace(/^\\\\/g, "file://");
+  }
+}
     jQuery(document).ready(function(){
         jQuery("#tableToggle tr.toggleable").hide();
+
     });
 </script>
