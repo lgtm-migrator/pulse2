@@ -40,6 +40,126 @@ END$$
 
 DELIMITER ;
 
+
+-- ----------------------------------------------------------------------
+-- index
+-- ----------------------------------------------------------------------
+ALTER TABLE `xmppmaster`.`deploy`
+ADD INDEX `ind_title` (`title` ASC) ;
+
+
+
+-- ----------------------------------------------------------------------
+-- mmc_delete_deploy_session_id stored procedure
+-- -----------------------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `mmc_delete_deploy_session_id`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`mmc_delete_deploy_session_id`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `mmc_delete_deploy_session_id`(IN IN_sessid VARCHAR(255))
+BEGIN
+-- This procedure removes the deployment records from log and deploy tables based on the session passed as parameter
+-- delete log informations
+DELETE FROM `xmppmaster`.`logs` WHERE (`sessionname` like IN_sessid);
+DELETE FROM `xmppmaster`.`deploy` WHERE (`sessionid` like IN_sessid);
+END$$
+
+DELIMITER ;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`mmc_delete_bloqued_convergence`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `mmc_delete_bloqued_convergence`()
+BEGIN
+-- Cette procedure supprime de la table delpoy et de la table log
+-- les deployements appartenant a une 1 Convergence restant bloque
+-- les deployement supprimer ne sont pas relance.
+-- les deployements seront relancé par la convergence planifier.
+
+DECLARE finished INTEGER DEFAULT 0;
+DECLARE session_string varchar(100) DEFAULT "";
+DECLARE machine_name varchar(50) DEFAULT "";
+DECLARE ars_name varchar(50) DEFAULT "";
+DECLARE title_deploy varchar(100) DEFAULT "";
+DECLARE history_log_msg varchar (1024) default "";
+DECLARE message_log varchar (1024) default "";
+DECLARE limit_deploy integer default 10000000;
+DECLARE nombreselect INTEGER DEFAULT 0;
+DECLARE cursor_session_reload CURSOR FOR
+SELECT
+    `xmppmaster`.`deploy`.sessionid,
+	`xmppmaster`.`deploy`.title,
+     fs_jidusertrue( `xmppmaster`.`deploy`.jidmachine),
+     fs_jidusertrue( `xmppmaster`.`deploy`.jid_relay),
+     `xmppmaster`.`logs`.text
+FROM
+    xmppmaster.deploy
+        JOIN
+    logs ON logs.sessionname = deploy.sessionid
+WHERE
+    deploy.title  like "Convergence%"
+    AND deploy.state = 'DEPLOYMENT START'
+        AND (NOW() BETWEEN deploy.startcmd AND deploy.endcmd)
+        AND sessionname = deploy.sessionid
+        AND ((logs.text REGEXP '^First WOL|^Second WOL|^Third WOL|.*Trying to continue deployment|Starting deployment$|^Key successfully present'
+        AND logs.date < DATE_ADD(NOW(), INTERVAL - 600 SECOND))
+        OR (logs.text REGEXP '^Client generated transfer command is'
+        AND logs.date < DATE_ADD(NOW(), INTERVAL - 1 DAY)))
+GROUP BY deploy.sessionid ;
+-- declare NOT FOUND handler
+	DECLARE CONTINUE HANDLER
+        FOR NOT FOUND SET finished = 1;
+# pour chaque result appeler reload deploy
+OPEN cursor_session_reload;
+nextsessionid: LOOP
+		FETCH cursor_session_reload INTO session_string, title_deploy,machine_name, ars_name,history_log_msg;
+		IF finished = 1 THEN
+			LEAVE nextsessionid;
+		END IF;
+		call `mmc_delete_deploy_session_id`(session_string);
+        -- create message log
+        select concat("Delete locked deploy   [",
+                       title_deploy,
+                       "] previous session  ",
+                       session_string,
+                       " on machine ",
+                       machine_name ,
+                       " [blocked on message :",
+                       history_log_msg,
+                       " ]"
+                       ) into  message_log;
+         INSERT INTO `xmppmaster`.`logs` (`type`,
+										 `module`,
+										 `text`,
+										 `fromuser`,
+										 `touser`,
+										 `action`,
+										 `sessionname`,
+										 `priority`,
+										 `who`) VALUES
+										 ('deploy',
+										 'Deployment | Restart | Notify',
+										 message_log,
+										 'mysql',
+										 'admin',
+										 'xmpplog',
+										 'command...',
+										 '-1',
+										 'mysql');
+	END LOOP nextsessionid;
+	CLOSE cursor_session_reload;
+    select nombreselect;
+END$$
+
+DELIMITER ;
+;
+
 -- ----------------------------------------------------------------------
 -- mmc_restart_deploy_sessionid stored procedure
 -- -----------------------------------------------------------------------
@@ -56,7 +176,7 @@ BEGIN
 -- parameters
 -- IN_sessid session id deployement
 -- force_redeploy = 1 do not consider ignored status (variable: ignorestatus)
--- rechedule_deploy = 1 Replan the deploiements betwenn not and 1 day
+-- rechedule_deploy = 1 Replan the deployements betwenn not and 1 day
 -- TODO: Update the list on which we forbid redeploy.
 SET @ignorestatus0 = "DEPLOYMENT SUCCESS";
 SET @ignorestatus1 = "WAITING MACHINE ONLINE";
@@ -104,7 +224,7 @@ SET @ignorestatus = "'DEPLOYMENT SUCCESS','WAITING MACHINE ONLINE'";
 -- parameters
 -- cmd_id command the msc id of the group or the individual machine.
 -- force_redeploy = 1 do not consider ignored status (variable: ignorestatus)
--- rechedule_deploy = 1 Replan the deploiements betwenn not and 1 day
+-- rechedule_deploy = 1 Replan the deployements betwenn not and 1 day
 
 IF force_redeploy > 0 THEN
 	 SET @s = CONCAT("CREATE TEMPORARY TABLE list_sessio_id SELECT FS_JIDUSERTRUE(host) as host, sessionid FROM xmppmaster.deploy where command = " , cmd_id);
@@ -121,14 +241,14 @@ DEALLOCATE PREPARE stmt;
    list_sessio_id;
 
   if @total != 0 THEN
-	-- temporary table list_sessio_id content session_id for restart deploiement
+	-- temporary table list_sessio_id content session_id for restart deployement
 	-- DELETE FROM `xmppmaster`.`logs` WHERE	`sessionname` IN (SELECT sessionid FROM list_sessio_id);
-	-- the deploiements does not exit anymore.
+	-- the deployements does not exit anymore.
 	 DELETE FROM `xmppmaster`.`deploy` WHERE `sessionid` IN (SELECT sessionid	FROM list_sessio_id);
 
 	 IF rechedule_deploy > 0 THEN
-       -- If not, we create the deploiements with the same date/hour.
-       -- rechedule_deploy is 1:  we make sure that that the deploiement is replayed whenever it is planned.
+       -- If not, we create the deployements with the same date/hour.
+       -- rechedule_deploy is 1:  we make sure that that the deployement is replayed whenever it is planned.
 	    UPDATE `msc`.`commands` SET `end_date` = now() + INTERVAL 1 DAY WHERE (`id` = cmd_id); -- and  NOW() > end_date;
 	 END IF;
 
@@ -183,7 +303,8 @@ FROM
         JOIN
     logs ON logs.sessionname = deploy.sessionid
 WHERE
-    deploy.state = 'DEPLOYMENT START'
+    deploy.title  NOT like "Convergence%"
+        AND deploy.state = 'DEPLOYMENT START'
         AND (NOW() BETWEEN deploy.startcmd AND deploy.endcmd)
         AND sessionname = deploy.sessionid
         AND ((logs.text REGEXP '^First WOL|^Second WOL|^Third WOL|.*Trying to continue deployment|Starting deployment$|^Key successfully present'
@@ -197,6 +318,9 @@ DECLARE CONTINUE HANDLER
 if  nombre_reload != -1 then
     set limit_deploy = nombre_reload;
 end if;
+
+-- on  delete convergente deploy bloque.
+call mmc_delete_bloqued_convergence();
 # pour chaque result appeler reload deploy
 OPEN cursor_session_reload;
 nextsessionid: LOOP
@@ -209,9 +333,9 @@ nextsessionid: LOOP
 	-- call reload deployement
 	call `mmc_restart_deploy_sessionid`(session_string, 1, 0);
 	-- create message log
-	select concat("Restarting deployment [", title_deploy, "] previous session  ", session_string, " on machine ", machine_name , " via relay ", ars_name, " [blocked on message :", history_log_msg, " ]") 
+	select concat("Restarting deployment [", title_deploy, "] previous session  ", session_string, " on machine ", machine_name , " via relay ", ars_name, " [blocked on message :", history_log_msg, " ]")
 		into  message_log;
-	INSERT INTO `xmppmaster`.`logs` (`type`, `module`, `text`, `fromuser`, `touser`, `action`, `sessionname`, `priority`, `who`) 
+	INSERT INTO `xmppmaster`.`logs` (`type`, `module`, `text`, `fromuser`, `touser`, `action`, `sessionname`, `priority`, `who`)
 		VALUES ('deploy', 'Deployment | Restart | Notify', message_log, 'mysql', 'admin', 'xmpplog', 'command...', '-1', 'mysql');
 END LOOP nextsessionid;
 CLOSE cursor_session_reload;
