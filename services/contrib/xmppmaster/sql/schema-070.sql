@@ -347,6 +347,205 @@ END$$
 
 DELIMITER ;
 
+-- ----------------------------------------------------------------------
+-- stored procedure  mmc_delete_blocked_convergence_transfert_error
+-- delete deployement en etat ERROR TRANSFER FAILED et ERROR TRANSFER FAILED bloquee
+-- issu d une convergence
+-- -----------------------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `mmc_delete_blocked_convergence_transfert_error`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`mmc_delete_blocked_convergence_transfert_error`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE  PROCEDURE `mmc_delete_blocked_convergence_transfert_error`()
+BEGIN
+DECLARE finished INTEGER DEFAULT 0;
+DECLARE session_string varchar(100) DEFAULT "";
+DECLARE machine_name varchar(50) DEFAULT "";
+DECLARE ars_name varchar(50) DEFAULT "";
+DECLARE title_deploy varchar(100) DEFAULT "";
+DECLARE history_log_msg varchar (1024) default "";
+DECLARE date_log timestamp default "";
+DECLARE id_log varchar (12) default "";
+DECLARE message_log varchar (1024) default "";
+DECLARE limit_deploy integer default 10000000;
+DECLARE nombreselect INTEGER DEFAULT 0;
+DECLARE cursor_session_reload CURSOR FOR
+-- deploy list fields :'id,title,jidmachine,jid_relay,pathpackage,state,sessionid,start,startcmd,endcmd,inventoryuuid,host,user,command,group_uuid,login,macadress,syncthing,result,subdep'
+-- logs list fields :' id,date,type,module,text,fromuser,touser,action,sessionname,how,why,priority,who'
+-- delete deployement en etat ERROR TRANSFER FAILED et ERROR TRANSFER FAILED bloquee
+-- issu d une convergence
+SELECT DISTINCT
+     `xmppmaster`.`deploy`.sessionid,
+	 `xmppmaster`.`deploy`.title,
+     fs_jidusertrue( `xmppmaster`.`deploy`.jidmachine),
+     fs_jidusertrue( `xmppmaster`.`deploy`.jid_relay),
+     newtablelog.text,
+     newtablelog.date,
+     newtablelog.id
+FROM
+    xmppmaster.deploy
+        JOIN
+    (SELECT
+        aaa.id, aaa.text, aaa.sessionname, aaa.date
+    FROM
+        logs aaa
+    INNER JOIN (SELECT
+        *, MAX(id) AS ddddd
+    FROM
+        logs
+    GROUP BY sessionname) AS bbb ON aaa.sessionname = bbb.sessionname
+        AND aaa.id = bbb.ddddd) newtablelog ON newtablelog.sessionname = deploy.sessionid
+WHERE
+    deploy.state REGEXP 'TRANSFER FAILED$'
+		AND deploy.title NOT LIKE 'Convergence%'
+        AND (NOW() BETWEEN deploy.startcmd AND deploy.endcmd)
+        AND (newtablelog.text NOT REGEXP '^DEPLOYMENT TERMINATE$|^.*ABORT DEPLOYMENT CANCELLED BY USER.*$'
+        AND newtablelog.date < DATE_ADD(NOW(), INTERVAL - 1 HOUR));
+-- declare NOT FOUND handler
+DECLARE CONTINUE HANDLER
+    FOR NOT FOUND SET finished = 1;
+
+OPEN cursor_session_reload;
+nextsessionid: LOOP
+	FETCH cursor_session_reload INTO session_string,title_deploy,machine_name,ars_name,history_log_msg, date_log, id_log  ;
+	IF finished = 1 THEN
+        LEAVE nextsessionid;
+	END IF;
+	-- count
+	set nombreselect = nombreselect + 1;
+	-- call reload deployement
+    call `mmc_delete_deploy_session_id`(session_string);
+	-- create message log
+	SELECT
+    CONCAT('Delete locked deploy [',
+            title_deploy,
+            '] previous session  ',
+            session_string,
+            ' on machine ',
+            machine_name,
+            ' via relay ',
+            ars_name,
+            ' [blocked on message :',
+            history_log_msg,
+            ' ]')
+INTO message_log;
+	INSERT INTO `xmppmaster`.`logs` (`type`, `module`, `text`, `fromuser`, `touser`, `action`, `sessionname`, `priority`, `who`)
+	VALUES ('deploy', 'Deployment | Restart | Notify', message_log, 'mysql', 'admin', 'xmpplog', 'command...', '-1', 'mysql');
+END LOOP nextsessionid;
+CLOSE cursor_session_reload;
+-- SELECT nombreselect;
+END$$
+
+DELIMITER ;
+;
+
+-- ----------------------------------------------------------------------
+-- stored procedure  mmc_restart_blocked_deployments_transfert_error
+-- selectionne n deploiement bloque sur les etat  ERROR TRANSFER FAILED et ERROR TRANSFER FAILED
+-- remarque les deploiements issus de convergence sont ignore
+-- -----------------------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `mmc_restart_blocked_deployments_transfert_error`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`mmc_restart_blocked_deployments_transfert_error`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `mmc_restart_blocked_deployments_transfert_error`(in nombre_reload integer)
+BEGIN
+DECLARE finished INTEGER DEFAULT 0;
+DECLARE session_string varchar(100) DEFAULT "";
+DECLARE machine_name varchar(50) DEFAULT "";
+DECLARE ars_name varchar(50) DEFAULT "";
+DECLARE title_deploy varchar(100) DEFAULT "";
+DECLARE history_log_msg varchar (1024) default "";
+DECLARE date_log timestamp default "";
+DECLARE id_log varchar (12) default "";
+DECLARE message_log varchar (1024) default "";
+DECLARE limit_deploy integer default 10000000;
+DECLARE nombreselect INTEGER DEFAULT 0;
+DECLARE cursor_session_reload CURSOR FOR
+-- deploy list fields :'id,title,jidmachine,jid_relay,pathpackage,state,sessionid,start,startcmd,endcmd,inventoryuuid,host,user,command,group_uuid,login,macadress,syncthing,result,subdep'
+-- logs list fields :' id,date,type,module,text,fromuser,touser,action,sessionname,how,why,priority,who'
+-- selectionne n deploiement bloque sur les etat  ERROR TRANSFER FAILED et ERROR TRANSFER FAILED
+-- remarque les deploiements issus de convergence sont ignore
+SELECT DISTINCT
+     `xmppmaster`.`deploy`.sessionid,
+	 `xmppmaster`.`deploy`.title,
+     fs_jidusertrue( `xmppmaster`.`deploy`.jidmachine),
+     fs_jidusertrue( `xmppmaster`.`deploy`.jid_relay),
+     newtablelog.text,
+     newtablelog.date,
+     newtablelog.id
+FROM
+    xmppmaster.deploy
+        JOIN
+    (SELECT
+        aaa.id, aaa.text, aaa.sessionname, aaa.date
+    FROM
+        logs aaa
+    INNER JOIN (SELECT
+        *, MAX(id) AS ddddd
+    FROM
+        logs
+    GROUP BY sessionname) AS bbb ON aaa.sessionname = bbb.sessionname
+        AND aaa.id = bbb.ddddd) newtablelog ON newtablelog.sessionname = deploy.sessionid
+WHERE
+    deploy.state REGEXP 'TRANSFER FAILED$'
+        AND deploy.title REGEXP '^Convergence'
+        AND (NOW() BETWEEN deploy.startcmd AND deploy.endcmd)
+        AND (newtablelog.text NOT REGEXP '^DEPLOYMENT TERMINATE$|^.*ABORT DEPLOYMENT CANCELLED BY USER.*$'
+        AND newtablelog.date < DATE_ADD(NOW(), INTERVAL - 1 HOUR))
+LIMIT nombre_reload;
+-- declare NOT FOUND handler
+DECLARE CONTINUE HANDLER
+    FOR NOT FOUND SET finished = 1;
+call  mmc_delete_blocked_convergence_transfert_error ();
+if  nombre_reload != -1 then
+    set limit_deploy = nombre_reload;
+end if;
+
+OPEN cursor_session_reload;
+nextsessionid: LOOP
+	FETCH cursor_session_reload INTO session_string,title_deploy,machine_name,ars_name,history_log_msg, date_log, id_log  ;
+	IF finished = 1 THEN
+        LEAVE nextsessionid;
+	END IF;
+	-- count
+	set nombreselect = nombreselect + 1;
+	-- call reload deployement
+	call `mmc_restart_deploy_sessionid`(session_string, 1, 0);
+	-- create message log
+	SELECT
+    CONCAT('Restarting deployment [',
+            title_deploy,
+            '] previous session  ',
+            session_string,
+            ' on machine ',
+            machine_name,
+            ' via relay ',
+            ars_name,
+            ' [blocked on message :',
+            history_log_msg,
+            ' ]') INTO message_log;
+	INSERT INTO `xmppmaster`.`logs` (`type`, `module`, `text`, `fromuser`, `touser`, `action`, `sessionname`, `priority`, `who`)
+	VALUES ('deploy', 'Deployment | Restart | Notify', message_log, 'mysql', 'admin', 'xmpplog', 'command...', '-1', 'mysql');
+END LOOP nextsessionid;
+CLOSE cursor_session_reload;
+SELECT nombreselect;
+END$$
+
+DELIMITER ;
+;
+
+
 
 -- ----------------------------------------------------------------------
 -- Database version
