@@ -1,0 +1,136 @@
+# -*- coding: utf-8; -*-
+#
+# (c) 2022 siveo, http://www.siveo.net
+#
+# This file is part of Pulse 2, http://www.siveo.net
+#
+# Pulse 2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Pulse 2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Pulse 2; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
+
+import logging
+import base64
+import json
+
+from pulse2.version import getVersion, getRevision # pyflakes.ignore
+from pulse2.database.urbackup import UrbackupDatabase
+
+from mmc.support.config import PluginConfig, PluginConfigFactory
+from mmc.plugins.urbackup.config import UrbackupConfig
+
+from mmc.plugins.urbackup.urwrapper import UrApiWrapper
+
+VERSION = "1.0.0"
+APIVERSION = "1:0:0"
+
+
+logger = logging.getLogger()
+
+
+# PLUGIN GENERAL FUNCTIONS
+
+def getApiVersion():
+    return APIVERSION
+
+
+def activate():
+    logger = logging.getLogger()
+    config = UrbackupConfig("urbackup")
+
+    if config.disable:
+        logger.warning("Plugin urbackup: disabled by configuration.")
+        return False
+
+    if not UrbackupDatabase().activate(config):
+        logger.warning("Plugin urbackup: an error occurred during the database initialization")
+        return False
+    return True
+
+def tests():
+    return UrbackupDatabase().tests()
+
+def login():
+    api = UrApiWrapper()
+    logged = api.login()
+    logged = api.response(logged)
+
+    if "content" in logged and "session" in logged["content"]:
+    	return logged["content"]["session"]
+
+    return False
+
+def get_ses():
+    api = UrApiWrapper()
+    session = api.get_session()
+
+    if session == "":
+        return "No DATA in session"
+
+    return session
+
+def get_logs():
+    api = UrApiWrapper()
+    _logs = api.get_logs()
+    logs = api.response(_logs)
+    if "content" in logs:
+        return logs["content"]
+
+    return "No DATA"
+
+def get_settings():
+    api = UrApiWrapper()
+    settings = api.get_settings_general()
+    settings = api.response(settings)
+    if "content" in settings:
+        return settings["content"]
+
+    return "No DATA settings"
+
+def get_clients():
+    api = UrApiWrapper()
+    list_clients = api.get_clients()
+    list_clients = api.response(listClients)
+    if "content" in listClients:
+        return listClients["content"]
+
+    return "No DATA listusers"
+
+def get_backups():
+    api = UrApiWrapper()
+    backups = api.get_backups()
+    backups = api.response(backups)
+    if "content" in backups:
+        return backups["content"]
+
+    return "No DATA backups"
+
+def get_status():
+    api = UrApiWrapper()
+    status = api.get_status()
+    status = api.response(status)
+    if "content" in status:
+        return status["content"]
+
+    return "No DATA status"
+
+def get_status_client(clientname):
+    api = UrApiWrapper()
+    status = api.get_status()
+    status = api.response(status)
+
+    for client in status["status"]:
+        if (client["name"] == clientname):
+            return client
+
+        return "No DATA client"
