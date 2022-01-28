@@ -1,6 +1,6 @@
 <?php
 /*
- * (c) 2015-2021 siveo, http://www.siveo.net/
+ * (c) 2015-2022 siveo, http://www.siveo.net/
  *
  * $Id$
  *
@@ -37,9 +37,8 @@ require_once("modules/xmppmaster/includes/xmlrpc.php");
         <?
         if(!isset($_GET['os']))
         {
-          if(isset($_GET["objectUUID"]))
-          {
-            $machine = xmlrpc_getMachinefromuuid($_GET["objectUUID"]);
+          if(isset($_GET["jid"])){
+            $machine = xmlrpc_getMachinefromjid($_GET['jid']);
             $_GET["os"] = $machine["platform"];
           }
         }

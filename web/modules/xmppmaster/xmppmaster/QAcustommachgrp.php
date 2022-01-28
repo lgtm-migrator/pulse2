@@ -1,6 +1,6 @@
 <?php
 /*
- * (c) 2017 Siveo, http://www.siveo.net
+ * (c) 2017-2022 Siveo, http://www.siveo.net
  *
  * $Id$
  *
@@ -134,10 +134,9 @@ require_once("modules/xmppmaster/includes/xmlrpc.php");
 include_once('modules/pulse2/includes/menu_actionaudit.php');
 echo "<br><br><br>";
 
-$machinelist = getRestrictedComputersList(0, -1, array('uuid' => $_GET['uuid']), False);
-$machine = $machinelist[$_GET['uuid']][1];
-$namemachine = $machine['cn'][0];
-$usermachine = $machine['user'][0];
+$machinelist = xmlrpc_xmppmaster_get_machines_list(0, 1, ["field"=>"jid", "filter"=>$_GET['jid']]);
+$machine = $machineXmpp["data"];
+$namemachine = $machine['hostname'][0];
 
 $p = new PageGenerator(_T("Quick action on machine", 'xmppmaster')." : $namemachine");
 $p->setSideMenu($sidemenu);
@@ -151,7 +150,7 @@ echo "<h3>". _T("Name of Quick Action  :", 'xmppmaster')." ". $custom_command['c
 $result = "";
 $listmessage = array();
 
-$resultAQformachine = xmlrpc_getQAforMachine($_GET['cmd_id'], $_GET['uuid'] );
+$resultAQformachine = xmlrpc_getQAforMachine($_GET['cmd_id'], $_GET['jid'] );
 if (count($resultAQformachine) != 0){
     foreach($resultAQformachine as $message ){
         if ( $message[3] == "result"){

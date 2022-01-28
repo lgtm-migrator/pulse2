@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; -*-
 #
-# (c) 2016-2017 siveo, http://www.siveo.net
+# (c) 2016-2022 siveo, http://www.siveo.net
 #
 # This file is part of Pulse 2, http://www.siveo.net
 #
@@ -28,7 +28,7 @@ import sys
 import json
 from pulse2.database.xmppmaster import XmppMasterDatabase
 
-plugin = {"VERSION": "1.0", "NAME": "resultasynchroremoteQA", "TYPE": "master"}
+plugin = {"VERSION": "1.01", "NAME": "resultasynchroremoteQA", "TYPE": "master"}
 
 
 def action(xmppobject, action, sessionid, data, message, ret, dataobj):
@@ -40,7 +40,8 @@ def action(xmppobject, action, sessionid, data, message, ret, dataobj):
                                                data['data']['data']['cmdid'],
                                                sessionid,
                                                "".join(data['result']['result']),
-                                               typemessage="result")
+                                               typemessage="result",
+                                               jid=data['data']['data']["jid"])
 
         print json.dumps(data, indent=4)
     except Exception, e:

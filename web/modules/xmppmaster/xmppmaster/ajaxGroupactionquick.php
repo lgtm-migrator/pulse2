@@ -1,6 +1,6 @@
 <?php
 /**
- *  (c) 2015-2021 Siveo, http://www.siveo.net
+ *  (c) 2015-2022 Siveo, http://www.siveo.net
  *
  * $Id$
  *
@@ -33,7 +33,6 @@ require_once("modules/xmppmaster/includes/xmlrpc.php");
     $end   = (isset($_GET['end'])?$_GET['end']:$maxperpage-1);
     $logs = array();
     $machinegroup = xmlrpc_getCommand_action_time(10000, $start, $end, $filter);
-
     $dd = array();
     $dd = $machinegroup['result'];
     $nbitem = $machinegroup['nbtotal'];
@@ -43,12 +42,8 @@ foreach ($dd[4] as $val ){
     $startdate[] = timestamp_to_datetime($val->timestamp);
 }
 $machinetarget =  array();
-foreach ($dd[7] as $val ){
-    $target = getRestrictedComputersList(0, -1, array('uuid' => $val), False);
-    $machine = $target[$val][1];
-    $namemachine = $machine['cn'][0];
-    $usermachine = $machine['user'][0];
-    $machinetarget[]= '<a href="'.urlStrRedirect("base/computers/glpitabs", ["cn"=>$namemachine, "objectUUID"=>$val]).'">'.$namemachine.'</a>';
+foreach ($dd[9] as $machineName ){
+    $machinetarget[]= $machineName;
 }
 $log = array();
 $resultmachine = new ActionItem(_T("Os", "xmppmaster"),"QAcustommachgrp","logfile","computer", "xmppmaster", "xmppmaster");
@@ -60,6 +55,7 @@ for ($i=0;$i< count( $dd[0] );$i++){
     $param['cmd_id'] = $dd[0][$i];
     $param['gid']    = $dd[5][$i];
     $param['uuid']   = $dd[7][$i];
+    $param['jid']    = $dd[8][$i];
     if($param['gid'] != ""){
         $gr = xmlCall("dyngroup.get_group", array($param['gid'], false, false));
         $listnamegroup[] = _T("Group : ") . $gr['name'];
@@ -67,13 +63,9 @@ for ($i=0;$i< count( $dd[0] );$i++){
         $param['machname'] =  "";
     }
     else{
-        $param['groupname'] = "";
-        $machinelist = getRestrictedComputersList(0, -1, array('uuid' => $param['uuid']), False);
-        $machine = $machinelist[$_GET['uuid']][1];
-        $namemachine = $machine['cn'][0];
-        $usermachine = $machine['user'][0];
-        $listnamegroup[] = _T("Computer") .$namemachine;
-        $param['machname'] =  $namemachine;
+      $param['groupname'] = "";
+      $listnamegroup[] = _T("Computer : ").$dd[9][$i];
+      $param['machname'] =  $dd[9][$i];
     }
     $param['login']  = $dd[2][$i];
     $param['os']     = $dd[3][$i];

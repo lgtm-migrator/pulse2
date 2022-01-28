@@ -1,6 +1,6 @@
 <?php
 /*
- * (c) 2016 Siveo, http://www.siveo.net
+ * (c) 2016-2022 Siveo, http://www.siveo.net
  *
  * $Id$
  *
@@ -34,8 +34,8 @@ require_once("modules/xmppmaster/includes/xmlrpc.php");
     $namecmd      = isset($_GET['namecmd']) ? $_GET['namecmd'] : $_POST['namecmd'];
     $os           = isset($_GET['os']) ? $_GET['os'] : $_POST['os'];
     $user         = isset($_GET['user']) ? $_GET['user'] : $_POST['user'];
-    $description  = isset($_GET['$description']) ? $_GET['$description'] : $_POST['$description'];
-    $COMMANDID = xmlrpc_setCommand_qa($namecmd, $cmdsend, $user, "", $uuid, $os);
+    $description  = isset($_GET['$description']) ? $_GET['$description'] : (isset($_POST['$description'])) ? $_POST['$description'] : "";
+    $COMMANDID = xmlrpc_setCommand_qa($namecmd, $cmdsend, $user, "", $uuid, $os,  $jid);
 
     $customqa = array();
     $customqa['user'] = $user;
@@ -45,13 +45,14 @@ require_once("modules/xmppmaster/includes/xmlrpc.php");
     $customqa['namecmd'] = $namecmd;
 
     $machinegroup = array();
-    $machinegroup = xmlrpc_getMachinefromuuid($uuid);
+    $machinegroup = xmlrpc_getMachinefromjid($jid);
+
     if (count($machinegroup) != 0 ){
         echo strtoupper($machinegroup['platform']);echo "<br>";
         echo $os;
         if ( strpos(strtoupper($machinegroup['platform']), strtoupper($os)) !== false){
             // machine presente et os correct pour la QA
-            $machineinfos = array_merge($_GET, $machinegroup,$customqa,$result);
+            $machineinfos = [];
             unset($machineinfos['picklekeypublic']);
             unset($machineinfos['urlguacamole']);
             unset($machineinfos['module']);
@@ -65,13 +66,13 @@ require_once("modules/xmppmaster/includes/xmlrpc.php");
         }
         else{
             $msg = sprintf(_T("Sorry the operating system of the machine %s is [%s].<br>The custom QA is defined for operating system [%s]", "xmppmaster"), $machine, $machinegroup['platform'], $os);
-            xmlrpc_setCommand_action( $uuid, $COMMANDID, "consoleweb", '<span style = "color : navy;">'. $msg.'</span>', "warning");
+            xmlrpc_setCommand_action( $uuid, $COMMANDID, "consoleweb", '<span style = "color : navy;">'. $msg.'</span>', "warning", $jid);
         }
     }
     else{
         // update table command action
         $msg = sprintf(_T("Sorry the machine '%s' is off", "xmppmaster"), $machine );
-        xmlrpc_setCommand_action( $uuid, $COMMANDID, "consoleweb", '<span style = "color : Orange;">'. $msg.'</span>', "warning");
+        xmlrpc_setCommand_action( $uuid, $COMMANDID, "consoleweb", '<span style = "color : Orange;">'. $msg.'</span>', "warning", $jid);
     }
     // Directement to result a action to $action = QAcustommachgrp
     // Table Action Quick $action = ActionQuickGroup

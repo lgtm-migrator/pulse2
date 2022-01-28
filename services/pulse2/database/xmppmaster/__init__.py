@@ -1,6 +1,6 @@
 # -*- coding: utf-8; -*-
 #
-# (c) 2016 siveo, http://www.siveo.net/
+# (c) 2016-2022 siveo, http://www.siveo.net/
 #
 # $Id$
 #
@@ -1412,11 +1412,11 @@ class XmppMasterDatabase(DatabaseHelper):
             logging.getLogger().error(str(e))
 
     @DatabaseHelper._sessionm
-    def getQAforMachine(self, session, cmd_id, uuidmachine):
+    def getQAforMachine(self, session, cmd_id, jidmachine):
         try:
             command_action = session.query(Command_action).\
                     filter(and_(Command_action.command_id == cmd_id,
-                                Command_action.target == uuidmachine))
+                                Command_action.jid == jidmachine))
             #print command_action
             #print cmd_id
             #print uuidmachine
@@ -1446,8 +1446,11 @@ class XmppMasterDatabase(DatabaseHelper):
                                        Command_qa.command_start.label("command_start"),
                                        Command_qa.command_grp.label("command_grp"),
                                        Command_qa.command_machine.label("command_machine"),
-                                       Command_action.target.label("target")).join(Command_action,
-                                                                        Command_qa.id == Command_action.command_id)
+                                       Command_action.target.label("target"),
+                                       Command_action.jid.label("jid"),
+                                       Machines.hostname).join(Command_action,
+                                                                       Command_qa.id == Command_action.command_id)\
+                                       .join(Machines, Command_action.jid == Machines.jid)
             ##si on veut passer par les groupe avant d'aller sur les machine.
             ## command_qa = command_qa.group_by(Command_qa.id)
             command_qa = command_qa.order_by(desc(Command_qa.id))
@@ -1473,6 +1476,8 @@ class XmppMasterDatabase(DatabaseHelper):
             command_grp_list = []
             command_machine_list = []
             command_target_list = []
+            command_jid_list = []
+            hostname_list = []
             for command in command_qa:
                 command_id_list.append(command.id)
                 command_name_list.append(command.command_name)
@@ -1482,6 +1487,8 @@ class XmppMasterDatabase(DatabaseHelper):
                 command_grp_list.append(command.command_grp)
                 command_machine_list.append(command.command_machine)
                 command_target_list.append(command.target)
+                command_jid_list.append(command.jid)
+                hostname_list.append(command.hostname)
             result_list.append(command_id_list)
             result_list.append(command_name_list)
             result_list.append(command_login_list)
@@ -1490,6 +1497,8 @@ class XmppMasterDatabase(DatabaseHelper):
             result_list.append(command_grp_list)
             result_list.append(command_machine_list)
             result_list.append(command_target_list)
+            result_list.append(command_jid_list)
+            result_list.append(hostname_list)
             return {"nbtotal": nbtotal, "result": result_list}
         except Exception, e:
             logging.getLogger().debug("getCommand_action_time error %s->" % str(e))
@@ -1499,7 +1508,7 @@ class XmppMasterDatabase(DatabaseHelper):
 
     @DatabaseHelper._sessionm
     def setCommand_qa(self, session, command_name, command_action,
-                      command_login, command_grp='', command_machine='', command_os=''):
+                      command_login, command_grp='', command_machine='', command_os='', command_jid=''):
         try:
             new_Command_qa = Command_qa()
             new_Command_qa.command_name = command_name
@@ -1508,6 +1517,7 @@ class XmppMasterDatabase(DatabaseHelper):
             new_Command_qa.command_grp = command_grp
             new_Command_qa.command_machine = command_machine
             new_Command_qa.command_os = command_os
+            new_Command_qa.command_jid = command_jid
             session.add(new_Command_qa)
             session.commit()
             session.flush()
@@ -1529,7 +1539,8 @@ class XmppMasterDatabase(DatabaseHelper):
                     "command_os": command_qa.command_os,
                     "command_start": str(command_qa.command_start),
                     "command_grp": command_qa.command_grp,
-                    "command_machine": command_qa.command_machine}
+                    "command_machine": command_qa.command_machine,
+                    "command_jid": command_qa.command_jid}
         except Exception, e:
             logging.getLogger().error("getCommand_qa_by_cmdid error %s->" % str(e))
             traceback.print_exc(file=sys.stdout)
@@ -1540,10 +1551,11 @@ class XmppMasterDatabase(DatabaseHelper):
                     "command_os": "",
                     "command_start": "",
                     "command_grp": "",
-                    "command_machine": ""}
+                    "command_machine": "",
+                    "command_jid": ""}
 
     @DatabaseHelper._sessionm
-    def setCommand_action(self, session, target, command_id, sessionid, command_result="", typemessage="log"):
+    def setCommand_action(self, session, target, command_id, sessionid, command_result="", typemessage="log", jid=""):
         try:
             new_Command_action = Command_action()
             new_Command_action.session_id = sessionid
@@ -1551,6 +1563,7 @@ class XmppMasterDatabase(DatabaseHelper):
             new_Command_action.typemessage = typemessage
             new_Command_action.command_result = command_result
             new_Command_action.target = target
+            new_Command_action.jid = jid
             session.add(new_Command_action)
             session.commit()
             session.flush()
@@ -6990,7 +7003,7 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def update_status_waiting_for_deploy_on_machine_restart_or_stop(self, session):
         """
-            We select the machines in a stalled deploiement for more than 60 seconds in the 
+            We select the machines in a stalled deploiement for more than 60 seconds in the
             WAITING MACHINE ONLINE state.
         """
         try:
