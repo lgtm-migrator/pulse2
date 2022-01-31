@@ -100,7 +100,7 @@ def get_settings():
 def get_clients():
     api = UrApiWrapper()
     list_clients = api.get_clients()
-    list_clients = api.response(listClients)
+    list_clients = api.response(list_clients)
     if "content" in listClients:
         return listClients["content"]
 
