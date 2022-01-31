@@ -101,8 +101,8 @@ def get_clients():
     api = UrApiWrapper()
     list_clients = api.get_clients()
     list_clients = api.response(list_clients)
-    if "content" in listClients:
-        return listClients["content"]
+    if "content" in list_clients:
+        return list_clients["content"]
 
     return "No DATA listusers"
 
