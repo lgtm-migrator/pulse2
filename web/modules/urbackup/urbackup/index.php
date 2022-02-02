@@ -3,19 +3,47 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$p = new PageGenerator(_T("Liste des clients machine", 'pkgs'));
+$p = new PageGenerator(_T("Client machine list", 'pkgs'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
-echo '<h1>ID de la session utilisateur en cours : </h1>';
-echo '<pre>';
 $tableau = xmlrpc_get_clients();
-echo '</pre>';
+$clients = $tableau["navitems"]["clients"];
 
-foreach($tableau as $key=>$value){
-  echo $key."<br>";
-  echo '<pre>';
-  print_r($value);
-  echo '</pre>';
+echo '<br>';
+echo '<br>';
+echo "<table style:'border: 1px solid #333;'>";
+echo '    <thead>';
+echo '        <tr>';
+echo '            <th colspan="3">Client list</th>';
+echo '        </tr>';
+echo '    </thead>';
+echo '    <tbody>';
+echo '        <tr>';
+echo "            <td style='padding:0px 500px 0px 0px;'>Client name</td>";
+echo '            <td>Group</td>';
+echo '            <td>Online</td>';
+echo '        </tr>';
+
+foreach ($clients as $client) {
+  echo '        <tr>';
+  echo "            <td style='padding:0px 500px 0px 0px;'>".$client['name']."</td>";
+  echo '            <td>'.$client['groupname'].'</td>';
+  echo '            <td>-</td>';
+  echo '        </tr>';
 }
+
+echo '    </tbody>';
+echo '</table>';
+echo '<br>';
+echo '<br>';
+
+echo '--------------------';
+echo '<br>';
+echo '<br>';
+
+echo 'Debug - CLIENTS Array';
+echo '<br>';
+
+print_r($clients);
 ?>
