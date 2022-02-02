@@ -9,30 +9,28 @@ $p->display();
 
 $client_array = xmlrpc_get_clients();
 $clients = $client_array["navitems"]["clients"];
-
-echo '<br>';
-echo '<br>';
-echo "<table style:'border: 1px solid #333;'>";
-echo '    <thead>';
-echo '        <tr>';
-echo '            <th colspan="3">'._T("Clients", 'urbackup').'</th>';
-echo '        </tr>';
-echo '    </thead>';
-echo '    <tbody>';
-echo '        <tr>';
-echo "            <td style='padding:0px 500px 0px 0px;'>"._T("Clients name", 'urbackup')."</td>";
-echo '            <td>'._T("Group", 'urbackup').'</td>';
-echo '            <td>'._T("Online state", 'urbackup').'</td>';
-echo '        </tr>';
-
-foreach ($clients as $client) {
-  echo '        <tr>';
-  echo "            <td style='padding:0px 500px 0px 0px;'>".$client['name']."</td>";
-  echo '            <td>'.$client['groupname'].'</td>';
-  echo '            <td>-</td>';
-  echo '        </tr>';
-}
-
-echo '    </tbody>';
-echo '</table>';
 ?>
+<br>
+<br>
+<table style:'border: 1px solid #333;'>
+    <thead>
+        <tr style='text-align: left; text-decoration: underline;'>
+          <th> <?php echo _T("Clients name", 'urbackup'); ?> </th>
+          <th> <?php echo _T("Group", 'urbackup'); ?> </th>
+          <th> <?php echo _T("Online state", 'urbackup'); ?> </th>
+        </tr>
+    </thead>
+    <tbody>
+<?php 
+foreach ($clients as $client) {
+?>
+        <tr>
+            <td style='padding:0px 500px 0px 0px;'> <?php echo $client['name']; ?></td>
+            <td> <?php echo $client['groupname']; ?></td>
+            <td>-</td>
+        </tr>
+<?php
+}
+?>
+    </tbody>
+</table>
