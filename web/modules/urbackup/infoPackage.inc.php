@@ -15,19 +15,19 @@ $submod->setImg('modules/urbackup/graph/navbar/urbackup');
 $submod->setDefaultPage("urbackup/urbackup/index");
 $submod->setPriority(500);
 
-$page = new Page("index", _T('Liste des clients machine', 'urbackup'));
+$page = new Page("index", _T('Client machine list', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/index.php");
 $submod->addPage($page);
 
-$page = new Page("downloads_client_urb", _T('Téléchargement client Windows', 'urbackup'));
+$page = new Page("downloads_client_urb", _T('Download page of Urbackup Client', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/downloads_client_urb.php");
 $submod->addPage($page);
 
-$page = new Page("activities", _T('Activités', 'urbackup'));
-$page->setFile("modules/urbackup/urbackup/activities.php");
+$page = new Page("saves", _T('Saves', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/saves.php");
 $submod->addPage($page);
 
-$page = new Page("usersgroups", _T('UsersGroups', 'urbackup'));
+$page = new Page("usersgroups", _T('Users and groups list', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/usersgroups.php");
 $submod->addPage($page);
 
