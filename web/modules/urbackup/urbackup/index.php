@@ -3,7 +3,7 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$p = new PageGenerator(_T("Client machine list", 'urbackup'));
+$p = new PageGenerator(_T("Clients machine list", 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -15,7 +15,7 @@ $clients = $client_array["navitems"]["clients"];
 <table style:'border: 1px solid #333;'>
     <thead>
         <tr style='text-align: left; text-decoration: underline;'>
-          <th> <?php echo _T("Clients name", 'urbackup'); ?> </th>
+          <th> <?php echo _T("Name", 'urbackup'); ?> </th>
           <th> <?php echo _T("Group", 'urbackup'); ?> </th>
           <th> <?php echo _T("Online state", 'urbackup'); ?> </th>
         </tr>
