@@ -25,4 +25,5 @@ $sidemenu->addSideMenuItem(new SideMenuItem(_T("Clients machine list", 'urbackup
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Download Windows client", 'urbackup'), "urbackup", "urbackup", "downloads_client_urb"));
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Saves", 'urbackup'), "urbackup", "urbackup", "saves"));
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Users and groups list", 'urbackup'), "urbackup", "urbackup", "usersgroups"));
+$sidemenu->addSideMenuItem(new SideMenuItem(_T("Settings", 'urbackup'), "urbackup", "urbackup", "settings"));
 ?>
