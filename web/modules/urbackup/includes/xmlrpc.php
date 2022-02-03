@@ -21,7 +21,7 @@ function xmlrpc_get_logs(){
 
 function xmlrpc_get_settings_global(){
     // Return all settings
-    return xmlCall("urbackup.get_settings", []);
+    return xmlCall("urbackup.get_settings_general", []);
 }
 
 function xmlrpc_get_clients(){
