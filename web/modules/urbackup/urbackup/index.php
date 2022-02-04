@@ -34,3 +34,7 @@ foreach ($clients as $client) {
 ?>
     </tbody>
 </table>
+
+<?php
+print_r(xmlrpc_get_status());
+?>

@@ -121,7 +121,22 @@ def get_settings_general():
 
     return "No DATA settings"
 
-def get_clients():
+def get_settings_clientsettings(id_client):
+    """
+        Get multiples server setting global
+
+        Returns:
+            Array of server settings global
+    """
+    api = UrApiWrapper()
+    settings = api.get_settings_clientsettings(id_client)
+    settings = api.response(settings)
+    if "content" in settings:
+        return settings["content"]
+
+    return "No DATA settings"
+
+def get_settings_clients():
     """
         Get clients groups and user on urbackup
 
@@ -129,7 +144,7 @@ def get_clients():
             Array of every client informations
     """
     api = UrApiWrapper()
-    list_clients = api.get_clients()
+    list_clients = api.get_settings_clients()
     list_clients = api.response(list_clients)
     if "content" in list_clients:
         return list_clients["content"]

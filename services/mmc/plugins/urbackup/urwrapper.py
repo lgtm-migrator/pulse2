@@ -104,7 +104,14 @@ class UrApiWrapper:
 
         return response
 
-    def get_clients(self):
+    def get_settings_clientsettings(self, id_client):
+        self.login()
+        params = {"sa": "clientsettings", "t_clientid": id_client, "ses": self.ses}
+        response = self.request("settings", params)
+
+        return response
+
+    def get_settings_clients(self):
         self.login()
         params = {"sa": "listusers", "ses": self.ses}
         response = self.request("settings", params)
