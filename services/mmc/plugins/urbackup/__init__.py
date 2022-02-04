@@ -61,6 +61,12 @@ def tests():
     return UrbackupDatabase().tests()
 
 def login():
+    """
+        Create connection with urbackup
+
+        Returns:
+            session value
+    """
     api = UrApiWrapper()
     logged = api.login()
     logged = api.response(logged)
@@ -71,6 +77,12 @@ def login():
     return False
 
 def get_ses():
+    """
+        Get value of session if logged
+
+        Returns:
+            session value
+    """
     api = UrApiWrapper()
     session = api.get_session()
 
@@ -80,6 +92,12 @@ def get_ses():
     return session
 
 def get_logs():
+    """
+        Get logs of server
+
+        Returns:
+            Array of logs server
+    """
     api = UrApiWrapper()
     _logs = api.get_logs()
     logs = api.response(_logs)
@@ -88,7 +106,13 @@ def get_logs():
 
     return "No DATA"
 
-def get_settings():
+def get_settings_general():
+    """
+        Get multiples server setting global
+
+        Returns:
+            Array of server settings global
+    """
     api = UrApiWrapper()
     settings = api.get_settings_general()
     settings = api.response(settings)
@@ -98,6 +122,12 @@ def get_settings():
     return "No DATA settings"
 
 def get_clients():
+    """
+        Get clients groups and user on urbackup
+
+        Returns:
+            Array of every client informations
+    """
     api = UrApiWrapper()
     list_clients = api.get_clients()
     list_clients = api.response(list_clients)
@@ -107,6 +137,12 @@ def get_clients():
     return "No DATA listusers"
 
 def get_backups():
+    """
+        Get every backups for each client
+
+        Returns:
+            Array of every backup for each client
+    """
     api = UrApiWrapper()
     backups = api.get_backups()
     backups = api.response(backups)
@@ -116,6 +152,12 @@ def get_backups():
     return "No DATA backups"
 
 def get_status():
+    """
+        Get server and all client status
+
+        Returns:
+            Array of server and all client status
+    """
     api = UrApiWrapper()
     status = api.get_status()
     status = api.response(status)
@@ -125,6 +167,15 @@ def get_status():
     return "No DATA status"
 
 def get_status_client(clientname):
+    """
+        Get status for one client
+
+        Args:
+            Clientname
+
+        Returns:
+            Array status for one client
+    """
     api = UrApiWrapper()
     status = api.get_status()
     status = api.response(status)
