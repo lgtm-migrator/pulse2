@@ -62,10 +62,11 @@ def tests():
 
 def login():
     """
-        Create connection with urbackup
+        Create a connection with urbackup.
 
         Returns:
-            session value
+           It returns a session value
+           If it failed to connect it returns False.
     """
     api = UrApiWrapper()
     logged = api.login()
@@ -93,10 +94,11 @@ def get_ses():
 
 def get_logs():
     """
-        Get logs of server
+        Get the logs of the server
 
         Returns:
-            Array of logs server
+            It returns the logs of the server.
+            If no logs are available, it returns the "No DATA" string.
     """
     api = UrApiWrapper()
     _logs = api.get_logs()

@@ -19,13 +19,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-# file : mmc/plugins/urbackup/config.py
-
 from mmc.support.config import PluginConfig
 from pulse2.database.urbackup.config import UrbackupDatabaseConfig
 
-class UrbackupConfig(PluginConfig,UrbackupDatabaseConfig):
-    def __init__(self, name = 'urbackup', conffile = None):
+class UrbackupConfig(PluginConfig, UrbackupDatabaseConfig):
+    def __init__(self, name='urbackup', conffile=None):
         if not hasattr(self, 'initdone'):
             PluginConfig.__init__(self, name, conffile)
             UrbackupDatabaseConfig.__init__(self)
@@ -33,10 +31,12 @@ class UrbackupConfig(PluginConfig,UrbackupDatabaseConfig):
 
     def setDefault(self):
         PluginConfig.setDefault(self)
-        #self.confOption = "option1"
-        # ...
 
     def readConf(self):
+        """
+            Read the configuration for urbackup from  the configuration files.
+            The configuration file is stored in /etc/mmc/plugins/urbackup.ini
+        """
         PluginConfig.readConf(self)
         UrbackupDatabaseConfig.setup(self, self.conffile)
         self.disable = self.getboolean("main", "disable")
@@ -47,12 +47,19 @@ class UrbackupConfig(PluginConfig,UrbackupDatabaseConfig):
         self.urbackup_password = self.get("urbackup", "password")
 
     def check(self):
+        """
+            Does nothing yet
+            IMPLEMENT ME
+        """
         #if not self.confOption: raise ConfigException("Conf error")
         pass
 
     @staticmethod
     def activate():
+        """
+            It looks in the configuration file /etc/mmc/plugins/urbackup.ini
+            If disable is set to 0 the plugin is enabled.
+        """
         # Get module config from "/etc/mmc/plugins/urbackup.ini"
         UrbackupConfig("urbackup")
         return True
-
