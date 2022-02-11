@@ -35,6 +35,10 @@ $page = new Page("settings", _T('Settings', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/settings.php");
 $submod->addPage($page);
 
+$page = new Page("review", _T('Review', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/review.php");
+$submod->addPage($page);
+
 $mod->addSubmod($submod);
 
 $MMCApp =& MMCApp::getInstance();
