@@ -79,10 +79,10 @@ def login():
 
 def get_ses():
     """
-        Get value of session if logged
+        Get value of session
 
         Returns:
-            session value
+            Session key
     """
     api = UrApiWrapper()
     session = api.get_session()
@@ -97,7 +97,7 @@ def get_logs():
         Get the logs of the server
 
         Returns:
-            It returns the logs of the server.
+            It returns the server logs.
             If no logs are available, it returns the "No DATA" string.
     """
     api = UrApiWrapper()
@@ -106,14 +106,14 @@ def get_logs():
     if "content" in logs:
         return logs["content"]
 
-    return "No DATA"
+    return "No DATA in logs"
 
 def get_settings_general():
     """
-        Get multiples server setting global
+        Get multiples settings value of server
 
         Returns:
-            Array of server settings global
+            Array of every settings value of server
     """
     api = UrApiWrapper()
     settings = api.get_settings_general()
@@ -121,14 +121,14 @@ def get_settings_general():
     if "content" in settings:
         return settings["content"]
 
-    return "No DATA settings"
+    return "No DATA in global settings"
 
 def get_settings_clientsettings(id_client):
     """
-        Get multiples server setting global
+        Get multiples settings for one client
 
         Returns:
-            Array of server settings global
+            Array of client settings
     """
     api = UrApiWrapper()
     settings = api.get_settings_clientsettings(id_client)
@@ -136,7 +136,7 @@ def get_settings_clientsettings(id_client):
     if "content" in settings:
         return settings["content"]
 
-    return "No DATA settings"
+    return "No DATA client settings"
 
 def get_settings_clients():
     """
@@ -182,6 +182,21 @@ def get_status():
         return status["content"]
 
     return "No DATA status"
+
+def get_progress():
+    """
+        Get progress for every backups
+
+        Returns:
+            Array of progress review for backups
+    """
+    api = UrApiWrapper()
+    progress = api.get_progress()
+    progress = api.response(progress)
+    if "content" in progress:
+        return progress["content"]
+
+    return "No DATA progress"
 
 def get_status_client(clientname):
     """
