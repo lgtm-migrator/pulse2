@@ -26,7 +26,7 @@ function xmlrpc_get_settings_global(){
 
 function xmlrpc_get_clients(){
     // Return all user
-    return xmlCall("urbackup.get_clients", []);
+    return xmlCall("urbackup.get_settings_clients", []);
 }
 
 function xmlrpc_get_backups(){
@@ -37,6 +37,11 @@ function xmlrpc_get_backups(){
 function xmlrpc_get_status(){
     // Return status
     return xmlCall("urbackup.get_status", []);
+}
+
+function xmlrpc_get_progress(){
+    // Return progress
+    return xmlCall("urbackup.get_progress", []);
 }
 
 /*function xmlrpc_get_status_client($clientname){
