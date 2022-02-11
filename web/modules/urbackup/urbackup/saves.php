@@ -9,6 +9,20 @@ $p->display();
 
 $backups_list_array = xmlrpc_get_backups();
 $clients_backup_list = $backups_list_array["clients"];
+
+//Formatage de date
+function secs2date($secs,$date)
+{
+    if ($secs>2147472000)    //2038-01-19 expire dt
+        {
+        $date->setTimestamp(2147472000);
+        $s=$secs-2147472000;
+        $date->add(new DateInterval('PT'.$s.'S'));
+        }
+    else
+        $date->setTimestamp($secs);
+}
+
 ?>
 
 <br>
@@ -24,10 +38,17 @@ $clients_backup_list = $backups_list_array["clients"];
 
 <?php
 foreach ($clients_backup_list as $client_backup) {
+
+    $date=new dateTime();
+
+    $secs=$client_backup['lastbackup'];  //2033-12-06 08:53:20
+    secs2date($secs,$date);
+    $dt=$date->format('Y-m-d H:i:s');
+
 ?>
         <tr>
             <td style='padding:0px 500px 0px 0px;'> <?php echo $client_backup['name']; ?></td>
-            <td> <?php echo $client_backup['lastbackup']; ?></td>
+            <td> <?php echo $dt; ?></td>
         </tr>
 <?php
 }
