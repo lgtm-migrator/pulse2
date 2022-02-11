@@ -26,4 +26,5 @@ $sidemenu->addSideMenuItem(new SideMenuItem(_T("Download Windows client", 'urbac
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Saves", 'urbackup'), "urbackup", "urbackup", "saves"));
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Users and groups list", 'urbackup'), "urbackup", "urbackup", "usersgroups"));
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Settings", 'urbackup'), "urbackup", "urbackup", "settings"));
+$sidemenu->addSideMenuItem(new SideMenuItem(_T("Review", 'urbackup'), "urbackup", "urbackup", "review"));
 ?>
