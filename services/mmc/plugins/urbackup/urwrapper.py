@@ -78,6 +78,7 @@ class UrApiWrapper:
         return response
 
     def get_session(self):
+        self.login()
         session = self.ses
         return session
 
@@ -122,6 +123,13 @@ class UrApiWrapper:
         self.login()
         params = {"clientid": 0, "ses": self.ses}
         response = self.request("backups", params)
+
+        return response
+
+    def get_progress(self):
+        self.login()
+        params = {"ses": self.ses}
+        response = self.request("progress", params)
 
         return response
 
