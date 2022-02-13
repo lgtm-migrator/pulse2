@@ -33,6 +33,7 @@ import logging
 import json
 import time
 
+
 class UrbackupDatabase(DatabaseHelper):
     is_activated = False
     session = None
@@ -47,7 +48,10 @@ class UrbackupDatabase(DatabaseHelper):
             return None
         self.config = config
 
-        self.db = create_engine(self.makeConnectionPath(), pool_recycle=self.config.dbpoolrecycle, pool_size=self.config.dbpoolsize)
+        self.db = create_engine(
+            self.makeConnectionPath(),
+            pool_recycle=self.config.dbpoolrecycle,
+            pool_size=self.config.dbpoolsize)
         print self.makeConnectionPath()
         if not self.db_check():
             return False
@@ -70,11 +74,12 @@ class UrbackupDatabase(DatabaseHelper):
         for i in range(NB_DB_CONN_TRY):
             try:
                 ret = self.db.connect()
-            except DBAPIError, e:
+            except DBAPIError as e:
                 logging.getLogger().error(e)
-            except Exception, e:
+            except Exception as e:
                 logging.getLogger().error(e)
-            if ret: break
+            if ret:
+                break
         if not ret:
             raise "Database urbackup connection error"
         return ret
@@ -82,8 +87,8 @@ class UrbackupDatabase(DatabaseHelper):
     # =====================================================================
     # urbackup FUNCTIONS
     # =====================================================================
-    #@DatabaseHelper._sessionm
-    #def tests(self, session):
+    # @DatabaseHelper._sessionm
+    # def tests(self, session):
     #    ret = session.query(Tests).all()
     #    lines = []
     #    for row in ret:
