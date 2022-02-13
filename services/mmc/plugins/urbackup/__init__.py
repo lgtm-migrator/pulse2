@@ -23,7 +23,7 @@ import logging
 import base64
 import json
 
-from pulse2.version import getVersion, getRevision # pyflakes.ignore
+from pulse2.version import getVersion, getRevision  # pyflakes.ignore
 from pulse2.database.urbackup import UrbackupDatabase
 
 from mmc.support.config import PluginConfig, PluginConfigFactory
@@ -53,12 +53,15 @@ def activate():
         return False
 
     if not UrbackupDatabase().activate(config):
-        logger.warning("Plugin urbackup: an error occurred during the database initialization")
+        logger.warning(
+            "Plugin urbackup: an error occurred during the database initialization")
         return False
     return True
 
+
 def tests():
     return UrbackupDatabase().tests()
+
 
 def login():
     """
@@ -77,6 +80,7 @@ def login():
 
     return False
 
+
 def get_ses():
     """
         Get value of session
@@ -91,6 +95,7 @@ def get_ses():
         return "No DATA in session"
 
     return session
+
 
 def get_logs():
     """
@@ -108,6 +113,7 @@ def get_logs():
 
     return "No DATA in logs"
 
+
 def get_settings_general():
     """
         Get multiples settings value of server
@@ -122,6 +128,7 @@ def get_settings_general():
         return settings["content"]
 
     return "No DATA in global settings"
+
 
 def get_settings_clientsettings(id_client):
     """
@@ -138,6 +145,7 @@ def get_settings_clientsettings(id_client):
 
     return "No DATA client settings"
 
+
 def get_settings_clients():
     """
         Get clients groups and user on urbackup
@@ -152,6 +160,7 @@ def get_settings_clients():
         return list_clients["content"]
 
     return "No DATA listusers"
+
 
 def get_backups():
     """
@@ -168,6 +177,7 @@ def get_backups():
 
     return "No DATA backups"
 
+
 def get_status():
     """
         Get server and all client status
@@ -183,6 +193,7 @@ def get_status():
 
     return "No DATA status"
 
+
 def get_progress():
     """
         Get progress for every backups
@@ -197,6 +208,7 @@ def get_progress():
         return progress["content"]
 
     return "No DATA progress"
+
 
 def get_status_client(clientname):
     """
