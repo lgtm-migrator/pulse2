@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8; -*-
 #
 # (c) 2007-2008 Mandriva, http://www.mandriva.com/
@@ -47,7 +47,7 @@ def md5file(fname):
         ret = sumfile(sys.stdin)
     else:
         try:
-            f = file(fname, 'rb')
+            f = open(fname, 'rb')
         except BaseException:
             return 'Failed to open file'
         ret = sumfile(f)
