@@ -24,7 +24,7 @@
 # PULSE2
 from mmc.database.config import DatabaseConfig
 
+
 class UrbackupDatabaseConfig(DatabaseConfig):
     dbname = "urbackup"
     dbsection = "database"
-

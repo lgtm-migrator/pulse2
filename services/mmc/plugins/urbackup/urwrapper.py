@@ -26,8 +26,9 @@ from mmc.plugins.urbackup import config
 
 try:
     from urllib import urlencode
-except:
+except BaseException:
     from urllib.parse import urlencode
+
 
 class UrApiWrapper:
     url = ""
@@ -43,7 +44,7 @@ class UrApiWrapper:
         self.url = _config.urbackup_url
         self.user_login = _config.urbackup_username
         self.password = _config.urbackup_password
-        self.ses = "" # sessionid
+        self.ses = ""  # sessionid
 
         self.headers = CaseInsensitiveDict()
         self.headers["Accept"] = "application/json"
@@ -58,21 +59,35 @@ class UrApiWrapper:
         url = self.url + "?" + urlencode({"a": action})
 
         if method == "GET":
-            response = requests.get(url, headers=self.headers, data=params, verify=self.verify, allow_redirects=self.allow_redirects)
+            response = requests.get(
+                url,
+                headers=self.headers,
+                data=params,
+                verify=self.verify,
+                allow_redirects=self.allow_redirects)
         if method == "POST":
-            response = requests.post(url, headers=self.headers, data=params, verify=self.verify, allow_redirects=self.allow_redirects)
+            response = requests.post(
+                url,
+                headers=self.headers,
+                data=params,
+                verify=self.verify,
+                allow_redirects=self.allow_redirects)
 
         return response
 
     def login(self, lang="en"):
-        params = {"username": self.user_login, "password": self.password, "plainpw":1, "lang":lang}
+        params = {
+            "username": self.user_login,
+            "password": self.password,
+            "plainpw": 1,
+            "lang": lang}
         response = self.request("login", params)
 
         try:
             result = json.loads(response.text)
             if "session" in result:
                 self.ses = result["session"]
-        except:
+        except BaseException:
             pass
 
         return response
@@ -86,10 +101,13 @@ class UrApiWrapper:
     def response(resp):
         try:
             resp_json = json.loads(resp.text)
-        except:
+        except BaseException:
             resp_json = resp.text
 
-        return {"status_code": resp.status_code, "headers": resp.headers, "content": resp_json}
+        return {
+            "status_code": resp.status_code,
+            "headers": resp.headers,
+            "content": resp_json}
 
     def get_logs(self, clientid=0):
         self.login()
@@ -107,7 +125,10 @@ class UrApiWrapper:
 
     def get_settings_clientsettings(self, id_client):
         self.login()
-        params = {"sa": "clientsettings", "t_clientid": id_client, "ses": self.ses}
+        params = {
+            "sa": "clientsettings",
+            "t_clientid": id_client,
+            "ses": self.ses}
         response = self.request("settings", params)
 
         return response

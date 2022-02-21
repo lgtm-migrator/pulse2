@@ -22,6 +22,7 @@
 from mmc.support.config import PluginConfig
 from pulse2.database.urbackup.config import UrbackupDatabaseConfig
 
+
 class UrbackupConfig(PluginConfig, UrbackupDatabaseConfig):
     def __init__(self, name='urbackup', conffile=None):
         if not hasattr(self, 'initdone'):
