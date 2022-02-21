@@ -217,3 +217,51 @@ def get_status_client(clientname):
             return client
 
         return "No DATA client"
+
+def create_backup_incr_file(client_id):
+    """
+    """
+    api = UrApiWrapper()
+    backup = api.create_backup("incr_file" client_id)
+    backup = api.response(backup)
+
+    if "content" in backup:
+        return backup["content"]
+
+    return "No DATA incremental backup file"
+
+def create_backup_full_file(client_id):
+    """
+    """
+    api = UrApiWrapper()
+    backup = api.create_backup("full_file" client_id)
+    backup = api.response(backup)
+
+    if "content" in backup:
+        return backup["content"]
+
+    return "No DATA full backup file"
+
+def create_backup_incr_image(client_id):
+    """
+    """
+    api = UrApiWrapper()
+    backup = api.create_backup("incr_image" client_id)
+    backup = api.response(backup)
+
+    if "content" in backup:
+        return backup["content"]
+
+    return "No DATA incremental backup image"
+
+def create_backup_full_image(client_id):
+    """
+    """
+    api = UrApiWrapper()
+    backup = api.create_backup("full_image" client_id)
+    backup = api.response(backup)
+
+    if "content" in backup:
+        return backup["content"]
+
+    return "No DATA full backup image"
