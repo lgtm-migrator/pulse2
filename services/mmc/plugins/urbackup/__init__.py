@@ -162,7 +162,7 @@ def get_settings_clients():
     return "No DATA listusers"
 
 
-def get_backups():
+def get_backups_all_client():
     """
         Get every backups for each client
 
@@ -170,12 +170,42 @@ def get_backups():
             Array of every backup for each client
     """
     api = UrApiWrapper()
-    backups = api.get_backups()
+    backups = api.get_backups("0")
     backups = api.response(backups)
     if "content" in backups:
         return backups["content"]
 
     return "No DATA backups"
+
+def get_backup_files(client_id, backup_id):
+    """
+        Get every files on backup
+
+        Returns:
+            Array of info from backup
+    """
+    api = UrApiWrapper()
+    backup = api.get_backup_files(client_id, backup_id)
+    backup = api.response(backup)
+    if "content" in backup:
+        return backup["content"]
+
+    return "No DATA file on backup"
+
+def get_backup_files_to_download(client_id, backup_id):
+    """
+        Get every files on backup
+
+        Returns:
+            Array of info from backup
+    """
+    api = UrApiWrapper()
+    files = api.get_backup_files_to_download(client_id, backup_id)
+    files = api.response(files)
+    if "content" in files:
+        return files["content"]
+
+    return "No DATA file"
 
 
 def get_status():
@@ -230,11 +260,11 @@ def get_status_client(clientname):
 
         return "No DATA client"
 
-def create_backup_incr_file(client_id):
+def create_backup_incremental_file(client_id):
     """
     """
     api = UrApiWrapper()
-    backup = api.create_backup("incr_file" client_id)
+    backup = api.create_backup("incr_file", client_id)
     backup = api.response(backup)
 
     if "content" in backup:
@@ -246,7 +276,7 @@ def create_backup_full_file(client_id):
     """
     """
     api = UrApiWrapper()
-    backup = api.create_backup("full_file" client_id)
+    backup = api.create_backup("full_file", client_id)
     backup = api.response(backup)
 
     if "content" in backup:
@@ -254,11 +284,11 @@ def create_backup_full_file(client_id):
 
     return "No DATA full backup file"
 
-def create_backup_incr_image(client_id):
+def create_backup_incremental_image(client_id):
     """
     """
     api = UrApiWrapper()
-    backup = api.create_backup("incr_image" client_id)
+    backup = api.create_backup("incr_image", client_id)
     backup = api.response(backup)
 
     if "content" in backup:
@@ -270,7 +300,7 @@ def create_backup_full_image(client_id):
     """
     """
     api = UrApiWrapper()
-    backup = api.create_backup("full_image" client_id)
+    backup = api.create_backup("full_image", client_id)
     backup = api.response(backup)
 
     if "content" in backup:
