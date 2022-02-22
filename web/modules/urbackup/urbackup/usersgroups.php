@@ -81,8 +81,4 @@ foreach ($group_array as $group) {
 }
 ?>
     </tbody>
-<<<<<<< HEAD
 </table>
-=======
-</table>
->>>>>>> origin/urbackup
