@@ -23,7 +23,7 @@ $clients = $client_array["status"];
         </tr>
     </thead>
     <tbody>
-<?php 
+<?php
 foreach ($clients as $client) {
     if ($client['groupname'] != "")
     {

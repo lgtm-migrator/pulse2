@@ -12,18 +12,18 @@ $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
 
 // Function for format bytes
-function formatBytes($bytes, $precision = 2) { 
-    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+function formatBytes($bytes, $precision = 2) {
+    $units = array('B', 'KB', 'MB', 'GB', 'TB');
 
-    $bytes = max($bytes, 0); 
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
-    $pow = min($pow, count($units) - 1); 
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
 
     // Uncomment one of the following alternatives
     $bytes /= pow(1024, $pow);
-    //$bytes /= (1 << (10 * $pow)); 
+    //$bytes /= (1 << (10 * $pow));
 
-    return round($bytes, $precision) . ' ' . $units[$pow]; 
+    return round($bytes, $precision) . ' ' . $units[$pow];
 }
 
 //---
@@ -110,7 +110,7 @@ curl_setopt($curlid, CURLOPT_RETURNTRANSFER, true);
 $datas = [
     'ses'=>$session,
 ];
-  
+
 //transforme les params pour le format x-www-form-urlencoded
 $urlencoded = "";
 foreach($datas as $key=>$val){
@@ -154,7 +154,7 @@ $array = json_decode(json_encode($reviews), true);
         </tr>
     </thead>
     <tbody>
-<?php 
+<?php
 foreach ($array as $review) {
     if ($review['del'] == 'true')
     {
@@ -162,7 +162,7 @@ foreach ($array as $review) {
         {
             $status = "Delete of full Disk Image";
         }
-        
+
         if ($review['incremental'] != '0')
         {
             $status = "Delete of incremental save";
@@ -186,7 +186,7 @@ foreach ($array as $review) {
         {
             $status = "Restoration of full Disk Image";
         }
-        
+
         if ($review['incremental'] != '0')
         {
             $status = "Restoration of incremental save";
@@ -211,7 +211,7 @@ foreach ($array as $review) {
         <tr>
             <td> <?php echo $review['id']; ?></td>
             <td> <?php echo $review['name']; ?></td>
-            <td> <?php echo $dt; ?></td>       
+            <td> <?php echo $dt; ?></td>
             <td> <?php echo $status; ?></td>
             <td> <?php echo $output_duration; ?></td>
             <td> <?php echo $size; ?></td>

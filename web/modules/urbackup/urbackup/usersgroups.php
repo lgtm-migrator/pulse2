@@ -27,7 +27,7 @@ $users_group_array = xmlrpc_get_clients();
             <td style='text-align: left; text-decoration: underline;'> <?php echo _T("Rights", 'urbackup'); ?> </td>
         </tr>
 
-<?php     
+<?php
 $user_array = $users_group_array['users'];
 
 foreach ($user_array as $user) {
@@ -47,7 +47,6 @@ foreach ($user_array as $user) {
 <?php
 }
 ?>
-        
     </tbody>
 </table>
 <br>
@@ -82,4 +81,8 @@ foreach ($group_array as $group) {
 }
 ?>
     </tbody>
+<<<<<<< HEAD
 </table>
+=======
+</table>
+>>>>>>> origin/urbackup

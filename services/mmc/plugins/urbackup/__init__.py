@@ -76,7 +76,7 @@ def login():
     logged = api.response(logged)
 
     if "content" in logged and "session" in logged["content"]:
-    	return logged["content"]["session"]
+        return logged["content"]["session"]
 
     return False
 
