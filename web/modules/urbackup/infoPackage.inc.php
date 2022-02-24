@@ -19,12 +19,28 @@ $page = new Page("index", _T('Client machine list', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/index.php");
 $submod->addPage($page);
 
-$page = new Page("downloads_client_urb", _T('Download page of Urbackup Client', 'urbackup'));
-$page->setFile("modules/urbackup/urbackup/downloads_client_urb.php");
-$submod->addPage($page);
-
 $page = new Page("saves", _T('Saves', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/saves.php");
+$submod->addPage($page);
+
+$page = new Page("list_backups", _T('List Backups by Client', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/list_backups.php");
+$submod->addPage($page);
+
+$page = new Page("backup_files", _T('List of file on backup', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/backup_files.php");
+$submod->addPage($page);
+
+$page = new Page("all_files_backup", _T('List of files from on backup', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/all_files_backup.php");
+$submod->addPage($page);
+
+$page = new Page("restore_file", _T('Restore file', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/restore_file.php");
+$submod->addPage($page);
+
+$page = new Page("download_file", _T('Download file', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/download_file.php");
 $submod->addPage($page);
 
 $page = new Page("usersgroups", _T('Users and groups list', 'urbackup'));
@@ -37,6 +53,10 @@ $submod->addPage($page);
 
 $page = new Page("review", _T('Review', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/review.php");
+$submod->addPage($page);
+
+$page = new Page("logs", _T('Logs', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/logs.php");
 $submod->addPage($page);
 
 $mod->addSubmod($submod);
