@@ -79,18 +79,8 @@ function xmlrpc_create_backup_full_file($client_id){
     return xmlCall("urbackup.create_backup_full_file", [$client_id]);
 }
 
-function xmlrpc_create_backup_incremental_image($client_id){
-    // Return state for incremental save of image
-    return xmlCall("urbackup.create_backup_incremental_image", [$client_id]);
-}
-
-function xmlrpc_create_backup_full_image($client_id){
-    // Return Return state for full save of image
-    return xmlCall("urbackup.create_backup_full_image", [$client_id]);
-}
-
-/*function xmlrpc_get_status_client($clientname){
+function xmlrpc_get_status_client($clientname){
     // Return status
     return xmlCall("urbackup.get_status_client", [$clientname]);
-}*/
+}
 ?>
