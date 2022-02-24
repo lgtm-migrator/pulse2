@@ -195,7 +195,7 @@ def get_backups_all_client():
 
     return "No DATA backups"
 
-def get_backup_files(client_id, backup_id):
+def get_backup_files(client_id, backup_id, path):
     """
         Get every files on backup
 
@@ -203,37 +203,7 @@ def get_backup_files(client_id, backup_id):
             Array of info from backup
     """
     api = UrApiWrapper()
-    backup = api.get_backup_files(client_id, backup_id)
-    backup = api.response(backup)
-    if "content" in backup:
-        return backup["content"]
-
-    return "No DATA file on backup"
-
-def get_backup_files_to_download(client_id, backup_id):
-    """
-        Get every files on backup
-
-        Returns:
-            Array of info from backup
-    """
-    api = UrApiWrapper()
-    files = api.get_backup_files_to_download(client_id, backup_id, "/")
-    files = api.response(files)
-    if "content" in files:
-        return files["content"]
-
-    return "No DATA file"
-
-def get_backup_files_to_download_specific_path(client_id, backup_id, path):
-    """
-        Get every files on backup
-
-        Returns:
-            Array of info from backup
-    """
-    api = UrApiWrapper()
-    files = api.get_backup_files_to_download(client_id, backup_id, path)
+    files = api.get_backup_files(client_id, backup_id, path)
     files = api.response(files)
     if "content" in files:
         return files["content"]
