@@ -12,8 +12,7 @@ $users_group_array = xmlrpc_get_clients();
 
 <br>
 <br>
-<h2> <?php echo _T("Users list :", 'urbackup'); ?> </h2>
-<br>
+<h1> <?php echo _T("Users list :", 'urbackup'); ?> </h1>
 <br>
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
@@ -61,8 +60,7 @@ foreach ($user_array as $user) {
 $group_array = $users_group_array['navitems']['groups'];
 ?>
 
-<h2> <?php echo _T("Groups list :", 'urbackup'); ?> </h2>
-<br>
+<h1> <?php echo _T("Groups list :", 'urbackup'); ?> </h1>
 <br>
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>

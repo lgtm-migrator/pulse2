@@ -3,10 +3,6 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$p = new PageGenerator(_T("List Backups by Client", 'urbackup'));
-$p->setSideMenu($sidemenu);
-$p->display();
-
 $client_id = htmlspecialchars($_GET["clientid"]);
 $backup_id = htmlspecialchars($_GET["backupid"]);
 $volume_name = htmlspecialchars($_GET["volumename"]);
@@ -15,6 +11,10 @@ $files = xmlrpc_get_backup_files($client_id, $backup_id, $volume_name);
 $path = $files['path'];
 $client_name = $files['clientname'];
 $files = $files['files'];
+
+$p = new PageGenerator(_T("Backups list for ".$client_name, 'urbackup'));
+$p->setSideMenu($sidemenu);
+$p->display();
 
 function secs2date($secs,$date)
 {
@@ -43,7 +43,7 @@ function formatBytes($bytes, $precision = 2) {
 ?>
 
 <br>
-<label><?php echo _T("Client name: ", 'urbackup').$client_name._T(" Path: ", 'urbackup').$path; ?></label>
+<label><?php echo _T(" Path: ", 'urbackup').$path; ?></label>
 <br>
 
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
