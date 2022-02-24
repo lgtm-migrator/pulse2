@@ -64,14 +64,16 @@ class UrApiWrapper:
                 headers=self.headers,
                 data=params,
                 verify=self.verify,
-                allow_redirects=self.allow_redirects)
+                allow_redirects=self.allow_redirects,
+            )
         if method == "POST":
             response = requests.post(
                 url,
                 headers=self.headers,
                 data=params,
                 verify=self.verify,
-                allow_redirects=self.allow_redirects)
+                allow_redirects=self.allow_redirects,
+            )
 
         return response
 
@@ -80,7 +82,8 @@ class UrApiWrapper:
             "username": self.user_login,
             "password": self.password,
             "plainpw": 1,
-            "lang": lang}
+            "lang": lang,
+        }
         response = self.request("login", params)
 
         try:
@@ -107,7 +110,8 @@ class UrApiWrapper:
         return {
             "status_code": resp.status_code,
             "headers": resp.headers,
-            "content": resp_json}
+            "content": resp_json,
+        }
 
     def get_logs(self, clientid=0):
         self.login()
@@ -132,10 +136,7 @@ class UrApiWrapper:
 
     def get_settings_clientsettings(self, id_client):
         self.login()
-        params = {
-            "sa": "clientsettings",
-            "t_clientid": id_client,
-            "ses": self.ses}
+        params = {"sa": "clientsettings", "t_clientid": id_client, "ses": self.ses}
         response = self.request("settings", params)
 
         return response
@@ -156,21 +157,40 @@ class UrApiWrapper:
 
     def get_backup_files(self, client_id, backup_id, path):
         self.login()
-        params = {"sa": "files", "clientid": client_id, "backupid": backup_id, "path": path, "ses": self.ses}
+        params = {
+            "sa": "files",
+            "clientid": client_id,
+            "backupid": backup_id,
+            "path": path,
+            "ses": self.ses,
+        }
         response = self.request("backups", params)
 
         return response
 
     def client_download_backup_file(self, client_id, backup_id, path):
         self.login()
-        params = {"sa": "clientdl", "clientid": client_id, "backupid": backup_id, "path": path, "ses": self.ses}
+        params = {
+            "sa": "clientdl",
+            "clientid": client_id,
+            "backupid": backup_id,
+            "path": path,
+            "ses": self.ses,
+        }
         response = self.request("backups", params)
 
         return response
 
     def client_download_backup_file_shahash(self, client_id, backup_id, path, shahash):
         self.login()
-        params = {"sa": "clientdl", "clientid": client_id, "backupid": backup_id, "path": path, "ses": self.ses, "shahash": shahash}
+        params = {
+            "sa": "clientdl",
+            "clientid": client_id,
+            "backupid": backup_id,
+            "path": path,
+            "ses": self.ses,
+            "shahash": shahash,
+        }
         response = self.request("backups", params)
 
         return response
