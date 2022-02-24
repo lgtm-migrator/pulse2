@@ -15,17 +15,15 @@ $users_group_array = xmlrpc_get_clients();
 <h2> <?php echo _T("Users list :", 'urbackup'); ?> </h2>
 <br>
 <br>
-<table style:'border: 1px solid #333;'>
+<table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
         <tr>
-            <th colspan="2"> <?php echo _T("User list", 'urbackup'); ?> </th>
+            <th style='text-align: left;'> <?php echo _T("User name", 'urbackup'); ?> </th>
+            <th style='text-align: left;'> <?php echo _T("Rights", 'urbackup'); ?> </th>
+            <th style='text-align: right;'> <?php echo _T("Actions", 'urbackup'); ?> </th>
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td style='text-align: left; text-decoration: underline;'> <?php echo _T("User name", 'urbackup'); ?> </td>
-            <td style='text-align: left; text-decoration: underline;'> <?php echo _T("Rights", 'urbackup'); ?> </td>
-        </tr>
 
 <?php
 $user_array = $users_group_array['users'];
@@ -33,7 +31,7 @@ $user_array = $users_group_array['users'];
 foreach ($user_array as $user) {
 ?>
         <tr>
-            <td> <?php echo $user['name']; ?></td>
+            <td style='padding-left: 5px;'> <?php echo $user['name']; ?></td>
             <td>
             <?php
             $user_rights = $user['rights'];
@@ -42,6 +40,13 @@ foreach ($user_array as $user) {
                   echo $rights['domain'].': '.$rights['right'].'. ';
             }
             ?>
+            </td>
+            <td>
+            <ul class="action">
+                <li class="delete">
+                    <a title=<?php echo _T("Delete", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete" onclick="PopupWindow(event,'main.php?module=urbackup&amp;submod=urbackup&amp;action=delete', 300); return false;">&nbsp;</a>
+                </li>
+            </ul>
             </td>
         </tr>
 <?php
@@ -59,22 +64,27 @@ $group_array = $users_group_array['navitems']['groups'];
 <h2> <?php echo _T("Groups list :", 'urbackup'); ?> </h2>
 <br>
 <br>
-<table style:'border: 1px solid #333;'>
+<table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
         <tr>
-            <th colspan="2"> <?php echo _T("Group list", 'urbackup'); ?> </th>
+            <th style='text-align: left;'> <?php echo _T("Group name", 'urbackup'); ?> </th>
+            <th style='text-align: right;'> <?php echo _T("Actions", 'urbackup'); ?> </th>
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td style='text-align: left; text-decoration: underline;'> <?php echo _T("Group name", 'urbackup'); ?> </td>
-        </tr>
 <?php
 foreach ($group_array as $group) {
     if ($group['name'] != "") {
 ?>
         <tr>
-            <td> <?php echo $group['name']; ?></td>
+            <td style='padding-left: 5px;'> <?php echo $group['name']; ?></td>
+            <td>
+            <ul class="action">
+                <li class="delete">
+                    <a title=<?php echo _T("Delete", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete" onclick="PopupWindow(event,'main.php?module=urbackup&amp;submod=urbackup&amp;action=delete', 300); return false;">&nbsp;</a>
+                </li>
+            </ul>
+            </td>
         </tr>
 <?php
     }
