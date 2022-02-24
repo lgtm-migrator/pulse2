@@ -116,6 +116,13 @@ class UrApiWrapper:
 
         return response
 
+    def add_client(self, clientname):
+        self.login()
+        params = {"clientname": clientname, "ses": self.ses}
+        response = self.request("add_client", params)
+
+        return response
+
     def get_settings_general(self):
         self.login()
         params = {"sa": "general", "ses": self.ses}
@@ -154,9 +161,23 @@ class UrApiWrapper:
 
         return response
 
-    def get_backup_files_to_download(self, client_id, backup_id):
+    def get_backup_files_to_download(self, client_id, backup_id, path):
         self.login()
-        params = {"sa": "filesdl", "clientid": client_id, "backupid": backup_id, "path":"/", "ses": self.ses}
+        params = {"sa": "files", "clientid": client_id, "backupid": backup_id, "path": path, "ses": self.ses}
+        response = self.request("backups", params)
+
+        return response
+
+    def client_download_backup_file(self, client_id, backup_id, path):
+        self.login()
+        params = {"sa": "clientdl", "clientid": client_id, "backupid": backup_id, "path": path, "ses": self.ses}
+        response = self.request("backups", params)
+
+        return response
+
+    def client_download_backup_file_shahash(self, client_id, backup_id, path, shahash):
+        self.login()
+        params = {"sa": "clientdl", "clientid": client_id, "backupid": backup_id, "path": path, "ses": self.ses, "shahash": shahash}
         response = self.request("backups", params)
 
         return response

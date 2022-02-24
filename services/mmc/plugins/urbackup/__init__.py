@@ -113,6 +113,24 @@ def get_logs():
 
     return "No DATA in logs"
 
+def add_client(client_name):
+    """
+        Create client with new id and authkey
+
+        Returns:
+            Server,
+            Port,
+            Authkey,
+            Client ID
+            Client Name
+    """
+    api = UrApiWrapper()
+    newclient = api.add_client(client_name)
+    newclient = api.response(newclient)
+    if "content" in newclient:
+        return newclient["content"]
+
+    return "No DATA in logs"
 
 def get_settings_general():
     """
@@ -200,14 +218,49 @@ def get_backup_files_to_download(client_id, backup_id):
             Array of info from backup
     """
     api = UrApiWrapper()
-    files = api.get_backup_files_to_download(client_id, backup_id)
+    files = api.get_backup_files_to_download(client_id, backup_id, "/")
     files = api.response(files)
     if "content" in files:
         return files["content"]
 
     return "No DATA file"
 
+def get_backup_files_to_download_specific_path(client_id, backup_id, path):
+    """
+        Get every files on backup
 
+        Returns:
+            Array of info from backup
+    """
+    api = UrApiWrapper()
+    files = api.get_backup_files_to_download(client_id, backup_id, path)
+    files = api.response(files)
+    if "content" in files:
+        return files["content"]
+
+    return "No DATA file"
+
+def client_download_backup_file(clientid, backupid, path):
+    """
+    """
+    api = UrApiWrapper()
+    download = api.client_download_backup_file(clientid, backupid, path)
+    download = api.response(download)
+    if "content" in download:
+        return download["content"]
+
+    return "No DATA file"
+
+def client_download_backup_file_shahash(clientid, backupid, path, shahash):
+    """
+    """
+    api = UrApiWrapper()
+    download = api.client_download_backup_file_shahash(clientid, backupid, path, shahash)
+    download = api.response(download)
+    if "content" in download:
+        return download["content"]
+
+    return "No DATA file"
 def get_status():
     """
         Get server and all client status
@@ -283,27 +336,3 @@ def create_backup_full_file(client_id):
         return backup["content"]
 
     return "No DATA full backup file"
-
-def create_backup_incremental_image(client_id):
-    """
-    """
-    api = UrApiWrapper()
-    backup = api.create_backup("incr_image", client_id)
-    backup = api.response(backup)
-
-    if "content" in backup:
-        return backup["content"]
-
-    return "No DATA incremental backup image"
-
-def create_backup_full_image(client_id):
-    """
-    """
-    api = UrApiWrapper()
-    backup = api.create_backup("full_image", client_id)
-    backup = api.response(backup)
-
-    if "content" in backup:
-        return backup["content"]
-
-    return "No DATA full backup image"
