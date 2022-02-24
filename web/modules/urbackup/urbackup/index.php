@@ -136,25 +136,17 @@ $array = json_decode(json_encode($reviews), true);
 foreach ($array as $review) {
     if ($review['del'] == 'true')
     {
-        if ($review['image'] == '1')
-            $status = "Delete of full Disk Image";
-        
         if ($review['incremental'] != '0')
             $status = "Delete of incremental save";
     }
     else
     {
-        if ($review['image'] != '0')
-            $status = 'Disk Image';
-        else
+        if ($review['incremental'] != '0')
             $status = 'Incremental Save';
     }
 
     if ($review['restore'] != '0')
     {
-        if ($review['image'] == '1')
-            $status = "Restoration of full Disk Image";
-        
         if ($review['incremental'] != '0')
             $status = "Restoration of incremental save";
     }
