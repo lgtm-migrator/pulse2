@@ -44,19 +44,9 @@ function xmlrpc_get_backups_for_client($client_id){
     return xmlCall("urbackup.get_backups_for_client", [$client_id]);
 }
 
-function xmlrpc_get_backup_files($client_id, $backup_id){
-    // Return backup specify by backup id, only for one client
-    return xmlCall("urbackup.get_backup_files", [$client_id, $backup_id]);
-}
-
-function xmlrpc_get_backup_files_to_download($client_id, $backup_id){
-    // Get all file from one client and one backup
-    return xmlCall("urbackup.get_backup_files_to_download", [$client_id, $backup_id]);
-}
-
-function xmlrpc_get_backup_files_to_download_specific_path($client_id, $backup_id, $path){
-    // Download file for of backup, need path
-    return xmlCall("urbackup.get_backup_files_to_download_specific_path", [$client_id, $backup_id, $path]);
+function xmlrpc_get_backup_files($client_id, $backup_id, $path){
+    // List file for of backup, need path
+    return xmlCall("urbackup.get_backup_files", [$client_id, $backup_id, $path]);
 }
 
 function xmlrpc_client_download_backup_file($client_id, $backup_id, $path){
