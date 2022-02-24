@@ -27,6 +27,10 @@ $page = new Page("list_backups", _T('List Backups by Client', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/list_backups.php");
 $submod->addPage($page);
 
+$page = new Page("start_backup", _T('Start backup', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/start_backup.php");
+$submod->addPage($page);
+
 $page = new Page("all_files_backup", _T('List of files from on backup', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/all_files_backup.php");
 $submod->addPage($page);
