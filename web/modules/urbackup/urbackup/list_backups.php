@@ -178,7 +178,7 @@ foreach ($backups as $backup) {
 ?>
         <tr >
             <td>
-                <a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=backup_files&amp;clientid=<?php echo $client_id; ?>&amp;backupid=<?php echo $id_backup; ?>"><?php echo $backup['id']; ?></a>
+                <a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid=<?php echo $client_id; ?>&amp;backupid=<?php echo $id_backup; ?>&amp;volumename=<?php echo "/" ?>"><?php echo $backup['id']; ?></a>
             </td>
             <td> <?php echo $incremental; ?></td>
             <td> <?php echo $archive; ?></td>
@@ -187,7 +187,7 @@ foreach ($backups as $backup) {
             <td>
             <ul class="action">
                 <li class="display">
-                    <a title=<?php echo _T("Browse", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=backup_files&amp;clientid=<?php echo $client_id; ?>&amp;backupid=<?php echo $id_backup; ?>">&nbsp;</a>
+                    <a title=<?php echo _T("Browse", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid=<?php echo $client_id; ?>&amp;backupid=<?php echo $id_backup; ?>&amp;volumename=<?php echo "/" ?>">&nbsp;</a>
                 </li>
                 <?php
                 if ($delete == "true")
