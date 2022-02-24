@@ -101,19 +101,11 @@ def get_ses():
 
 def get_logs():
     """
-<<<<<<< HEAD
-        Get the logs of the server
-
-        Returns:
-            It returns the server logs.
-            If no logs are available, it returns the "No DATA" string.
-=======
     Get the logs of the server
 
     Returns:
         It returns the server logs.
         If no logs are available, it returns the "No DATA" string.
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     _logs = api.get_logs()
@@ -123,18 +115,6 @@ def get_logs():
 
     return "No DATA in logs"
 
-<<<<<<< HEAD
-def add_client(client_name):
-    """
-        Create client with new id and authkey
-
-        Returns:
-            Server,
-            Port,
-            Authkey,
-            Client ID
-            Client Name
-=======
 
 def add_client(client_name):
     """
@@ -146,7 +126,6 @@ def add_client(client_name):
         Authkey,
         Client ID
         Client Name
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     newclient = api.add_client(client_name)
@@ -156,14 +135,6 @@ def add_client(client_name):
 
     return "No DATA in logs"
 
-<<<<<<< HEAD
-def get_settings_general():
-    """
-        Get multiples settings value of server
-
-        Returns:
-            Array of every settings value of server
-=======
 
 def get_settings_general():
     """
@@ -171,7 +142,6 @@ def get_settings_general():
 
     Returns:
         Array of every settings value of server
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     settings = api.get_settings_general()
@@ -184,17 +154,10 @@ def get_settings_general():
 
 def get_settings_clientsettings(id_client):
     """
-<<<<<<< HEAD
-        Get multiples settings for one client
-
-        Returns:
-            Array of client settings
-=======
     Get multiples settings for one client
 
     Returns:
         Array of client settings
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     settings = api.get_settings_clientsettings(id_client)
@@ -207,17 +170,10 @@ def get_settings_clientsettings(id_client):
 
 def get_settings_clients():
     """
-<<<<<<< HEAD
-        Get clients groups and user on urbackup
-
-        Returns:
-            Array of every client informations
-=======
     Get clients groups and user on urbackup
 
     Returns:
         Array of every client informations
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     list_clients = api.get_settings_clients()
@@ -230,17 +186,10 @@ def get_settings_clients():
 
 def get_backups_all_client():
     """
-<<<<<<< HEAD
-        Get every backups for each client
-
-        Returns:
-            Array of every backup for each client
-=======
     Get every backups for each client
 
     Returns:
         Array of every backup for each client
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     backups = api.get_backups("0")
@@ -250,14 +199,6 @@ def get_backups_all_client():
 
     return "No DATA backups"
 
-<<<<<<< HEAD
-def get_backup_files(client_id, backup_id, path):
-    """
-        Get every files on backup
-
-        Returns:
-            Array of info from backup
-=======
 
 def get_backup_files(client_id, backup_id, path):
     """
@@ -265,7 +206,6 @@ def get_backup_files(client_id, backup_id, path):
 
     Returns:
         Array of info from backup
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     files = api.get_backup_files(client_id, backup_id, path)
@@ -275,15 +215,9 @@ def get_backup_files(client_id, backup_id, path):
 
     return "No DATA file"
 
-<<<<<<< HEAD
-def client_download_backup_file(clientid, backupid, path):
-    """
-    """
-=======
 
 def client_download_backup_file(clientid, backupid, path):
     """ """
->>>>>>> origin/urbackup
     api = UrApiWrapper()
     download = api.client_download_backup_file(clientid, backupid, path)
     download = api.response(download)
@@ -292,13 +226,6 @@ def client_download_backup_file(clientid, backupid, path):
 
     return "No DATA file"
 
-<<<<<<< HEAD
-def client_download_backup_file_shahash(clientid, backupid, path, shahash):
-    """
-    """
-    api = UrApiWrapper()
-    download = api.client_download_backup_file_shahash(clientid, backupid, path, shahash)
-=======
 
 def client_download_backup_file_shahash(clientid, backupid, path, shahash):
     """ """
@@ -306,20 +233,11 @@ def client_download_backup_file_shahash(clientid, backupid, path, shahash):
     download = api.client_download_backup_file_shahash(
         clientid, backupid, path, shahash
     )
->>>>>>> origin/urbackup
     download = api.response(download)
     if "content" in download:
         return download["content"]
 
     return "No DATA file"
-<<<<<<< HEAD
-def get_status():
-    """
-        Get server and all client status
-
-        Returns:
-            Array of server and all client status
-=======
 
 
 def get_status():
@@ -328,7 +246,6 @@ def get_status():
 
     Returns:
         Array of server and all client status
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     status = api.get_status()
@@ -341,17 +258,10 @@ def get_status():
 
 def get_progress():
     """
-<<<<<<< HEAD
-        Get progress for every backups
-
-        Returns:
-            Array of progress review for backups
-=======
     Get progress for every backups
 
     Returns:
         Array of progress review for backups
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     progress = api.get_progress()
@@ -364,15 +274,6 @@ def get_progress():
 
 def get_status_client(clientname):
     """
-<<<<<<< HEAD
-        Get status for one client
-
-        Args:
-            Clientname
-
-        Returns:
-            Array status for one client
-=======
     Get status for one client
 
     Args:
@@ -380,31 +281,20 @@ def get_status_client(clientname):
 
     Returns:
         Array status for one client
->>>>>>> origin/urbackup
     """
     api = UrApiWrapper()
     status = api.get_status()
     status = api.response(status)
 
     for client in status["status"]:
-<<<<<<< HEAD
-        if (client["name"] == clientname):
-=======
         if client["name"] == clientname:
->>>>>>> origin/urbackup
             return client
 
         return "No DATA client"
 
-<<<<<<< HEAD
-def create_backup_incremental_file(client_id):
-    """
-    """
-=======
 
 def create_backup_incremental_file(client_id):
     """ """
->>>>>>> origin/urbackup
     api = UrApiWrapper()
     backup = api.create_backup("incr_file", client_id)
     backup = api.response(backup)
@@ -414,15 +304,9 @@ def create_backup_incremental_file(client_id):
 
     return "No DATA incremental backup file"
 
-<<<<<<< HEAD
-def create_backup_full_file(client_id):
-    """
-    """
-=======
 
 def create_backup_full_file(client_id):
     """ """
->>>>>>> origin/urbackup
     api = UrApiWrapper()
     backup = api.create_backup("full_file", client_id)
     backup = api.response(backup)
