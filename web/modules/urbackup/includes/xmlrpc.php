@@ -19,6 +19,11 @@ function xmlrpc_get_logs(){
     return xmlCall("urbackup.get_logs", []);
 }
 
+function xmlrpc_add_client($clientname){
+    // Return logs for all user
+    return xmlCall("urbackup.add_client", [$clientname]);
+}
+
 function xmlrpc_get_settings_global(){
     // Return all settings
     return xmlCall("urbackup.get_settings_general", []);
@@ -35,18 +40,33 @@ function xmlrpc_get_backups_all_client(){
 }
 
 function xmlrpc_get_backups_for_client($client_id){
-    // Return backups of all clients with date last backup
+    // Return backups of one clients with date last backup
     return xmlCall("urbackup.get_backups_for_client", [$client_id]);
 }
 
 function xmlrpc_get_backup_files($client_id, $backup_id){
-    // Return backups of all clients with date last backup
+    // Return backup specify by backup id, only for one client
     return xmlCall("urbackup.get_backup_files", [$client_id, $backup_id]);
 }
 
 function xmlrpc_get_backup_files_to_download($client_id, $backup_id){
-    // Return backups of all clients with date last backup
+    // Get all file from one client and one backup
     return xmlCall("urbackup.get_backup_files_to_download", [$client_id, $backup_id]);
+}
+
+function xmlrpc_get_backup_files_to_download_specific_path($client_id, $backup_id, $path){
+    // Download file for of backup, need path
+    return xmlCall("urbackup.get_backup_files_to_download_specific_path", [$client_id, $backup_id, $path]);
+}
+
+function xmlrpc_client_download_backup_file($client_id, $backup_id, $path){
+    // Restore file for client
+    return xmlCall("urbackup.client_download_backup_file", [$client_id, $backup_id, $path]);
+}
+
+function xmlrpc_client_download_backup_file_shahash($client_id, $backup_id, $path, $shahash){
+    // Restore file for client, need shahash for only file
+    return xmlCall("urbackup.client_download_backup_file_shahash", [$client_id, $backup_id, $path, $shahash]);
 }
 
 function xmlrpc_get_status(){
