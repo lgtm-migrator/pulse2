@@ -15,7 +15,7 @@ $submod->setImg('modules/urbackup/graph/navbar/urbackup');
 $submod->setDefaultPage("urbackup/urbackup/index");
 $submod->setPriority(500);
 
-$page = new Page("index", _T('Client machine list', 'urbackup'));
+$page = new Page("index", _T('Review', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/index.php");
 $submod->addPage($page);
 
@@ -25,10 +25,6 @@ $submod->addPage($page);
 
 $page = new Page("list_backups", _T('List Backups by Client', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/list_backups.php");
-$submod->addPage($page);
-
-$page = new Page("backup_files", _T('List of file on backup', 'urbackup'));
-$page->setFile("modules/urbackup/urbackup/backup_files.php");
 $submod->addPage($page);
 
 $page = new Page("all_files_backup", _T('List of files from on backup', 'urbackup'));
@@ -45,14 +41,6 @@ $submod->addPage($page);
 
 $page = new Page("usersgroups", _T('Users and groups list', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/usersgroups.php");
-$submod->addPage($page);
-
-$page = new Page("settings", _T('Settings', 'urbackup'));
-$page->setFile("modules/urbackup/urbackup/settings.php");
-$submod->addPage($page);
-
-$page = new Page("review", _T('Review', 'urbackup'));
-$page->setFile("modules/urbackup/urbackup/review.php");
 $submod->addPage($page);
 
 $page = new Page("logs", _T('Logs', 'urbackup'));
