@@ -134,6 +134,7 @@ function formatBytes($bytes, $precision = 2)
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start incremental backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=incrementalbackup">Start incremental backup</a>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=fullbackup">Start full backup</a>
 <br>
+<br>
 <label><?php echo _T("Client name: ", 'urbackup').$name; ?></label>
 <br>
 <h2> <?php echo _T("File save", 'urbackup'); ?> </h2>
