@@ -11,7 +11,7 @@ $client_id = htmlspecialchars($_GET["clientid"]);
 $backup_id = htmlspecialchars($_GET["backupid"]);
 $volume_name = htmlspecialchars($_GET["volumename"]);
 
-$files = xmlrpc_get_backup_files_to_download_specific_path($client_id, $backup_id, $volume_name);
+$files = xmlrpc_get_backup_files($client_id, $backup_id, $volume_name);
 $path = $files['path'];
 $client_name = $files['clientname'];
 $files = $files['files'];
@@ -70,15 +70,14 @@ if (empty($files))
 foreach ($files as $file)
 {
     if (isset($file['shahash']))
-    {
         $shahash = $file['shahash'];
-    }
     else
-    {
         $shahash = "";
-    }
-    
-    $final_path = $path."/".$file['name'];
+
+    if ($path != "/")
+        $final_path = $path."/".$file['name'];
+    else
+        $final_path = $path.$file['name'];
 
     if ($file['dir'] == "false")
         $dir = "false";
