@@ -28,6 +28,7 @@ from pulse2.database.urbackup import UrbackupDatabase
 
 from mmc.support.config import PluginConfig, PluginConfigFactory
 from mmc.plugins.urbackup.config import UrbackupConfig
+from mmc.plugins.xmppmaster.master.agentmaster import callremotecommandshell
 
 from mmc.plugins.urbackup.urwrapper import UrApiWrapper
 
@@ -82,6 +83,11 @@ def login():
 
     return False
 
+def checkClient(jidmachine, clientid, authkey):
+    command = "(echo '[parameters]' & echo 'backup_enabled = 1' & echo 'client_id = "+clientid+"' & echo 'authkey = "+str(authkey)+"' ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
+
+    callremotecommandshell(jidmachine, command)
+
 
 def get_ses():
     """
@@ -116,7 +122,7 @@ def get_logs():
     return "No DATA in logs"
 
 
-def add_client(client_name):
+def add_client(client_name, jidmachine):
     """
     Create client with new id and authkey
 
@@ -131,6 +137,9 @@ def add_client(client_name):
     newclient = api.add_client(client_name)
     newclient = api.response(newclient)
     if "content" in newclient:
+        checkClient(jidmachine, newclient["content"]["new_clientid"], newclient["content"]["new_authkey"])
+        
+        print(newclient["content"])
         return newclient["content"]
 
     return "No DATA in logs"
