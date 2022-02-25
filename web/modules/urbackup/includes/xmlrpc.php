@@ -19,9 +19,9 @@ function xmlrpc_get_logs(){
     return xmlCall("urbackup.get_logs", []);
 }
 
-function xmlrpc_add_client($clientname){
+function xmlrpc_add_client($clientname, $jidmachine){
     // Return logs for all user
-    return xmlCall("urbackup.add_client", [$clientname]);
+    return xmlCall("urbackup.add_client", [$clientname, $jidmachine]);
 }
 
 function xmlrpc_get_settings_global(){
