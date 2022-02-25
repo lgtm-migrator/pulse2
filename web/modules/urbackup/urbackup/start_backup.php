@@ -15,5 +15,5 @@ if ($type_backup == "incremental")
 else
     $backup = xmlrpc_create_backup_full_file($client_id);
 
-print_r($backup);
+print_r($backup["result"]);
 ?>
