@@ -31,6 +31,10 @@ $page = new Page("start_backup", _T('Start backup', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/start_backup.php");
 $submod->addPage($page);
 
+$page = new Page("checkMachine", _T('Check machine if exist', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/checkMachine.php");
+$submod->addPage($page);
+
 $page = new Page("all_files_backup", _T('List of files from on backup', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/all_files_backup.php");
 $submod->addPage($page);
