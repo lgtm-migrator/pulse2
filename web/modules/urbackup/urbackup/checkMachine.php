@@ -39,13 +39,11 @@ else
     $create_client = xmlrpc_add_client($clientname);
 
     if ($create_client["already_exists"] == "1")
-        print_r(_T("Utilisateur déjà existant, en cours de suppression.","urbackup"));
+        print_r(_T("User already exists, this user is in delete process..." ,"urbackup"));
     else
     {
-        print_r(_T("Utilisateur créé.","urbackup"));
+        print_r(_T("User created.", "urbackup"));
         $check_client = xmlrpc_check_client($jidMachine, $create_client["new_clientid"], $create_client["new_authkey"]);
     }
-        
-    
 }
 ?>
