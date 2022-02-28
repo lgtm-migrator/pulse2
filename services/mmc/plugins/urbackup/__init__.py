@@ -141,6 +141,21 @@ def add_client(client_name):
 
     return "No DATA in newclient"
 
+def add_group(groupname):
+    """
+    Create groupe
+
+    Returns:
+        Settings for created group
+    """
+    api = UrApiWrapper()
+    newgroup = api.add_group(groupname)
+    newgroup = api.response(newgroup)
+    if "content" in newgroup:
+        return newgroup["content"]
+
+    return "No DATA in newclient"
+
 
 def get_settings_general():
     """
@@ -156,6 +171,22 @@ def get_settings_general():
         return settings["content"]
 
     return "No DATA in global settings"
+
+
+def save_settings(clientid, name_data, value_data):
+    """
+    Save settings for client of group
+
+    Returns:
+        Settings saved for group
+    """
+    api = UrApiWrapper()
+    settings = api.save_settings(clientid, name_data, value_data)
+    settings = api.response(settings)
+    if "content" in settings:
+        return settings["content"]
+
+    return "No DATA settings saved"
 
 
 def get_settings_clientsettings(id_client):
