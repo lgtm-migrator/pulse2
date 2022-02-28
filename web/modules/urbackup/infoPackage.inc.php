@@ -35,6 +35,18 @@ $page = new Page("checkMachine", _T('Check machine if exist', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/checkMachine.php");
 $submod->addPage($page);
 
+$page = new Page("create_group", _T('Create group', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/create_group.php");
+$submod->addPage($page);
+
+$page = new Page("edit_group_settings", _T('Edit group', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/edit_group_settings.php");
+$submod->addPage($page);
+
+$page = new Page("validate_edit_group", _T('Validate save settings', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/validate_edit_group.php");
+$submod->addPage($page);
+
 $page = new Page("all_files_backup", _T('List of files from on backup', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/all_files_backup.php");
 $submod->addPage($page);
