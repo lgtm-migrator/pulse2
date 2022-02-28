@@ -19,9 +19,14 @@ function xmlrpc_get_logs(){
     return xmlCall("urbackup.get_logs", []);
 }
 
-function xmlrpc_add_client($clientname, $jidmachine){
+function xmlrpc_add_client($clientname){
     // Return logs for all user
-    return xmlCall("urbackup.add_client", [$clientname, $jidmachine]);
+    return xmlCall("urbackup.add_client", [$clientname]);
+}
+
+function xmlrpc_check_client($jidmachine, $clientid, $authkey){
+    // 
+    return xmlCall("urbackup.check_client", [$jidmachine, $clientid, $authkey]);
 }
 
 function xmlrpc_get_settings_global(){
@@ -49,9 +54,9 @@ function xmlrpc_get_backup_files($client_id, $backup_id, $path){
     return xmlCall("urbackup.get_backup_files", [$client_id, $backup_id, $path]);
 }
 
-function xmlrpc_client_download_backup_file($client_id, $backup_id, $path){
+function xmlrpc_client_download_backup_file($client_id, $backup_id, $path, $filter){
     // Restore file for client
-    return xmlCall("urbackup.client_download_backup_file", [$client_id, $backup_id, $path]);
+    return xmlCall("urbackup.client_download_backup_file", [$client_id, $backup_id, $path, $filter]);
 }
 
 function xmlrpc_client_download_backup_file_shahash($client_id, $backup_id, $path, $shahash){
