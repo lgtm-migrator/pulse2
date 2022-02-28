@@ -19,18 +19,18 @@ $filename = htmlspecialchars($_GET["filename"]);
 if ($shahash == "")
 {
     $client_restore_file = xmlrpc_client_download_backup_file($client_id, $backup_id, $path, $filename);
-    if ($client_restore_file["start_ok"] == "1")
-        print_r(_T("Demande de restauration du dossier envoyée à l'agent avec succes.", "urbackup"));
+    if ($client_restore_file["ok"] == "true")
+        print_r(_T("Backup folder request successfully asked to client.", "urbackup"));
     else
-        print_r(_T("Erreur de la restauration, veuillez re essayer, vérifiez également que le post distant est en ligne.","urbackup"));
+        print_r(_T("Backup error, please try again, check if client exist or is online.","urbackup"));
 }
 else
 {
     $client_restore_file_shahash = xmlrpc_client_download_backup_file_shahash($client_id, $backup_id, $path, $shahash);
-    if ($client_restore_file["start_ok"] == "1")
-        print_r(_T("Demande de restauration du fichier envoyée à l'agent avec succes.", "urbackup"));
+    if ($client_restore_file["ok"] == "true")
+        print_r(_T("Backup file(s) request successfully asked to client.", "urbackup"));
     else
-        print_r(_T("Erreur de la restauration, veuillez re essayer, vérifiez également que le post distant est en ligne.","urbackup"));
+        print_r(_T("Backup error, please try again, check if client exist or is online.","urbackup"));
 }
 
 ?>
