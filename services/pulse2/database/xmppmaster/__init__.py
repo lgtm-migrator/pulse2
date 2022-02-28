@@ -7020,7 +7020,7 @@ class XmppMasterDatabase(DatabaseHelper):
     @DatabaseHelper._sessionm
     def update_status_waiting_for_deploy_on_machine_restart_or_stop(self, session):
         """
-            We select the machines in a stalled deploiement for more than 60 seconds in the 
+            We select the machines in a stalled deploiement for more than 60 seconds in the
             WAITING MACHINE ONLINE state.
         """
         try:
@@ -8208,7 +8208,7 @@ class XmppMasterDatabase(DatabaseHelper):
             for machine in query:
                 flag = False
                 for count_ars in counts:
-                    if machine.jid == count_ars["jid"]:
+                    if machine.jid_from_relayserver == count_ars["jid"]:
                         flag = True
                         break
                 if flag == True:
