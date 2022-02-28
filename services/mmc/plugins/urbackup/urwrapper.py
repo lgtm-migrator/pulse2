@@ -126,7 +126,7 @@ class UrApiWrapper:
         response = self.request("add_client", params)
 
         return response
-    
+
     def add_group(self, groupname):
         self.login()
         params = {"sa": "groupadd", "name": groupname}
@@ -140,10 +140,16 @@ class UrApiWrapper:
         response = self.request("settings", params)
 
         return response
-    
+
     def save_settings(self, clientid, name_data, value_data):
         self.login()
-        params = {"sa": "clientsettings_save", "t_clientid": clientid, "overwrite": "true", name_data: value_data, "ses": self.ses}
+        params = {
+            "sa": "clientsettings_save",
+            "t_clientid": clientid,
+            "overwrite": "true",
+            name_data: value_data,
+            "ses": self.ses,
+        }
         response = self.request("settings", params)
 
         return response
