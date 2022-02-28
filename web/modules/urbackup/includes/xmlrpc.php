@@ -20,18 +20,28 @@ function xmlrpc_get_logs(){
 }
 
 function xmlrpc_add_client($clientname){
-    // Return logs for all user
+    // Create new user
     return xmlCall("urbackup.add_client", [$clientname]);
 }
 
+function xmlrpc_add_group($groupname){
+    // Create new group
+    return xmlCall("urbackup.add_group", [$groupname]);
+}
+
 function xmlrpc_check_client($jidmachine, $clientid, $authkey){
-    // 
+    // Call agent to send command
     return xmlCall("urbackup.check_client", [$jidmachine, $clientid, $authkey]);
 }
 
 function xmlrpc_get_settings_global(){
     // Return all settings
     return xmlCall("urbackup.get_settings_general", []);
+}
+
+function xmlrpc_save_settings($clientid, $name_data, $value_data){
+    // Save setings for client or group
+    return xmlCall("urbackup.save_settings", [$clientid, $name_data, $value_data]);
 }
 
 function xmlrpc_get_clients(){
