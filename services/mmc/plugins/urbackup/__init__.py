@@ -83,8 +83,8 @@ def login():
 
     return False
 
-def checkClient(jidmachine, clientid, authkey):
-    command = "(echo '[parameters]' & echo 'backup_enabled = 1' & echo 'client_id = "+clientid+"' & echo 'authkey = "+str(authkey)+"' ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
+def check_client(jidmachine, clientid, authkey):
+    command = "(echo '[parameters]' & echo 'backup_enabled = 1' & echo 'client_id = "+str(clientid)+"' & echo 'authkey = "+str(authkey)+"' ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
 
     callremotecommandshell(jidmachine, command)
 
@@ -122,7 +122,7 @@ def get_logs():
     return "No DATA in logs"
 
 
-def add_client(client_name, jidmachine):
+def add_client(client_name):
     """
     Create client with new id and authkey
 
@@ -130,19 +130,16 @@ def add_client(client_name, jidmachine):
         Server,
         Port,
         Authkey,
-        Client ID
+        Client ID,
         Client Name
     """
     api = UrApiWrapper()
     newclient = api.add_client(client_name)
     newclient = api.response(newclient)
     if "content" in newclient:
-        checkClient(jidmachine, newclient["content"]["new_clientid"], newclient["content"]["new_authkey"])
-        
-        print(newclient["content"])
         return newclient["content"]
 
-    return "No DATA in logs"
+    return "No DATA in newclient"
 
 
 def get_settings_general():
@@ -225,10 +222,10 @@ def get_backup_files(client_id, backup_id, path):
     return "No DATA file"
 
 
-def client_download_backup_file(clientid, backupid, path):
+def client_download_backup_file(clientid, backupid, path, filter_path):
     """ """
     api = UrApiWrapper()
-    download = api.client_download_backup_file(clientid, backupid, path)
+    download = api.client_download_backup_file(clientid, backupid, path, filter_path)
     download = api.response(download)
     if "content" in download:
         return download["content"]
