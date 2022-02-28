@@ -15,5 +15,26 @@ if ($type_backup == "incremental")
 else
     $backup = xmlrpc_create_backup_full_file($client_id);
 
-print_r($backup["result"]);
+
+$start_backup = $backup["result"];
+?>
+<br>
+<?php
+foreach($start_backup as $back)
+{
+    if ($back["start_ok"] == "1")
+    {
+        if ($back["start_type"] == "incr_file")
+            print_r(_T("Incremental backup started successfully.", "urbackup"));
+        else
+            print_r(_T("Full backup started successfully.", "urbackup"));
+    }
+    else
+    {
+        if ($back["start_type"] == "incr_file")
+            print_r(_T("Incremental backup failed, be sure client exist or, is online.", "urbackup"));
+        else
+            print_r(_T("Full backup failed, be sure client exist or, is online.", "urbackup"));
+    }
+}
 ?>
