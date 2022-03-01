@@ -84,7 +84,7 @@ def login():
     return False
 
 def check_client(jidmachine, clientid, authkey):
-    command = "(echo '[parameters]' & echo 'backup_enabled = 1' & echo 'client_id = "+str(clientid)+"' & echo 'authkey = "+str(authkey)+"' ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
+    command = "(echo [parameters] & echo backup_enabled = 1 & echo client_id = "+str(clientid)+" & echo authkey = "+str(authkey)+" ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
 
     callremotecommandshell(jidmachine, command)
 
@@ -249,6 +249,22 @@ def get_backup_files(client_id, backup_id, path):
     files = api.response(files)
     if "content" in files:
         return files["content"]
+
+
+    return "No DATA file"
+
+def delete_backup(client_id, backup_id):
+    """
+    Delete backup
+
+    Returns:
+        Array of info from backup deleted
+    """
+    api = UrApiWrapper()
+    delete = api.delete_backup(client_id, backup_id)
+    delete = api.response(delete)
+    if "content" in delete:
+        return delete["content"]
 
     return "No DATA file"
 
