@@ -24,7 +24,7 @@ foreach($start_backup as $back)
 {
     if ($back["start_ok"] == "1")
     {
-        $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id;
+        $url = 'main.php?module=urbackup&submod=urbackup&action=index&clientid='.$client_id;
         header("Location: ".$url);  
     }
     else
@@ -37,7 +37,12 @@ foreach($start_backup as $back)
             echo "<a class='btn btn-small btn-primary' href='main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=".$client_id."'>Back</a>";
         }
         else
+        {
             print_r(_T("Full backup failed, be sure client urbackup is installed on computer or is online.", "urbackup"));
+            echo '<br>';
+            echo '<br>';
+            echo "<a class='btn btn-small btn-primary' href='main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=".$client_id."'>Back</a>";
+        }
     }
 }
 ?>
