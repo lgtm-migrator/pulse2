@@ -146,13 +146,29 @@ def add_group(groupname):
     Create groupe
 
     Returns:
-        Settings for created group
+        Settings
     """
     api = UrApiWrapper()
     newgroup = api.add_group(groupname)
     newgroup = api.response(newgroup)
     if "content" in newgroup:
         return newgroup["content"]
+
+    return "No DATA in newclient"
+
+
+def remove_group(groupid):
+    """
+    Remove groupe
+
+    Returns:
+        Settings
+    """
+    api = UrApiWrapper()
+    removegroup = api.remove_group(groupid)
+    removegroup = api.response(removegroup)
+    if "content" in removegroup:
+        return removegroup["content"]
 
     return "No DATA in newclient"
 

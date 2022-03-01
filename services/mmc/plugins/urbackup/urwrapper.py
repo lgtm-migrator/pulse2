@@ -133,6 +133,13 @@ class UrApiWrapper:
         response = self.request("settings", params)
 
         return response
+    
+    def remove_group(self, groupid):
+        self.login()
+        params = {"sa": "groupremove", "id": groupid, "ses": self.ses}
+        response = self.request("settings", params)
+
+        return response
 
     def get_settings_general(self):
         self.login()
