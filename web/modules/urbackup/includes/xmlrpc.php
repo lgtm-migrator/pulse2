@@ -29,6 +29,11 @@ function xmlrpc_add_group($groupname){
     return xmlCall("urbackup.add_group", [$groupname]);
 }
 
+function xmlrpc_remove_group($groupid){
+    // Create new group
+    return xmlCall("urbackup.remove_group", [$groupid]);
+}
+
 function xmlrpc_check_client($jidmachine, $clientid, $authkey){
     // Call agent to send command
     return xmlCall("urbackup.check_client", [$jidmachine, $clientid, $authkey]);
