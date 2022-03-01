@@ -7,9 +7,15 @@ $p = new PageGenerator(_T("Group creation", 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
-$groupname = isset($_POST['groupname']);
-print_r($groupname);
+$groupname = $_POST['groupname'];
+
 $create_group = xmlrpc_add_group($groupname);
 
-print_r($create_group);
+?>
+<br>
+<br>
+<?php
+$url = 'main.php?module=urbackup&submod=urbackup&action=usersgroups';
+
+header("Location: ".$url);
 ?>
