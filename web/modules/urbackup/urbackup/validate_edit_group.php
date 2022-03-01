@@ -101,20 +101,26 @@ curl_close($curlid);
 
 $saving = $result;
 $array = json_decode(json_encode($saving), true);
+
+$settings = $array['settings'];
 //-----------------------------------END SAVE SETTINGS
 ?>
 <br>
 <label><?php echo _T("Interval for incremental file backup", "urbackup"); ?></label>
-<?php echo $array['update_freq_incr']; ?>
+<?php echo $settings['update_freq_incr']; ?>
+<br>
 <br>
 <label><?php echo _T("Interval for full file backups", "urbackup"); ?></label>
-<?php echo $array['update_freq_full']; ?>
+<?php echo $settings['update_freq_full']; ?>
+<br>
 <br>
 <label><?php echo _T("Excluded files", "urbackup"); ?></label>
-<?php echo $array['exclude_files']; ?>
+<?php echo $settings['exclude_files']; ?>
+<br>
 <br>
 <label><?php echo _T("Included files", "urbackup"); ?></label>
-<?php echo $array['include_files']; ?>
+<?php echo $settings['include_files']; ?>
+<br>
 <br>
 <label><?php echo _T("Default directories to backup", "urbackup"); ?></label>
-<?php echo $array['default_dirs']; ?>
+<?php echo $settings['default_dirs']; ?>
