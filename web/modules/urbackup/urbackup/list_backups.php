@@ -206,14 +206,14 @@ foreach ($backups as $backup) {
                         if ($backup['disable_delete'] == "false")
                         {
                             echo '<li class="delete">';
-                                echo '<a title='._T("Delete", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete" onclick="PopupWindow(event,"main.php?module=urbackup&amp;submod=urbackup&amp;action=delete", 300); return false;">&nbsp;</a>';
+                            echo '<a title='._T("Delete", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=deleting_backup&amp;clientid='.$client_id.'&amp;backupid='.$id_backup.'">&nbsp;</a>';
                             echo '</li>';
                         }
                     }
                     else
                     {
                         echo '<li class="delete">';
-                            echo '<a title='._T("Delete", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=deleting_backup&amp;clientid='.$client_id.'&amp;backupid='.$id_backup.'>&nbsp;</a>';
+                            echo '<a title='._T("Delete", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=deleting_backup&amp;clientid='.$client_id.'&amp;backupid='.$id_backup.'">&nbsp;</a>';
                         echo '</li>';
                     }
                 }
