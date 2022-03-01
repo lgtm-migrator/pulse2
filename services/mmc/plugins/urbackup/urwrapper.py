@@ -129,7 +129,7 @@ class UrApiWrapper:
 
     def add_group(self, groupname):
         self.login()
-        params = {"sa": "groupadd", "name": groupname}
+        params = {"sa": "groupadd", "name": groupname, "ses": self.ses}
         response = self.request("settings", params)
 
         return response
@@ -171,6 +171,13 @@ class UrApiWrapper:
     def get_backups(self, client_id):
         self.login()
         params = {"clientid": client_id, "ses": self.ses}
+        response = self.request("backups", params)
+
+        return response
+    
+    def delete_backup(self, client_id, backup_id):
+        self.login()
+        params = {"sa": "backups", "clientid": client_id, "delete_now": backup_id, "ses": self.ses}
         response = self.request("backups", params)
 
         return response
