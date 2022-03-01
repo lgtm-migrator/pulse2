@@ -24,17 +24,20 @@ foreach($start_backup as $back)
 {
     if ($back["start_ok"] == "1")
     {
-        if ($back["start_type"] == "incr_file")
-            print_r(_T("Incremental backup started successfully.", "urbackup"));
-        else
-            print_r(_T("Full backup started successfully.", "urbackup"));
+        $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id;
+        header("Location: ".$url);  
     }
     else
     {
         if ($back["start_type"] == "incr_file")
-            print_r(_T("Incremental backup failed, be sure client exist or, is online.", "urbackup"));
+        {
+            print_r(_T("Incremental backup failed, be sure client urbackup is installed on computer or is online.", "urbackup"));
+            echo '<br>';
+            echo '<br>';
+            echo "<a class='btn btn-small btn-primary' href='main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=".$client_id."'>Back</a>";
+        }
         else
-            print_r(_T("Full backup failed, be sure client exist or, is online.", "urbackup"));
+            print_r(_T("Full backup failed, be sure client urbackup is installed on computer or is online.", "urbackup"));
     }
 }
 ?>
