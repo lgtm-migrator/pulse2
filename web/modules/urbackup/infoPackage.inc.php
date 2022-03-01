@@ -39,6 +39,10 @@ $page = new Page("edit_group_settings", _T('Edit group', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/edit_group_settings.php");
 $submod->addPage($page);
 
+$page = new Page("list_computers_ongroup", _T('List computer on group', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/list_computers_ongroup.php");
+$submod->addPage($page);
+
 $page = new Page("validate_edit_group", _T('Validate save settings', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/validate_edit_group.php");
 $submod->addPage($page);
