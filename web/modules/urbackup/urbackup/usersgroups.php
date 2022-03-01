@@ -48,7 +48,7 @@ foreach ($group_array as $group) {
                     <a title=<?php echo _T("Edit", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=edit_group_settings&amp;groupid=<?php echo $group['id']; ?>&amp;groupname=<?php echo $group['name']; ?>">&nbsp;</a>
                 </li>
                 <li class="delete">
-                    <a title=<?php echo _T("Delete", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete" onclick="PopupWindow(event,'main.php?module=urbackup&amp;submod=urbackup&amp;action=delete', 300); return false;">&nbsp;</a>
+                    <a title=<?php echo _T("Delete", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=deleting_group&amp;groupid=<?php echo $group['id']; ?>">&nbsp;</a>
                 </li>
             </ul>
             </td>
