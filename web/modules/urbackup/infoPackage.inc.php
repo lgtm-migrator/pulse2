@@ -19,10 +19,6 @@ $page = new Page("index", _T('Review', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/index.php");
 $submod->addPage($page);
 
-$page = new Page("saves", _T('Saves', 'urbackup'));
-$page->setFile("modules/urbackup/urbackup/saves.php");
-$submod->addPage($page);
-
 $page = new Page("list_backups", _T('List Backups by Client', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/list_backups.php");
 $submod->addPage($page);
@@ -45,6 +41,10 @@ $submod->addPage($page);
 
 $page = new Page("validate_edit_group", _T('Validate save settings', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/validate_edit_group.php");
+$submod->addPage($page);
+
+$page = new Page("deleting_backup", _T('Delete backup', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/deleting_backup.php");
 $submod->addPage($page);
 
 $page = new Page("all_files_backup", _T('List of files from on backup', 'urbackup'));
