@@ -3,7 +3,7 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$p = new PageGenerator(_T("Groups", 'urbackup'));
+$p = new PageGenerator(_T("Profils", 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -12,11 +12,11 @@ $users_group_array = xmlrpc_get_clients();
 
 <br>
 <br>
-<h1><?php echo _T("Create group :", "urbackup"); ?></h1>
+<h1><?php echo _T("Create profil :", "urbackup"); ?></h1>
 <br>
-<form action="main.php?module=urbackup&amp;submod=urbackup&amp;action=create_group" method="POST">
-    <label>Group name :</label><input type="text" name="groupname" id="groupname"/>
-    <input type="submit" value="Create groupe">
+<form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=create_group" method="post">
+    <label><?php echo _T("Profil name :", 'urbackup'); ?></label><input type="text" name="groupname" id="groupname"/>
+    <input type="submit" name="subcreate" id="subcreate" value="Create groupe">
 </form>
 
 <br>
@@ -26,12 +26,12 @@ $users_group_array = xmlrpc_get_clients();
 $group_array = $users_group_array['navitems']['groups'];
 ?>
 
-<h1> <?php echo _T("Groups list :", 'urbackup'); ?> </h1>
+<h1> <?php echo _T("Profils list :", 'urbackup'); ?> </h1>
 <br>
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
         <tr>
-            <th style='text-align: left;'> <?php echo _T("Group name", 'urbackup'); ?> </th>
+            <th style='text-align: left;'> <?php echo _T("Profil name", 'urbackup'); ?> </th>
             <th style='text-align: right;'> <?php echo _T("Actions", 'urbackup'); ?> </th>
         </tr>
     </thead>
