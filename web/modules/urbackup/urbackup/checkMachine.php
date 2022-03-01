@@ -15,7 +15,6 @@ $clients = $clients["clients"];
 
 foreach ($clients as $client)
 {
-
     if ($client["name"] == $clientname)
     {
         $exist = "true";
@@ -28,18 +27,22 @@ foreach ($clients as $client)
 <br>
 <?php
 
+$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id;
+
 if ($exist == "true")
 {
-    header("Location: ".$_SERVER['REQUEST_URI']."main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=".$id);
-    exit();
+    header("Location: ".$url);
     echo "<a href='main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=".$id."'>Go to user backups</a>";
 }
 else
 {
     $create_client = xmlrpc_add_client($clientname);
 
-    if ($create_client["already_exists"] == "1")
-        print_r(_T("User already exists, this user is in delete process..." ,"urbackup"));
+    if ($create_client["already_exists"] == "1") 
+    {
+        print_r(_T("User already exists" ,"urbackup"));
+        header("Location: ".$url);
+    }
     else
     {
         print_r(_T("User created.", "urbackup"));
