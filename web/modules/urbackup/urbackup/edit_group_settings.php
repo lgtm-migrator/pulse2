@@ -12,7 +12,7 @@ $p->display();
 
 ?>
 <br>
-<form action="main.php?module=urbackup&amp;submod=urbackup&amp;action=validate_edit_group&amp;groupid=<?php echo $group_id; ?>" method="POST">
+<form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=validate_edit_group&amp;groupid=<?php echo $group_id; ?>" method="post">
     <label><?php echo _T("Interval for incremental file backups", "urbackup"); ?></label><input type="text" name="update_freq_incr" id="update_freq_incr"/>
     <label><?php echo _T("Interval for full file backups", "urbackup"); ?></label><input type="text" name="update_freq_full" id="update_freq_full"/>
     <label><?php echo _T("Excluded files", "urbackup"); ?></label><input type="text" name="exclude_files" id="exclude_files"/>
