@@ -114,12 +114,57 @@ curl_close($curlid);
 
 $reviews = $result["lastacts"];
 $array = json_decode(json_encode($reviews), true);
+
+$progress = $result['progress'];
+$array_progress = json_decode(json_encode($progress), true);
 //-----------------------------------END GET_PROGRESS
 
 ?>
 <br>
 <br>
+<?php
+foreach($array_progress as $progress)
+{
+    if (!empty($progress))
+    {
+        echo '<h2>'._T("Progress", 'urackup').'</h2>';
+        echo '<br>';
+        ?>
+        <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
+            <thead>
+                <tr style='text-align: left;'>
+                <th> <?php echo _T("Computer name", 'urbackup'); ?> </th>
+                <th> <?php echo _T("Action", 'urbackup'); ?> </th>
+                <th> <?php echo _T("Details", 'urbackup'); ?> </th>
+                <th> <?php echo _T("Progress", 'urbackup'); ?> </th>
+                <th> <?php echo _T("ETA (ms)", 'urbackup'); ?> </th>
+                <th> <?php echo _T("Speed (bpms)", 'urbackup'); ?> </th>
+                <th> <?php echo _T("File in queue", 'urbackup'); ?> </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style='padding-left: 5px;'> <?php echo $progress['name']; ?></td>
+                    <td> <?php echo $progress['action']; ?></td>
+                    <td> <?php echo $progress['details']; ?></td>
+                    <td> <?php echo $progress['pcdone']."%"; ?></td>
+                    <td> <?php echo $progress['eta_ms']; ?></td>
+                    <td> <?php echo $progress['speed_bpms']; ?></td>
+                    <td> <?php echo $progress['queue']; ?></td>
+                </tr>
+            </tbody>
+        </table>
+        <?php
+        echo '<br>';
+        echo '<br>';
+    }
+}
+?>
+
 <h2><?php echo _T("Last activities", 'urbackup'); ?></h2>
+
+
+
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
         <tr style='text-align: left;'>
@@ -127,6 +172,7 @@ $array = json_decode(json_encode($reviews), true);
           <th> <?php echo _T("Name", 'urbackup'); ?> </th>
           <th> <?php echo _T("Backuptime", 'urbackup'); ?> </th>
           <th> <?php echo _T("Status", 'urbackup'); ?> </th>
+          <th> <?php echo _T("Details", 'urbackup'); ?> </th>
           <th> <?php echo _T("Duration H:M:S", 'urbackup'); ?> </th>
           <th> <?php echo _T("Size", 'urbackup'); ?> </th>
         </tr>
@@ -136,20 +182,40 @@ $array = json_decode(json_encode($reviews), true);
 foreach ($array as $review) {
     if ($review['del'] == 'true')
     {
-        if ($review['incremental'] != '0')
-            $status = "Delete of incremental save";
+        if ($review['incremental'] == '1')
+            $status = "Delete of incremental backup";
+
+        if ($review['incremental'] == '0')
+        {
+            if ($review['image'] == '0')
+                $status = "Delete of full backup";
+        }
     }
-    else
+    
+    if ($review['del'] == 'false')
     {
-        if ($review['incremental'] != '0')
-            $status = 'Incremental Save';
+        if ($review['restore'] == '1')
+        {
+            if ($review['incremental'] == '1')
+                $status = "Restoration of incremental backup";
+        }
+        else
+        {
+            if ($review['incremental'] == '1')
+                $status = 'Incremental backup';
+
+            if ($review['incremental'] == '0')
+            {
+                if ($review['image'] == '0')
+                    $status = "Full files backup";
+            }
+        }
     }
 
-    if ($review['restore'] != '0')
-    {
-        if ($review['incremental'] != '0')
-            $status = "Restoration of incremental save";
-    }
+    if ($review['details'] == "")
+        $details = "-";
+    else
+        $details = $review['details'];
 
     $size = formatBytes($review['size_bytes']);
     $duration = $review['duration'];
@@ -171,6 +237,7 @@ foreach ($array as $review) {
             <td> <?php echo $review['name']; ?></td>
             <td> <?php echo $dt; ?></td>       
             <td> <?php echo $status; ?></td>
+            <td> <?php echo $details; ?></td>
             <td> <?php echo $output_duration; ?></td>
             <td> <?php echo $size; ?></td>
         </tr>
