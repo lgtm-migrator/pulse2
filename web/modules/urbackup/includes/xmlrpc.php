@@ -54,6 +54,11 @@ function xmlrpc_get_backups_all_client(){
     return xmlCall("urbackup.get_backups_all_client", []);
 }
 
+function xmlrpc_delete_backup($clientid, $backupid){
+    // Return backups of all clients with date last backup
+    return xmlCall("urbackup.delete_backup", [$clientid, $backupid]);
+}
+
 function xmlrpc_get_backups_for_client($client_id){
     // Return backups of one clients with date last backup
     return xmlCall("urbackup.get_backups_for_client", [$client_id]);
