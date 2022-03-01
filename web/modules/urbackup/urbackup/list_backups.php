@@ -151,7 +151,15 @@ function formatBytes($bytes, $precision = 2)
         </tr>
     </thead>
     <tbody>
-<?php 
+<?php
+
+if (empty($backups))
+{
+    echo "<tr style='text-align: center;'>";
+        echo '<td colspan="6">'._T("No backup", 'urbackup').'</td>';
+    echo '</tr>';
+}
+
 foreach ($backups as $backup) {
     $id_backup = $backup['id'];
     $date=new dateTime();
@@ -205,7 +213,7 @@ foreach ($backups as $backup) {
                     else
                     {
                         echo '<li class="delete">';
-                            echo '<a title='._T("Delete", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete" onclick="PopupWindow(event,"main.php?module=urbackup&amp;submod=urbackup&amp;action=delete", 300); return false;">&nbsp;</a>';
+                            echo '<a title='._T("Delete", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=deleting_backup&amp;clientid='.$client_id.'&amp;backupid='.$id_backup.'>&nbsp;</a>';
                         echo '</li>';
                     }
                 }
