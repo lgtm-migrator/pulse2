@@ -3,7 +3,9 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$p = new PageGenerator(_T("Settings saved for ", 'urbackup'));
+$group_name = htmlspecialchars($_GET["groupname"]);
+
+$p = new PageGenerator(_T("Settings saved for ".$group_name, 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -17,11 +19,15 @@ $exclude_files = $_POST['exclude_files'];
 $include_files = $_POST['include_files'];
 $default_dirs = $_POST['default_dirs'];
 
+$interval_frequence_incremental_save_hour_seconds = $interval_frequence_incremental_save*3600;
+$interval_frequence_full_save_day_seconds = $interval_frequence_full_save*86400;
+
 $group_id = htmlspecialchars($_GET["groupid"]);
 
+
 $settings_saver = array (
-    "update_freq_incr" => $interval_frequence_incremental_save,
-    "update_freq_full" => $interval_frequence_full_save,
+    "update_freq_incr" => $interval_frequence_incremental_save_hour_seconds,
+    "update_freq_full" => $interval_frequence_full_save_day_seconds,
     "exclude_files" => $exclude_files,
     "include_files" => $include_files,
     "default_dirs" => $default_dirs,
@@ -118,11 +124,11 @@ foreach ($settings_saver as $value => $item) {
 ?>
 <br>
 <label><?php echo _T("Interval for incremental file backup", "urbackup"); ?></label>
-<?php echo $settings['update_freq_incr']; ?>
+<?php echo $interval_frequence_incremental_save; ?>
 <br>
 <br>
 <label><?php echo _T("Interval for full file backups", "urbackup"); ?></label>
-<?php echo $settings['update_freq_full']; ?>
+<?php echo $interval_frequence_full_save; ?>
 <br>
 <br>
 <label><?php echo _T("Excluded files", "urbackup"); ?></label>
