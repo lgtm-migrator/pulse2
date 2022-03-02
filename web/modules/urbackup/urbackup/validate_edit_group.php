@@ -33,7 +33,7 @@ $settings_saver = array (
     "default_dirs" => $default_dirs,
 );
 
-$group_id = "-".$group_id;
+$group_id_new = "-".$group_id;
 
 //-----------------------------------START LOGIN FUNCTION
 $url = "https://wva.siveo.net/urbackup/x?a=login";
@@ -95,7 +95,7 @@ foreach ($settings_saver as $value => $item) {
 
     $datas = [
         'sa'=>'clientsettings_save',
-        't_clientid'=>$group_id,
+        't_clientid'=>$group_id_new,
         $name_data=>$value_data,
         'overwrite'=>"true",
         'ses'=>$session,
@@ -121,23 +121,9 @@ foreach ($settings_saver as $value => $item) {
 }   
 
 //-----------------------------------END SAVE SETTINGS
+
+$url = "main.php?module=urbackup&submod=urbackup&action=edit_group_settings&groupid=".$group_id."&groupname=".$group_name;
+
+header("Location: ".$url);
+
 ?>
-<br>
-<label><?php echo _T("Interval for incremental file backup", "urbackup"); ?></label>
-<?php echo $interval_frequence_incremental_save; ?>
-<br>
-<br>
-<label><?php echo _T("Interval for full file backups", "urbackup"); ?></label>
-<?php echo $interval_frequence_full_save; ?>
-<br>
-<br>
-<label><?php echo _T("Excluded files", "urbackup"); ?></label>
-<?php echo $settings['exclude_files']; ?>
-<br>
-<br>
-<label><?php echo _T("Included files", "urbackup"); ?></label>
-<?php echo $settings['include_files']; ?>
-<br>
-<br>
-<label><?php echo _T("Default directories to backup", "urbackup"); ?></label>
-<?php echo $settings['default_dirs']; ?>
