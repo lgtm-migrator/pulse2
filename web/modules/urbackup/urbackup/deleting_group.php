@@ -1,4 +1,3 @@
-
 <?php
 require("graph/navbar.inc.php");
 require("localSidebar.php");
