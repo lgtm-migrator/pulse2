@@ -110,13 +110,33 @@ $clients = $array['navitems']['clients'];
 </form>
 <br>
 <br>
-<?php
-foreach($clients as $client)
-{
-    if ($client['group'] == $group_id)
-    {
-        print_r($client['name']);
-        echo '<br>';
-    }
-}
-?>
+<div style="display:flex">
+    <div>
+        <h3>Computer <b>outside</b> the profil</h3>
+        <ul id="outProfil" name="outProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px; margin-right: 30px;">
+            <?php
+            foreach($clients as $client)
+            {
+                if ($client['group'] != $group_id)
+                {
+                    echo "<li value=".$client['id']." class='ui-draggable ui-draggable-handle ui-sortable-handle' style='width: 250px; height: 14px;'>".$client['name']."</li>";
+                }
+            }
+            ?>
+        </ul>
+    </div>
+    <div>
+        <h3>Computer <b>inside</b> the profil</h3>
+        <ul id="inProfil" name="inProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px;">
+            <?php
+            foreach($clients as $client)
+            {
+                if ($client['group'] == $group_id)
+                {
+                    echo "<li value=".$client['id']." class='ui-draggable ui-draggable-handle ui-sortable-handle' style='width: 250px; height: 14px;'>".$client['name']."</li>";
+                }
+            }
+            ?>
+        </ul>
+    </div>
+</div>
