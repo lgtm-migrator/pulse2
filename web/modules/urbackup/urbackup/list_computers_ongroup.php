@@ -11,6 +11,8 @@ $p = new PageGenerator(_T("List user on profil ".$group_name, 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
+$clients = xmlrpc_get_backups_all_client();
+
 $ini_array = parse_ini_file("/etc/mmc/plugins/urbackup.ini");
 $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
@@ -90,7 +92,23 @@ $array = json_decode(json_encode($settings), true);
 
 $clients = $array['navitems']['clients'];
 //-----------------------------------END SAVE SETTINGS
+
 ?>
+<br>
+<h2><?php echo _T("Add member to this group", 'urbackup'); ?></h2>
+<br>
+<form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup&amp;groupname=<?php echo $group_name; ?>&amp;groupid=<?php echo $group_id; ?>" method="post">
+    <select name="client">
+        <?php
+        foreach($clients as $client)
+        {
+            echo '<option id="clientid" name="clientid" value="'.$client['id'].'">'.$client['name'].'</option>';
+        }
+        ?>
+    </select>
+    <input type="submit" name="subadd" id="subadd" value="Add this member">
+</form>
+<br>
 <br>
 <?php
 foreach($clients as $client)
