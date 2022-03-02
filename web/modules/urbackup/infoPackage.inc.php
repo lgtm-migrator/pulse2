@@ -35,6 +35,10 @@ $page = new Page("create_group", _T('Create group', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/create_group.php");
 $submod->addPage($page);
 
+$page = new Page("add_member_togroup", _T('Assign member to group', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/add_member_togroup.php");
+$submod->addPage($page);
+
 $page = new Page("edit_group_settings", _T('Edit group', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/edit_group_settings.php");
 $submod->addPage($page);
