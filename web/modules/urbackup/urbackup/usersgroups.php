@@ -16,7 +16,7 @@ $users_group_array = xmlrpc_get_clients();
 <br>
 <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=create_group" method="post">
     <label><?php echo _T("Profil name :", 'urbackup'); ?></label><input type="text" name="groupname" id="groupname"/>
-    <input type="submit" name="subcreate" id="subcreate" value="Create groupe">
+    <input type="submit" name="subcreate" id="subcreate" value="Create profil">
 </form>
 
 <br>
