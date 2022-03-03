@@ -146,6 +146,7 @@ if ($backupstate == "false")
     print_r(_T("Incremental backup failed, be sure client urbackup is installed on computer or is online.", "urbackup"));;
     echo '-------------';
     echo '<br>';
+    echo '<br>';
 }
 
 ?>
