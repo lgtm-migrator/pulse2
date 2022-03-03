@@ -104,7 +104,7 @@ $array_progress = json_decode(json_encode($addgroup), true);
 <br>
 <?php
 
-$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$group_id;
+$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id;
 
 header("Location: ".$url);
 ?>
