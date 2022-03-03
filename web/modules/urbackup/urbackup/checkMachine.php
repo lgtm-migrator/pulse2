@@ -125,16 +125,18 @@ else
     }
     else
     {
-        print_r(_T("User created.", "urbackup"));
         $check_client = xmlrpc_check_client($jidMachine, $create_client["new_clientid"], $create_client["new_authkey"]);
         ?>
         <div style="display:flex">
             <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $create_client["new_clientid"]; ?>" method="post">
-                <div style="padding-top: 10px; margin-right: 30px;">
-                    <label><?php echo _T("Computer ", "urbackup"); ?></label><?php echo $create_client["new_clientname"]; ?>
+                <div>
+                    <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
+                    <ul id="outProfil" name="outProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px; margin-right: 30px;">
+                        <?php echo $create_client["new_clientname"]; ?>
+                    </ul>
                 </div>
-                <div style="padding-top: 10px; margin-right: 30px;">
-                    <label><?php echo _T("Choose profil to computer", "urbackup"); ?></label>
+                <div>
+                    <h3><?php echo _T("Choose profil to computer", "urbackup"); ?></h3>
                     <select name="group" id="group">
                         <?php
                         foreach($groups as $group)
