@@ -12,6 +12,7 @@ $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
 
 $client_id = htmlspecialchars($_GET["clientid"]);
+$backupstate = htmlspecialchars($_GET["backupstate"]);
 
 //-----------------------------------START LOGIN FUNCTION
 $url = "https://wva.siveo.net/urbackup/x?a=login";
@@ -137,6 +138,17 @@ function formatBytes($bytes, $precision = 2)
 <br>
 <label><?php echo _T("Client name: ", 'urbackup').$name; ?></label>
 <br>
+<?php
+
+if ($backupstate == "false")
+{
+    echo '-------------';
+    print_r(_T("Incremental backup failed, be sure client urbackup is installed on computer or is online.", "urbackup"));;
+    echo '-------------';
+    echo '<br>';
+}
+
+?>
 <h2> <?php echo _T("File save", 'urbackup'); ?> </h2>
 
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
