@@ -139,16 +139,14 @@ function formatBytes($bytes, $precision = 2)
 <label><?php echo _T("Client name: ", 'urbackup').$name; ?></label>
 <br>
 <?php
-
 if ($backupstate == "false")
 {
-    echo '-------------';
-    print_r(_T("Incremental backup failed, be sure client urbackup is installed on computer or is online.", "urbackup"));;
-    echo '-------------';
-    echo '<br>';
-    echo '<br>';
+    ?>
+    <script>
+        alert("Incremental backup failed, be sure client urbackup is installed on computer or is online.");
+    </script>
+    <?php
 }
-
 ?>
 <h2> <?php echo _T("File save", 'urbackup'); ?> </h2>
 
