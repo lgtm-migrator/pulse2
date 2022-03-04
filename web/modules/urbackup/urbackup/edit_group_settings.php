@@ -15,9 +15,10 @@ $group_id_new = "-".$group_id;
 $ini_array = parse_ini_file("/etc/mmc/plugins/urbackup.ini");
 $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
+$url_urbackup = $ini_array['url'];
 
 //-----------------------------------START LOGIN FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=login";
+$url = $url_urbackup."?a=login";
 
 $curlid = curl_init($url);
 
@@ -60,7 +61,7 @@ if(isset($result['session'], $result['success']) && $result['success'] == 1){
 
 //-----------------------------------START SAVE SETTINGS FUNCTION
 
-$url = "https://wva.siveo.net/urbackup/x?a=settings";
+$url = $url_urbackup."?a=settings";
 $curlid = curl_init($url);
 
 curl_setopt($curlid, CURLOPT_FOLLOWLOCATION, true);

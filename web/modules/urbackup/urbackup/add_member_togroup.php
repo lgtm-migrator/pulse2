@@ -4,7 +4,11 @@ require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
 $group_id = htmlspecialchars($_GET["groupid"]);
+
 $client_id = $_POST['client'];
+if ($client_id == "")
+    $client_id = htmlspecialchars($_GET["clientid"]);
+
 $group_name = htmlspecialchars($_GET["groupname"]);
 
 $group_id_new = "-".$group_id;
@@ -16,9 +20,10 @@ $p->display();
 $ini_array = parse_ini_file("/etc/mmc/plugins/urbackup.ini");
 $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
+$url_urbackup = $ini_array['url'];
 
 //-----------------------------------START LOGIN FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=login";
+$url = $url_urbackup."?a=login";
 
 $curlid = curl_init($url);
 
@@ -59,7 +64,7 @@ if(isset($result['session'], $result['success']) && $result['success'] == 1)
 //-----------------------------------END LOGIN
 
 //-----------------------------------START ADD MEMBER TO GROUP FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=settings";
+$url = $url_urbackup."?a=settings";
 $curlid = curl_init($url);
 
 curl_setopt($curlid, CURLOPT_FOLLOWLOCATION, true);

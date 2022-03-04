@@ -12,6 +12,7 @@ $p->display();
 $ini_array = parse_ini_file("/etc/mmc/plugins/urbackup.ini");
 $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
+$url_urbackup = $ini_array['url'];
 
 $interval_frequence_incremental_save = $_POST['update_freq_incr'];
 $interval_frequence_full_save = $_POST['update_freq_full'];
@@ -36,7 +37,7 @@ $settings_saver = array (
 $group_id_new = "-".$group_id;
 
 //-----------------------------------START LOGIN FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=login";
+$url = $url_urbackup."?a=login";
 
 $curlid = curl_init($url);
 
@@ -84,7 +85,7 @@ foreach ($settings_saver as $value => $item) {
     $name_data = $value;
     $value_data = $item;
 
-    $url = "https://wva.siveo.net/urbackup/x?a=settings";
+    $url = $url_urbackup."?a=settings";
     $curlid = curl_init($url);
 
     curl_setopt($curlid, CURLOPT_FOLLOWLOCATION, true);

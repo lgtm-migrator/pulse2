@@ -16,9 +16,10 @@ $clients = xmlrpc_get_backups_all_client();
 $ini_array = parse_ini_file("/etc/mmc/plugins/urbackup.ini");
 $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
+$url_urbackup = $ini_array['url'];
 
 //-----------------------------------START LOGIN FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=login";
+$url = $url_urbackup."?a=login";
 
 $curlid = curl_init($url);
 
@@ -60,7 +61,7 @@ if(isset($result['session'], $result['success']) && $result['success'] == 1){
 //-----------------------------------END LOGIN
 
 //-----------------------------------START SAVE SETTINGS FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=settings";
+$url = $url_urbackup."?a=settings";
 $curlid = curl_init($url);
 
 curl_setopt($curlid, CURLOPT_FOLLOWLOCATION, true);
@@ -140,3 +141,31 @@ $clients = $array['navitems']['clients'];
         </ul>
     </div>
 </div>
+
+<script>
+jQuery(function(){
+  jQuery("#outProfil li, #inProfil li").draggable({
+    connectToSortable: "#inProfil, #outProfil",
+    stop: function(){
+      profil_list = []
+      profil_id = []
+
+      jQuery("#inProfil li").each(function(id, idgroup){
+            //
+            <?php
+            $url = "main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup&amp;groupname=".$group_name."&amp;groupid=".$group_id."&amp;clientid=".$clientid;
+            //header("Location: ".$url);
+            ?>
+      })
+
+      jQuery("input[name='relays_id']").val(profil_id.join(','))
+      jQuery("input[name='relays_list']").val(profil_list.join(','))
+    },
+  })
+
+  jQuery( "#outProfil, #inProfil" ).sortable({
+    revert: true
+  });
+  jQuery( "ul, li" ).disableSelection();
+});
+</script>

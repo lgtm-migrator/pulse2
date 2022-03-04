@@ -10,12 +10,13 @@ $p->display();
 $ini_array = parse_ini_file("/etc/mmc/plugins/urbackup.ini");
 $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
+$url_urbackup = $ini_array['url'];
 
 $client_id = htmlspecialchars($_GET["clientid"]);
 $backupstate = htmlspecialchars($_GET["backupstate"]);
 
 //-----------------------------------START LOGIN FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=login";
+$url = $url_urbackup."?a=login";
 
 $curlid = curl_init($url);
 
@@ -57,7 +58,7 @@ if(isset($result['session'], $result['success']) && $result['success'] == 1){
 //-----------------------------------END LOGIN
 
 //-----------------------------------START GET_BACKUPS FUNCTION
-$url = "https://wva.siveo.net/urbackup/x?a=backups";
+$url = $url_urbackup."?a=backups";
 $curlid = curl_init($url);
 
 curl_setopt($curlid, CURLOPT_FOLLOWLOCATION, true);
