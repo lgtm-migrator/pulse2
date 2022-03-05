@@ -263,7 +263,7 @@ class DatabaseHelper(Singleton):
             if "filters" in params and params["filters"]:
                 clauses = [
                     _entity_descriptor(query._mapper_zero(), key) == value
-                    for key, value in params["filters"].items()
+                    for key, value in list(params["filters"].items())
                 ]
                 if clauses:
                     query = query.filter(*clauses)
@@ -273,7 +273,7 @@ class DatabaseHelper(Singleton):
                     _entity_descriptor(query._mapper_zero(), key).like(
                         "%" + value + "%"
                     )
-                    for key, value in params["like_filters"].items()
+                    for key, value in list(params["like_filters"].items())
                 ]
                 if clauses:
                     query = query.filter(*clauses)
@@ -413,7 +413,7 @@ class DBObject(object):
                 # we don't want to enter in an infinite loop
                 # and generally we don't need more levels
                 attr = getattr(self, i)
-                if type(attr) == list:
+                if isinstance(attr, list):
                     new_attr = []
                     for a in attr:
                         new_attr.append(a.toH(level + 1))
@@ -448,7 +448,7 @@ class DBObj(object):
         if "_sa_instance_state" in d:
             del d["_sa_instance_state"]
         # Actually we don't support relations
-        for key, value in d.items():
+        for key, value in list(d.items()):
             if key and type(value) not in [type({}), type([])]:
                 setattr(self, key, value)
 

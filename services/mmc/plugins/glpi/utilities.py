@@ -36,9 +36,9 @@ from sqlalchemy.sql.sqltypes import String, DateTime, NullType
 
 # python2/3 compatible.
 is_python3 = str is not bytes
-text_type = str if is_python3 else unicode
-int_type = int if is_python3 else (int, long)
-str_type = str if is_python3 else (str, unicode)
+text_type = str if is_python3 else str
+int_type = int if is_python3 else (int, int)
+str_type = str if is_python3 else (str, str)
 
 
 class StringLiteral(String):
@@ -104,7 +104,7 @@ def complete_ctx(ctx):
                 __convert, mmc.plugins.glpi.database.Glpi().getUserLocations(ctx.userid)
             )
         )
-        if type(ctx.locations) == list:
+        if isinstance(ctx.locations, list):
             if hasattr(ctx.locations[0], "id"):  # GLPI 0.8
                 ctx.locationsid = [e.id for e in ctx.locations]
             elif hasattr(ctx.locations[0], "ID"):  # GLPI 0.7x
