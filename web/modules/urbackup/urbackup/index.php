@@ -181,36 +181,59 @@ foreach($array_progress as $progress)
     <tbody>
 <?php
 foreach ($array as $review) {
-    if ($review['del'] == 'true')
+    if ($review['del'] == true)
     {
-        if ($review['incremental'] == '1')
-            $status = "Delete of incremental backup";
-
-        if ($review['incremental'] == '0')
+        if ($review['incremental'] == 1)
         {
-            if ($review['image'] == '0')
+            if ($review['image'] == 0)
+                $status = "Delete of incremental backup";
+        }
+
+        if ($review['incremental'] == 0)
+        {
+            if ($review['image'] == 0)
                 $status = "Delete of full backup";
         }
     }
-    
-    if ($review['del'] == 'false')
+    elseif ($review['del'] == false)
     {
-        if ($review['restore'] == '1')
+        if ($review['restore'] == 1)
         {
-            if ($review['incremental'] == '1')
-                $status = "Restoration of incremental backup";
+            if ($review['incremental'] == 1)
+            {
+                if ($review['image'] == 0)
+                {
+                    if ($review['details'] != "")
+                        $status = "Restoration of file";
+                }
+            }
+            else
+            {
+                if ($review['image'] == 0)
+                {
+                    if ($review['details'] != "")
+                        $status = "Restoration of file";
+                }
+            }
         }
         else
         {
-            if ($review['incremental'] == '1')
-                $status = 'Incremental backup';
-
-            if ($review['incremental'] == '0')
+            if ($review['incremental'] == 1)
             {
-                if ($review['image'] == '0')
+                if ($review['image'] == 0)
+                    $status = "Incremental backup";
+            }
+
+            if ($review['incremental'] == 0)
+            {
+                if ($review['image'] == 0)
                     $status = "Full files backup";
             }
         }
+    }
+    else
+    {
+
     }
 
     if ($review['details'] == "")
