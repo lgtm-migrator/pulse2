@@ -123,15 +123,18 @@ class Glpi92(DyngroupDatabaseHelper):
         logging.getLogger().debug("Trying to detect if GLPI version is higher than 9.2")
 
         try:
-            self._glpi_version = list(
-                self.db.execute("SELECT version FROM glpi_configs").fetchone().values()
-            )[0].replace(" ", "")
+            versionresult =  self.db.execute(
+                "SELECT version FROM glpi_configs"
+                ).fetchone().values()
+            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
         except OperationalError:
-            self._glpi_version = list(
-                self.db.execute('SELECT value FROM glpi_configs WHERE name = "version"')
-                .fetchone()
-                .values()
-            )[0].replace(" ", "")
+            versionresult =  self.db.execute(
+                "SELECT value FROM glpi_configs WHERE name = 'version'"
+                ).fetchone().values()
+            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
+        except Exception as e:
+            logging.getLogger().error("GLPI version search 0.92 !")
+            return False
 
         if LooseVersion(self._glpi_version) >= LooseVersion("9.2") and LooseVersion(
             self._glpi_version
@@ -176,15 +179,18 @@ class Glpi92(DyngroupDatabaseHelper):
             setattr(Glpi92, "encode", encode_latin1)
 
         try:
-            self._glpi_version = list(
-                self.db.execute("SELECT version FROM glpi_configs").fetchone().values()
-            )[0].replace(" ", "")
+            versionresult =  self.db.execute(
+                "SELECT version FROM glpi_configs"
+                ).fetchone().values()
+            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
         except OperationalError:
-            self._glpi_version = list(
-                self.db.execute('SELECT value FROM glpi_configs WHERE name = "version"')
-                .fetchone()
-                .values()
-            )[0].replace(" ", "")
+            versionresult =  self.db.execute(
+                "SELECT value FROM glpi_configs WHERE name = 'version'"
+                ).fetchone().values()
+            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
+        except Exception as e:
+            logging.getLogger().error("GLPI version search 0.92 !")
+            return False
 
         self.metadata = MetaData(self.db)
         self.initMappers()
