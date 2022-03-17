@@ -556,7 +556,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
         mem_usage = memory_usage(-1, interval=1, timeout=1)
         mesure = str(mem_usage[0]).replace(".", ",")
         if mesure != self.mesure:
-            print("__________leak memory_________")
+            #print("__________leak memory_________")
             taillepris = (mem_usage[0] - self.mesuref)
             self.mesuref = mem_usage[0]
             fichier = open(self.name_file_log_leak_memory, "a")
@@ -574,7 +574,6 @@ class MUCBot(sleekxmpp.ClientXMPP):
             print(stem)
             fichier.close()
             self.mesure = mesure
-            print "______________________________"
 
     def sendwol(self, macadress, machine_hostname=""):
         listmacadress = macadress.split("||")

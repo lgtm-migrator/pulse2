@@ -43,22 +43,16 @@ import array
 import struct
 import socket
 import platform
-
+try:
+    set
+except NameError:
+    from sets import Set as set_types
 # python 2.3 fallback for set() in xmlrpcleanup
 # also try sqlalchemy.util Sets
 try:
     from sqlalchemy.util import Set as sa_set
-
-    try:
-        set
-    except NameError:
-        from sets import Set as set
     set_types = set, sa_set
 except ImportError:
-    try:
-        set
-    except NameError:
-        from sets import Set as set
     set_types = (set,)
 
 try:

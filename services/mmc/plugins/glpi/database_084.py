@@ -27,7 +27,6 @@ version 0.8x
 import os
 import logging
 import re
-from sets import Set
 import datetime
 import calendar, hashlib
 import time
@@ -92,6 +91,7 @@ from pulse2.database.xmppmaster import XmppMasterDatabase
 from mmc.agent import PluginManager
 import traceback, sys
 
+Set=set
 
 class Glpi084(DyngroupDatabaseHelper):
     """

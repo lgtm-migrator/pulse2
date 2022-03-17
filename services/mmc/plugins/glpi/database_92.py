@@ -27,7 +27,6 @@ version 9.2
 import os
 import logging
 import re
-from sets import Set
 import datetime
 import calendar, hashlib
 import time
@@ -96,7 +95,7 @@ import decimal
 
 logger = logging.getLogger()
 
-
+Set=set
 class Glpi92(DyngroupDatabaseHelper):
     """
     Singleton Class to query the glpi database in version > 0.80.

@@ -27,7 +27,6 @@ version 9.5
 import os
 import logging
 import re
-from sets import Set
 import datetime
 import calendar, hashlib
 import time
@@ -70,6 +69,8 @@ from collections import OrderedDict
 import decimal
 
 logger = logging.getLogger()
+
+Set=set
 
 class Glpi95(DyngroupDatabaseHelper):
     """
@@ -1520,7 +1521,7 @@ class Glpi95(DyngroupDatabaseHelper):
                             else:
                                 ret.append(partA.like(self.encode(partB)))
                         except Exception as e:
-                            print str(e)
+                            #print str(e)
                             traceback.print_exc(file=sys.stdout)
                             ret.append(partA.like(self.encode(partB)))
             if ctx.userid != 'root':

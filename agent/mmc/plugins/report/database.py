@@ -52,6 +52,7 @@ class ReportDatabase(DatabaseHelper):
         return DatabaseHelper.db_check(self)
 
     def activate(self, config):
+        logger.info("#################################Report database is connecting")
         if self.is_activated:
             return None
 

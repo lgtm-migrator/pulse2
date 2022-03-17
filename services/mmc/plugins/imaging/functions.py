@@ -27,7 +27,6 @@ imaging plugin
 """
 import logging
 from twisted.internet import defer
-from sets import Set as set
 import time, ipaddr
 import traceback
 from mmc.support.mmctools import xmlrpcCleanup
@@ -48,7 +47,10 @@ import subprocess
 import json
 import hashlib
 import socket
-
+try:
+    set
+except NameError:
+    from sets import Set as set
 
 def is_ipv4_valid(ip_string):
     try:
