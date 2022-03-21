@@ -474,13 +474,13 @@ class ImagingRpcProxy(RpcProxyI):
         obj = {}
         ctx = self.currentContext
         try:
-            obj['mac'] = ComputerManager().getMachineMac(ctx, {'uuid': uuid})
-            obj['uuid']=uuid
+            obj["mac"] = ComputerManager().getMachineMac(ctx, {"uuid": uuid})
+            obj["uuid"] = uuid
             db = ImagingDatabase()
-            locationName=[]
+            locationName = []
             location = db.getAllLocation()
             for t in location:
-                self.imagingClearMenuforLocation( obj, t.url)
+                self.imagingClearMenuforLocation(obj, t.url)
                 locationName.append(t.name)
             return locationName
         except:

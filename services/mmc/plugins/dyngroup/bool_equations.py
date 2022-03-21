@@ -50,6 +50,8 @@ s2x4 = re.compile(",")
 s2x5 = re.compile("\)")
 s2x6 = re.compile("</p>$")
 
+Set = set
+
 
 Set=set
 

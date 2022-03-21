@@ -123,23 +123,29 @@ class Glpi94(DyngroupDatabaseHelper):
         logging.getLogger().debug("Trying to detect if GLPI version is higher than 9.4")
 
         try:
-            versionresult =  self.db.execute(
-                "SELECT version FROM glpi_configs"
-                ).fetchone().values()
-            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
+            versionresult = (
+                self.db.execute("SELECT version FROM glpi_configs").fetchone().values()
+            )
+            self._glpi_version = str(versionresult[0], encoding="utf-8").replace(
+                " ", ""
+            )
         except OperationalError:
-            versionresult =  self.db.execute(
-                "SELECT value FROM glpi_configs WHERE name = 'version'"
-                ).fetchone().values()
-            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
+            versionresult = (
+                self.db.execute("SELECT value FROM glpi_configs WHERE name = 'version'")
+                .fetchone()
+                .values()
+            )
+            self._glpi_version = str(versionresult[0], encoding="utf-8").replace(
+                " ", ""
+            )
         except Exception as e:
-            logging.getLogger().error("GLPI version search 0.94 !")
+            logging.getLogger().error("We are searching for GLPI 9.4.")
             return False
 
         if LooseVersion(self._glpi_version) >= LooseVersion("9.4") and LooseVersion(
             self._glpi_version
         ) <= LooseVersion("9.4.6"):
-            logging.getLogger().debug("GLPI version %s found !" % self._glpi_version)
+            logging.getLogger().debug("GLPI version %s found." % self._glpi_version)
             return True
         else:
             logging.getLogger().debug("GLPI higher than version 9.4 was not detected")
@@ -179,17 +185,23 @@ class Glpi94(DyngroupDatabaseHelper):
             setattr(Glpi94, "encode", encode_latin1)
 
         try:
-            versionresult =  self.db.execute(
-                "SELECT version FROM glpi_configs"
-                ).fetchone().values()
-            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
+            versionresult = (
+                self.db.execute("SELECT version FROM glpi_configs").fetchone().values()
+            )
+            self._glpi_version = str(versionresult[0], encoding="utf-8").replace(
+                " ", ""
+            )
         except OperationalError:
-            versionresult =  self.db.execute(
-                "SELECT value FROM glpi_configs WHERE name = 'version'"
-                ).fetchone().values()
-            self._glpi_version=str(versionresult[0], encoding="utf-8").replace(" ", "")
+            versionresult = (
+                self.db.execute("SELECT value FROM glpi_configs WHERE name = 'version'")
+                .fetchone()
+                .values()
+            )
+            self._glpi_version = str(versionresult[0], encoding="utf-8").replace(
+                " ", ""
+            )
         except Exception as e:
-            logging.getLogger().error("GLPI version search 0.94 !")
+            logging.getLogger().error("We are searching for GLPI 9.4.")
             return False
 
         self.metadata = MetaData(self.db)

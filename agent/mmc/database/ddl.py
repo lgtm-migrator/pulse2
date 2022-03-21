@@ -48,7 +48,6 @@ def myLogger():
 
 
 class DBEngine(object):
-
     def __init__(self, user, passwd, host, db, port=None, log=None):
         """
         @param user: database user
@@ -80,7 +79,11 @@ class DBEngine(object):
     def connectiondb(self):
         try:
             self.conn = MySQLdb.connect(
-                user=self.user, passwd=self.passwd, host=self.host, port=self.port, db=self.db
+                user=self.user,
+                passwd=self.passwd,
+                host=self.host,
+                port=self.port,
+                db=self.db,
             )
             return self.conn
         except Exception as exc:

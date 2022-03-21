@@ -77,21 +77,19 @@ class DatabaseHelper(Singleton):
             if self.my_name == "Glpi":
                 return True
 
-            logger.debug("Module %s" %(self.my_name))
-            logger.debug("required version is %s" %(required_version))
-            result = self.db.execute("SELECT * FROM version limit 1;")
-            db_version = [element.Number for element in result]
-            logger.debug("version in base  : %s" % (db_version))
-
             if self.db_version is None:
-                logger.error("versin in base is None")
+                logger.error(
+                    "The module %s does not have a version in the database. Please check that the module is correctly installed"
+                    % self.my_name
+                )
                 return False
             if required_version == self.db_version:
                 return True
             elif required_version > self.db_version:
                 logger.warning(
-                    "search for update script sql of  %s" %(self.my_name)
-                    )
+                    "Your installation does not use the lastest schema for the %s module. Please check your installation"
+                    % self.my_name
+                )
                 return self.db_update()
             elif required_version != -1 and conn != required_version:
                 logger.error(
@@ -115,7 +113,6 @@ class DatabaseHelper(Singleton):
 
     def db_update(self):
         """Automatic database update"""
-        logger.debug("db_update %s" % self.my_name)
         db_control = DBControl(
             user=self.config.dbuser,
             passwd=self.config.dbpasswd,
