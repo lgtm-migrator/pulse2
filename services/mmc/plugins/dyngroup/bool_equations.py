@@ -53,8 +53,6 @@ s2x6 = re.compile("</p>$")
 Set = set
 
 
-Set=set
-
 class BoolRequest(object):
     def __init__(self):
         self.equ = None
