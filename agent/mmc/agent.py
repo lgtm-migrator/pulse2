@@ -1257,6 +1257,7 @@ class PluginManager(Singleton):
         f, p, d = imp.find_module(name, ["plugins"])
 
         try:
+            logger.debug("-------------module %s-------------" % name)
             logger.debug("Trying to load module %s" % name)
             plugin = imp.load_module(name, f, p, d)
             logger.debug("Module %s loaded" % name)
