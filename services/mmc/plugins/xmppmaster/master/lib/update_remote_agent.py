@@ -123,4 +123,6 @@ class Update_Remote_Agent:
             ).hexdigest()
             listmd5.append(self.directory["script_agent"][fichiername])
         listmd5.sort()
-        self.directory["fingerprint"] = hashlib.md5(json.dumps(listmd5).encode('utf-8')).hexdigest()
+        self.directory["fingerprint"] = hashlib.md5(
+            json.dumps(listmd5).encode("utf-8")
+        ).hexdigest()

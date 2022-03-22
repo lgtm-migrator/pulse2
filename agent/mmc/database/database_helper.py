@@ -164,7 +164,7 @@ class DatabaseHelper(Singleton):
             # charset=utf8 will convert all data to UTF-8, even if tables are
             # stored in Latin-1
             url += "?charset=utf8"
-            if not "mysqldb" in  self.config.dbdriver:
+            if not "mysqldb" in self.config.dbdriver:
                 url += "&use_unicode=0"
             if self.config.dbsslenable:
                 url = url + "&ssl_ca=%s&ssl_key=%s&ssl_cert=%s" % (

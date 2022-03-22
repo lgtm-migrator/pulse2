@@ -20,6 +20,7 @@
 # along with Pulse 2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
+
 from sqlalchemy import and_, or_, not_
 from pulse2.managers.group import ComputerGroupManager
 
