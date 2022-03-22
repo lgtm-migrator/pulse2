@@ -61,7 +61,6 @@ class DatabaseHelper(Singleton):
     session = None
 
     def db_check(self):
-        logger.info("/-------DB CHECK %s -----------------\\"% self.my_name)
         required_version = DDLContentManager().get_version(self.my_name)
         if not checkSqlalchemy():
             logger.error(
