@@ -109,3 +109,4 @@ $interval_full_backup = $settings['update_freq_full']/86400;
     <label><?php echo _T("Default directories to backup", "urbackup"); ?></label><input placeholder="Current value: <?php echo $settings['default_dirs']; ?>" type="text" name="default_dirs" id="default_dirs"/><br><br>
     <input type="submit" value="Save">
 </form>
+
