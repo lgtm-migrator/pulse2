@@ -68,7 +68,240 @@ import zipfile
 from stat import ST_CTIME
 import slixmpp
 import traceback
+import types
+import time
+import sys
+import hashlib
 
+import random
+
+# 3rd party modules
+
+import posix_ipc
+
+
+logger = logging.getLogger()
+
+sys.path.append("plugins")
+
+Fault = xmlrpc.client.Fault
+ctx = None
+VERSION = "4.6.9"
+
+class messagefilexmpp:
+    # priority : 1 send message remote to
+        #dataform jsonstring ({to,action,ret,base64,data,sessionid}
+
+    # priority : 2 send message remote iq
+        #dataform
+
+    # priority 4 call plugin master
+        #(dataform : json string { "action" : plugin, "ret": 0, "sessionid": sessionid, "data": data
+
+    # priority 9 notification
+        # (dataform : string )
+
+    def name_random(self, nb, pref=""):
+        a = "abcdefghijklnmopqrstuvwxyz0123456789"
+        d = pref
+        for t in range(nb):
+            d = d + a[random.randint(0, 35)]
+        return d
+
+    def __init__(self):
+        #self.name_queue = ["/mysend", "/myrep"]
+        self.name_queue = ["/mysend"]
+        self.mpsend = None
+        self.mprec = None
+        self.create_file_message()
+        self.file_reponse_iq = []
+
+    def create_file_message(self):
+        try: #sender
+            self.mpsend = posix_ipc.MessageQueue(
+                "/mysend",
+                posix_ipc.O_CREX
+                )
+            logger.error("JFKJFK creation queue /mysend")
+        except posix_ipc.ExistentialError:
+            self.mpsend = posix_ipc.MessageQueue("/mysend")
+        except OSError as e:
+            logger.error("ERROR CREATE QUEUE POSIX %s" % e)
+            logger.error("eg : admin (/etc/security/limits.conf and  /etc/sysctl.conf")
+        except Exception as e:
+            logger.error("exception %s" % e)
+            logger.error("\n%s"%(traceback.format_exc()))
+
+        logger.error("JFKJFK creation queue /mysend %s" % self.mpsend)
+
+    def close_file_message(self):
+        for elt in self.name_queue:
+            try:
+                # destruction message MessageQueue
+                posix_ipc.unlink_message_queue(elt)
+            except:
+                pass
+
+    def sendstr(self, msg, timeout=None, priority= 9):
+        self.mpsend.send(msg.encode('utf-8'), timeout = timeout, priority= priority)
+
+    def sendbytes(self, msg, timeout=None, priority= 9):
+        self.mpsend.send(msg, timeout = timeout, priority= priority)
+
+    def iqsendpulse(self, mto, mbody, timeout):
+        mbody['mto']= mto
+        mbody['mtimeout']= timeout
+        logger.error("JFKJFK iqsendpulse: mbody = %s" % (mbody))
+        # creation message queue result
+
+        return self.sendiqstr(json.dumps(mbody), timeout)
+
+    def send_message(mto, mbodystr):
+        data={"mto" : mto,
+              "mbodystr" : mbodystr}
+        self.sendstr(self, json.dumps(msg), timeout=None, priority= 9)
+
+    def clean_message_file(self, deltatime_max=120):
+        deltatime = time.time()
+        listdelqueue=[]
+        listqueue=[]
+        for queue_elt in self.file_reponse_iq:
+            if ( deltatime - queue_elt['time'] ) > deltatime_max:
+                try:
+                    posix_ipc.unlink_message_queue(queue_elt['name'])
+                except:
+                    pass
+            else:
+                listqueue.append(queue_elt)
+        self.file_reponse_iq = listqueue
+
+
+    def sendiqstr(self, msg, timeout=5):
+        """
+        la demande est envoyée via file de messages posix.
+        elle posede session number qui sera le nom de la file d'attente de la reponse.
+        on atend que la file d'attente soit crer puis on attend la reponce.
+        """
+        bresult = False
+        self.clean_message_file(deltatime_max=120)
+
+        name_iq_rand = self.name_random( 5, "/mmc_recv_iq_data" )
+        self.file_reponse_iq.append({
+            "name" : name_iq_rand,
+            "time" : time.time()}
+        )
+        if isinstance(msg, str):
+            msg=json.loads(msg)
+        logger.error("JFKJFK msg is  %s"%msg)
+        msg['name_iq_queue'] = name_iq_rand
+        logger.error("JFKJFK msg is  %s"%msg)
+        logger.error("JFKJFK msg dumps is  %s"%json.dumps(msg).encode('utf-8'))
+        logger.error("JFKJFK ENVOI TO QUEUE")
+        self.mpsend.send( json.dumps(msg).encode('utf-8'), priority=2 )
+        time.sleep(1)
+        logger.error("JFKJFK creation queue %s " % msg['name_iq_queue'])
+        try:
+            mprep = posix_ipc.MessageQueue(
+                msg['name_iq_queue'],
+                posix_ipc.O_CREX
+                )
+        except posix_ipc.ExistentialError:
+            mprep = posix_ipc.MessageQueue(msg['name_iq_queue'])
+        except OSError as e:
+            logger.error("ERROR CREATE QUEUE POSIX %s" % e)
+            logger.error("eg : admin (/etc/security/limits.conf and  /etc/sysctl.conf")
+        except Exception as e:
+            logger.error("exception %s" % e)
+            logger.error("\n%s"%(traceback.format_exc()))
+
+        try:
+            msgrep, priority = mprep.receive(timeout)
+            logger.error("JFKJFK RECU PRIORITE %s " % priority)
+            logger.error("JFKJFK RECU msgrep %s " % msgrep)
+
+            bresult = True
+        except posix_ipc.BusyError:
+            #timeout iq
+            logger.error("JFKJFK TIMEOUT "\
+                "suppression queue %s " % msg['name_iq_queue'])
+        try:
+            # destruction message MessageQueue
+            logger.error("JFKJFK AAAAAAA suppression "\
+                "queue %s " % msg['name_iq_queue'])
+            posix_ipc.unlink_message_queue(msg['name_iq_queue'])
+        except:
+            pass
+
+        if bresult :
+            return msgrep.decode()
+        return bresult
+
+    def sendiqbytes(self, msg, timeout=None, priority= 9):
+        self.mpsend.send(msg, priority= 9)
+
+    def callpluginmasterfrommmc(self, plugin, data, sessionid=None):
+        if sessionid is None:
+            sessionid = self.name_random(5, plugin)
+        msg = { "action" : plugin,
+               "ret": 0,
+               "sessionid": sessionid,
+               "data": data}
+        self.sendstr(json.dumps(msg), priority = 4)
+
+    def _call_remote_action(self, to, nameaction, sessionname):
+        msg = {
+            "to" : to,
+            "action": nameaction,
+            "sessionid": self.name_random(5,sessionname),
+            "data": [],
+            "ret": 255,
+            "base64" : False}
+        self.sendstr(json.dumps(msg), priority= 1)
+
+    def send_message_json(to, jsonstring):
+        jsonstring['to']=to
+        self.sendstr(json.dumps(jsonstring), priority= 1)
+
+    def callrestartbymaster(self, to):
+        self._call_remote_action( to, "restarfrommaster", "restart")
+        return True
+
+    def callinventory(self, to):
+        self._call_remote_action( to, "inventory", "inventory")
+        return True
+
+    def callrestartbotbymaster(to):
+        self._call_remote_action( to, "restartbot", "restartbot")
+        return True
+
+    def callshutdownbymaster(self, to, time=0, msg=""):
+        shutdownmachine = {
+            "action": "shutdownfrommaster",
+            "sessionid": self.name_random(5, "shutdown"),
+            "data": {"time": time, "msg": msg},
+            "ret": 0,
+            "base64" : False }
+        self.sendstr(json.dumps(shutdownmachine), priority= 1)
+        return True
+
+    def callvncchangepermsbymaster(self, to, askpermission=1):
+        vncchangepermsonmachine = {
+            "action": "vncchangepermsfrommaster",
+            "sessionid": self.name_random(5, "vncchangeperms"),
+            "data": {"askpermission": askpermission},
+            "ret": 0,
+            "base64" : False }
+        self.sendstr(json.dumps(vncchangepermsonmachine), priority= 1)
+        return True
+
+    def stop(self):
+        for queue_elt in self.file_reponse_iq:
+            try:
+                posix_ipc.unlink_message_queue(queue_elt['name'])
+            except:
+                pass
+        self.file_reponse_iq = []
+        self.close_file_message()
 
 class TimedCompressedRotatingFileHandler(TimedRotatingFileHandler):
     """
@@ -125,16 +358,6 @@ class TimedCompressedRotatingFileHandler(TimedRotatingFileHandler):
         with zipfile.ZipFile(dfn_zipped, "w") as f:
             f.write(dfn, dfn_zipped, zipfile.ZIP_DEFLATED)
         os.remove(dfn)
-
-
-logger = logging.getLogger()
-
-sys.path.append("plugins")
-
-Fault = xmlrpc.client.Fault
-ctx = None
-VERSION = "4.6.9"
-
 
 class IncludeStartsWithFilter(logging.Filter):
     """This class create a specialized filter for logging.getLogger.
@@ -1074,18 +1297,42 @@ class MMCApp(object):
         )
         # Start client XMPP if module xmppmaster enable
         if PluginManager().isEnabled("xmppmaster"):
-            logger.info("Start client mmc Xmpp XmppMaster")
-            self.modulexmppmaster = (
-                PluginManager().getEnabledPlugins()["xmppmaster"].xmppMasterthread()
-            )
-            self.modulexmppmaster.setDaemon(True)
-            self.modulexmppmaster.start()
+            #create file  message
+            # JFKJFK
+            PluginManager().getEnabledPlugins()["xmppmaster"].messagefilexmpp=messagefilexmpp()
+            self.modulexmppmaster = PluginManager().getEnabledPlugins()["xmppmaster"].messagefilexmpp
+            #try:
+                #PluginManager().getEnabledPlugins()["xmppmaster"].mp = posix_ipc.MessageQueue("/mysend", posix_ipc.O_CREX)
+            #except posix_ipc.ExistentialError:
+                #PluginManager().getEnabledPlugins()["xmppmaster"].mp = posix_ipc.MessageQueue("/mysend")
+            # MASTER est maintenant 1 substitut.
+            logger.info("Start/restart MMC creation canal commande xmpp")
+            msg = "Start/restart MMC"
+            self.modulexmppmaster.sendstr(msg, priority= 9)
+
+
+            result= { 'action' : 'list_mmc_module',
+                      'data' : PluginManager().getEnabledPluginNames() }
+
+            sendstructinfo=json.dumps(result)
+
+            self.modulexmppmaster.sendstr( sendstructinfo,
+                                           priority=4)
+
+            # logger.info("Start client mmc Xmpp XmppMaster")
+            # self.modulexmppmaster = (
+                #PluginManager().getEnabledPlugins()["xmppmaster"].xmppMasterthread()
+            # )
+            # self.modulexmppmaster.setDaemon(True)
+            # self.modulexmppmaster.daemon=True
+            # self.modulexmppmaster.start()
 
     def cleanUp(self):
         """
         function call before shutdown of reactor
         """
         if PluginManager().isEnabled("xmppmaster"):
+
             # self.modulexmppmaster
             if self.modulexmppmaster.isAlive():
                 logger.info("mmc-agent xmppmaster stop...")
