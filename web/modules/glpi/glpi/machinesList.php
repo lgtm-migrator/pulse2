@@ -98,8 +98,8 @@ list($list, $values) = getEntitiesSelectableElements();
 
 $listWithAll = array_merge([_T("All my entities", "glpi")], $list);
 
-# todo cette variable devra etre mise en parametre 
-$root_sees_all_machines = 0;//  1 The root user sees all the machines, even those with neither entity nor uuid_inventory. 
+# FIXME: This variable should be added as a parameter.
+$root_sees_all_machines = 0;//  1 The root user sees all the machines, even those with neither entity nor uuid_inventory.
 
 if ($root_sees_all_machines == 1)
 {

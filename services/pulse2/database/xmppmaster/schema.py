@@ -223,7 +223,7 @@ class Machines(Base, XmppMasterDBObj):
     # id = Column(Integer, primary_key=True)
     jid = Column(String(255), nullable=False)
     uuid_serial_machine = Column(String(45))
-    need_reconf = Column(Boolean, nullable=False, default="0")
+    need_reconf = Column(Boolean, nullable=False, default=0)
     enabled = Column(Boolean, unique=False)
     platform = Column(String(60))
     hostname = Column(String(45), nullable=False)
@@ -321,8 +321,8 @@ class RelayServer(Base, XmppMasterDBObj):
     longitude = Column(String(45))
     latitude = Column(String(45))
     enabled = Column(Boolean, unique=False)
-    mandatory = Column(Boolean, nullable=False, default="1")
-    switchonoff = Column(Boolean, nullable=False, default="1")
+    mandatory = Column(Boolean, nullable=False, default=1)
+    switchonoff = Column(Boolean, nullable=False, default=1)
     classutil = Column(String(10))
     moderelayserver = Column(String(7))
     keysyncthing = Column(String(70), default="")
@@ -743,6 +743,7 @@ class Mon_rules(Base, XmppMasterDBObj):
     # Here we define columns for the table mon_device_service.
     # Notice that each column is also a normal Python instance attribute.
     # id = Column(Integer, primary_key=True)
+    enable = Column(Integer,nullable=False, default=1)
     hostname = Column(String(255), default=None)
     device_type = Column(String(255), nullable=False,
                                   default="opticalReader")
@@ -753,6 +754,8 @@ class Mon_rules(Base, XmppMasterDBObj):
     type_event = Column(String(255), default=None)
     user = Column(String(255), default=None)
     comment = Column(String(1024))
+    os = Column(String(45),  default=None)
+    type_machine= Column(String(45),  default=None)
 
 
 class Mon_event(Base, XmppMasterDBObj):
@@ -768,10 +771,9 @@ class Mon_event(Base, XmppMasterDBObj):
     machines_id = Column(Integer, nullable=False)
     id_rule = Column(Integer, nullable=False)
     id_device = Column(Integer, nullable=False)
-    parameter_other=  Column(String(1025), default=None)
-    ack_user =  Column(String(90), default=None)
-    ack_date = Column(DateTime,  default=None)
-
+    parameter_other = Column(String(1024), nullable=True)
+    ack_user = Column(String(90), nullable=True)
+    ack_date = Column(DateTime, default=datetime.datetime.now)
 
 class Mon_panels_template(Base, XmppMasterDBObj):
     # ====== Table name =========================

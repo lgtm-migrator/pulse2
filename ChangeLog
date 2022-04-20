@@ -1,3 +1,13 @@
+Pulse 2 4.6.10
+=============
+* [BUGFIX]  Fix displaying machines in the GLPI view
+* [BUGFIX]  Fix displaying of teams in Audit
+* [BUGFIX]  Fix displaying package order when editing a package
+* [BUGFIX]  Fix deleting machines not available in glpi
+* [BUGFIX]  Fix creation of the reversessh in backuppc
+* [BUGFIX]  Fix removing computers not on glpi anymore
+* [BUGFIX]  Fix computer default name in sysprep configuration page
+
 Pulse 2 4.6.9
 =============
 * [FEATURE] Add Team support in Audit page
@@ -23,6 +33,7 @@ popup, etc.)
 * [BUGFIX]  The abort deployment button was always disabled
 * [BUGFIX]  Fix creation of groups based on OU or AD. Bug#1238
 * [BUGFIX]  Add carriage return on "Executed command" info in detail view
+* [BUGFIX]  Fix detection of online machines with glpi 0.84
 
 Pulse 2 4.6.8
 =============

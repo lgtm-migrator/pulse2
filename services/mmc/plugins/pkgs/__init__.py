@@ -400,6 +400,14 @@ def test_ln(pathdirpackage):
         os.remove(pathdirpackage)
     return { "result" : False }
 
+
+def parsexmppjsonfile(path):
+    # puts the words False in lowercase.
+    datastr = file_get_contents(path)
+    datastr = re.sub(r"(?i) *: *false", " : false", datastr)
+    datastr = re.sub(r"(?i) *: *true", " : true", datastr)
+    file_put_contents(path, datastr)
+
 def putPackageDetail(package, need_assign=True):
     """
         This function is used to create or edite a package
@@ -420,10 +428,10 @@ def putPackageDetail(package, need_assign=True):
         return False
 
     # ___ try compability with old packages ___
-    if "localisation_server" not in  package:
+    if "localisation_server" not in package or package['localisation_server']== "":
         package['localisation_server']="global"
 
-    if "creator" not in  package:
+    if "creator" not in  package or package['creator'] == "":
         package['creator']="root"
         package['creation_date']=strdate
 
@@ -534,12 +542,13 @@ def putPackageDetail(package, need_assign=True):
     if 'mode' in package and   package['mode'] !=  'creation':
         typesynchro = 'chang'
 
-
     # writte file to xmpp deploy
     xmppdeployfile = to_json_xmppdeploy(package)
     fichier = open( os.path.join(packages_id_input_dir,"xmppdeploy.json"), "w" )
     fichier.write(xmppdeployfile)
     fichier.close()
+
+    parsexmppjsonfile(os.path.join(packages_id_input_dir,"xmppdeploy.json"))
 
     if centralizedmultiplesharing:
         localisation_server = package['localisation_server'] if 'localisation_server' in package else None
@@ -575,9 +584,21 @@ def putPackageDetail(package, need_assign=True):
             PkgsDatabase().pkgs_register_synchro_package_multisharing(package,
                                                                   typesynchro )
     else:
+        pkgs_shares = PkgsDatabase().pkgs_sharing_admin_profil()
+        pkgs_share_id = 0
+        for share in pkgs_shares:
+            if share['name'] != package['localisation_server']:
+                continue
+            else:
+                pkgs_share_id = share['id_sharing']
+                package['shareobject'] = share
+                break
+
+        pkgs_share_id = share['id_sharing']
         pkgs_register_synchro_package(package['id'],
                                       typesynchro )
-        pkgmanage().add_package(confjson)
+
+        pkgmanage().add_package(confjson, pkgs_share_id)
 
     # write file to package directory
     with open( os.path.join(packages_id_input_dir,"conf.json"), "w" ) as outfile:

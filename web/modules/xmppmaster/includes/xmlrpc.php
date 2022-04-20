@@ -175,7 +175,7 @@ function xmlrpc_addlogincommand($login,
                                 $commandid,
                                 $grpid = '',
                                 $nb_machine_in_grp = '',
-                                $instructions_nb_machine_for_exec,
+                                $instructions_nb_machine_for_exec = '',
                                 $instructions_datetime_for_exec = '',
                                 $parameterspackage = '',
                                 $rebootrequired = 0,
@@ -640,6 +640,10 @@ function xmlrpc_create_reverse_ssh_from_am_to_ars($jidmachine, $remoteport,  $pr
 
 function xmlrpc_get_mon_events($start=-1, $maxperpage=-1, $filter=""){
   return xmlCall("xmppmaster.get_mon_events", [$start, $maxperpage, $filter]);
+}
+
+function xmlrpc_get_mon_events_history($start=-1, $maxperpage=-1, $filter=""){
+  return xmlCall("xmppmaster.get_mon_events_history", [$start, $maxperpage, $filter]);
 }
 
 function xmlrpc_acquit_mon_event($id, $user){

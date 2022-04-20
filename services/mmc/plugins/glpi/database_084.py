@@ -643,20 +643,20 @@ class Glpi084(DyngroupDatabaseHelper):
             contains = ctx["contains"]
 
         query = session.query(Machine.id.label('uuid')).distinct(Machine.id)\
-        .join(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
+        .outerjoin(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
         .outerjoin(self.user, Machine.users_id == self.user.c.id)\
         .join(Entities, Entities.id == Machine.entities_id)\
         .outerjoin(self.locations, Machine.locations_id == self.locations.c.id)\
         .outerjoin(self.manufacturers, Machine.manufacturers_id == self.manufacturers.c.id)\
-        .join(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)#\
+        .outerjoin(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)#\
         #.outerjoin(self.regcontents, Machine.id == self.regcontents.c.computers_id)
 
         if field != "":
-            query = query.join(Computersitems, Machine.id == Computersitems.computers_id)
+            query = query.outerjoin(Computersitems, Machine.id == Computersitems.computers_id)
             if field != "type":
-                query = query.join(Peripherals, and_(Computersitems.items_id == Peripherals.id,
+                query = query.outerjoin(Peripherals, and_(Computersitems.items_id == Peripherals.id,
                                    Computersitems.itemtype == "Peripheral"))\
-                    .join(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
+                    .outerjoin(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
         if 'cn' in self.config.summary:
             query = query.add_column(Machine.name.label("cn"))
 
@@ -732,16 +732,13 @@ class Glpi084(DyngroupDatabaseHelper):
         query = query.order_by(Machine.name)
 
         online_machines = []
-        # All computers
+        online_machines = [int(id) for id in XmppMasterDatabase().getidlistPresenceMachine(presence=True) if id != "UUID" and id != ""]
         if "computerpresence" not in ctx:
             # Do nothing more
             pass
         elif ctx["computerpresence"] == "no_presence":
-            online_machines = XmppMasterDatabase().getidlistPresenceMachine(presence=False)
+            query = query.filter(Machine.id.notin_(online_machines))
         else:
-            online_machines = XmppMasterDatabase().getidlistPresenceMachine(presence=True)
-
-        if online_machines:
             query = query.filter(Machine.id.in_(online_machines))
 
         query = self.__filter_on(query)
@@ -756,9 +753,9 @@ class Glpi084(DyngroupDatabaseHelper):
 
         if debugfunction:
             try:
-                logger.info("@@@DEBUG@@@ %s"%literalquery(query))
+                self.logger.info("@@@DEBUG@@@ %s"%literalquery(query))
             except Exception as e:
-                logger.error("display @@@DEBUG@@@ sql literal from alchemy error : %s" % e)
+                self.logger.error("display @@@DEBUG@@@ sql literal from alchemy error : %s" % e)
 
         machines = query.all()
 
@@ -843,19 +840,19 @@ class Glpi084(DyngroupDatabaseHelper):
             if online_machines is not None:
                 online_machines = [int(id.replace("UUID", "")) for id in online_machines if id !=""]
         query = session.query(Machine.id.label('uuid')).distinct(Machine.id)\
-            .join(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
+            .outerjoin(self.glpi_computertypes, Machine.computertypes_id == self.glpi_computertypes.c.id)\
             .outerjoin(self.user, Machine.users_id == self.user.c.id)\
             .join(Entities, Entities.id == Machine.entities_id)\
             .outerjoin(self.locations, Machine.locations_id == self.locations.c.id)\
             .outerjoin(self.manufacturers, Machine.manufacturers_id == self.manufacturers.c.id)\
-            .join(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)
+            .outerjoin(self.glpi_computermodels, Machine.computermodels_id == self.glpi_computermodels.c.id)
 
         if field != "":
-            query = query.join(Computersitems, Machine.id == Computersitems.computers_id)
+            query = query.outerjoin(Computersitems, Machine.id == Computersitems.computers_id)
             if field != "type":
-                query = query.join(Peripherals, and_(Computersitems.items_id == Peripherals.id,
+                query = query.outerjoin(Peripherals, and_(Computersitems.items_id == Peripherals.id,
                                    Computersitems.itemtype == "Peripheral"))\
-                    .join(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
+                    .outerjoin(Peripheralsmanufacturers, Peripherals.manufacturers_id == Peripheralsmanufacturers.id)
         # fild always exist
         query = query.add_column(Machine.name.label("cn"))
         if uuidsetup != "" or idmachine != "":
