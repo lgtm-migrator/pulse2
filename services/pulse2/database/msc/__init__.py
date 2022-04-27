@@ -991,7 +991,7 @@ class MscDatabase(DatabaseHelper):
             )
             result.append(resultat)
         for x in q:
-            # print x.CommandsOnHost.id
+            # print (x.CommandsOnHost.id)
             # session.query(CommandsOnHost).filter(CommandsOnHost.id == x.CommandsOnHost.id ).delete()
             # session.flush()
             # session.query(CommandsOnHostPhase).filter(CommandsOnHostPhase.fk_commands_on_host == x.CommandsOnHost.id ).delete()

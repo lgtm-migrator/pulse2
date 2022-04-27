@@ -142,11 +142,21 @@ class messagefilexmpp:
             except:
                 pass
 
-    def sendstr(self, msg, timeout=None, priority= 9):
-        self.mpsend.send(msg.encode('utf-8'), timeout = timeout, priority= priority)
+    def sendstr(self, msg, timeout=0, priority= 9):
+        try:
+            self.mpsend.send(msg.encode('utf-8'), timeout = timeout, priority= priority)
+        except posix_ipc.BusyError:
+            #timeout
+            logger.warning("msg posix %s \"BusyError on send message\""\
+                "[timeout is %s] -- VERIFY SUBSTITUT MASTER IS ON : " %  (self.name_queue,timeout))
 
-    def sendbytes(self, msg, timeout=None, priority= 9):
-        self.mpsend.send(msg, timeout = timeout, priority= priority)
+    def sendbytes(self, msg, timeout=0, priority= 9):
+        try:
+            self.mpsend.send(msg, timeout = timeout, priority= priority)
+        except posix_ipc.BusyError:
+            #timeout
+            logger.warning("msg posix %s \"BusyError on send message\""\
+                "[timeout is %s] -- VERIFY SUBSTITUT MASTER IS ON : " %  (self.name_queue,timeout))
 
     def iqsendpulse(self, mto, mbody, timeout):
         mbody['mto']= mto
