@@ -122,7 +122,7 @@ class messagefilexmpp:
                 "/mysend",
                 posix_ipc.O_CREX
                 )
-            logger.error("JFKJFK creation queue /mysend")
+            logger.error("creation queue /mysend")
         except posix_ipc.ExistentialError:
             self.mpsend = posix_ipc.MessageQueue("/mysend")
         except OSError as e:
@@ -131,8 +131,7 @@ class messagefilexmpp:
         except Exception as e:
             logger.error("exception %s" % e)
             logger.error("\n%s"%(traceback.format_exc()))
-
-        logger.error("JFKJFK creation queue /mysend %s" % self.mpsend)
+        logger.debug("creation queue /mysend %s" % self.mpsend)
 
     def close_file_message(self):
         for elt in self.name_queue:
@@ -161,9 +160,7 @@ class messagefilexmpp:
     def iqsendpulse(self, mto, mbody, timeout):
         mbody['mto']= mto
         mbody['mtimeout']= timeout
-        logger.error("JFKJFK iqsendpulse: mbody = %s" % (mbody))
         # creation message queue result
-
         return self.sendiqstr(json.dumps(mbody), timeout)
 
     def send_message(mto, mbodystr):
@@ -202,14 +199,9 @@ class messagefilexmpp:
         )
         if isinstance(msg, str):
             msg=json.loads(msg)
-        logger.error("JFKJFK msg is  %s"%msg)
         msg['name_iq_queue'] = name_iq_rand
-        logger.error("JFKJFK msg is  %s"%msg)
-        logger.error("JFKJFK msg dumps is  %s"%json.dumps(msg).encode('utf-8'))
-        logger.error("JFKJFK ENVOI TO QUEUE")
         self.mpsend.send( json.dumps(msg).encode('utf-8'), priority=2 )
         time.sleep(1)
-        logger.error("JFKJFK creation queue %s " % msg['name_iq_queue'])
         try:
             mprep = posix_ipc.MessageQueue(
                 msg['name_iq_queue'],
@@ -226,17 +218,14 @@ class messagefilexmpp:
 
         try:
             msgrep, priority = mprep.receive(timeout)
-            logger.error("JFKJFK RECU PRIORITE %s " % priority)
-            logger.error("JFKJFK RECU msgrep %s " % msgrep)
-
             bresult = True
         except posix_ipc.BusyError:
             #timeout iq
-            logger.error("JFKJFK TIMEOUT "\
+            logger.error("TIMEOUT "\
                 "suppression queue %s " % msg['name_iq_queue'])
         try:
             # destruction message MessageQueue
-            logger.error("JFKJFK AAAAAAA suppression "\
+            logger.error("suppression "\
                 "queue %s " % msg['name_iq_queue'])
             posix_ipc.unlink_message_queue(msg['name_iq_queue'])
         except:
@@ -1308,7 +1297,6 @@ class MMCApp(object):
         # Start client XMPP if module xmppmaster enable
         if PluginManager().isEnabled("xmppmaster"):
             #create file  message
-            # JFKJFK
             PluginManager().getEnabledPlugins()["xmppmaster"].messagefilexmpp=messagefilexmpp()
             self.modulexmppmaster = PluginManager().getEnabledPlugins()["xmppmaster"].messagefilexmpp
             #try:
