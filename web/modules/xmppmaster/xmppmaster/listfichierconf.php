@@ -139,9 +139,7 @@ echo "<br><br><br>";
     $jid  = isset($_GET['jid']) ? $_GET['jid'] : ( isset($_POST['jid']) ? $_POST['jid'] : "");
     $machine  = isset($_POST['Machine']) ? $_POST['Machine'] : ($uuid != '' ?  xmlrpc_getjidMachinefromuuid( $uuid ) : $jid);
     $ma = xmlrpc_getMachinefromjid($machine);
-
-    $jid = $ma['jid'] ? isset($ma) : $jid;
-
+    $jid = isset($ma['jid']) ? $ma['jid']   : $jid;
     if (isset($_POST["bcreate"])){
         header("Location: " . urlStrRedirect("xmppmaster/xmppmaster/editfileconf", array()));
     }
