@@ -150,6 +150,6 @@ class PkgsConfig(PluginConfig):
         if self.has_option("integrity_checks", "hashing_algo"):
             self.hashing_algo = self.get("integrity_checks", "hashing_algo")
             
-        self.keyAES32 = 'key'
+        self.keyAES32 = 'abcdefghijklnmopqrstuvwxyz012345'
         if self.has_option("integrity_checks", "keyAES32"):
             self.keyAES32 = self.get("integrity_checks", "keyAES32")
