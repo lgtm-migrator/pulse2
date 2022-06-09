@@ -416,32 +416,27 @@ def generate_hash(path, package_id):
     
     if PkgsConfig("pkgs").hashing_algo:
         hash_type = PkgsConfig("pkgs").hashing_algo
-        
-    with open(dest + "/" + "hash.type", 'w') as f:
-        f.write(hash_type)
 
     try:
         file_hash = hashlib.new(hash_type)
     except:
         logging.error("Wrong hash type")
-    
-    isExist = os.path.exists(dest)
 
-    if not isExist:
+    if not os.path.exists(dest):
         os.makedirs(dest)
     
     packages = get_package_summary(package_id)
     
     for file_package in packages["files"]:
-        with open(source + "/" + file_package, "rb") as file:
-            fb = file.read(BLOCK_SIZE) # Read from the file. Take in the amount declared above
-            while len(fb) > 0: # While there is still data being read from the file
-                file_hash.update(fb) # Update the hash
-                fb = file.read(BLOCK_SIZE) # Read the next block from the file
+        with open(source + "/" + file_package, "rb") as _file:
+            file_block = _file.read(BLOCK_SIZE) # Read from the file. Take in the amount declared above
+            while len(file_block) > 0: # While there is still data being read from the file
+                file_hash.update(file_block) # Update the hash
+                file_block = _file.read(BLOCK_SIZE) # Read the next block from the file
             
         try:
-            with open(dest + "/" + file_package + ".hash", 'w') as f:
-                f.write(file_hash.hexdigest())
+            with open(dest + "/" + file_package + ".hash", 'w') as _file:
+                _file.write(file_hash.hexdigest())
         except:
             print("The 'docs' directory does not exist")
     
@@ -460,8 +455,6 @@ def generate_hash(path, package_id):
     
     with open(dest + ".hash", 'w') as outfile:
         outfile.write(content)
-        
-    return content
 
 def putPackageDetail(package, need_assign=True):
     """
@@ -556,10 +549,7 @@ def putPackageDetail(package, need_assign=True):
         package["edition_date"] = ""
         
     if bool(PkgsConfig("pkgs").generate_hash):
-        if "hash" not in package:
-            package['hash'] = {}
-            package['hash']['global'] = generate_hash(package['localisation_server'], package["id"])
-            package['hash']['type'] = PkgsConfig("pkgs").hashing_algo
+        generate_hash(package['localisation_server'], package["id"])
 
     confjson={
         "sub_packages" : [],
@@ -596,8 +586,7 @@ def putPackageDetail(package, need_assign=True):
                 "boolcnd": package['boolcnd'],
                 "Qsoftware": package['Qsoftware']
             }
-        },
-        "hash" : package['hash']
+        }
     }
 
     typesynchro = 'create'
