@@ -425,9 +425,7 @@ def generate_hash(path, package_id):
     if not os.path.exists(dest):
         os.makedirs(dest)
     
-    packages = get_package_summary(package_id)
-    
-    for file_package in packages["files"]:
+    for file_package in os.listdir(source):
         with open(source + "/" + file_package, "rb") as _file:
             file_block = _file.read(BLOCK_SIZE) # Read from the file. Take in the amount declared above
             while len(file_block) > 0: # While there is still data being read from the file
