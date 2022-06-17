@@ -41,7 +41,7 @@ CREATE TABLE `udp_list` (
   `list_name` varchar(90) NOT NULL,
   `comment` varchar(255) DEFAULT NULL,
   `priority` int(11) DEFAULT 10 COMMENT 'la liste de plus haute priorite est applique en dernier.\n',
-  `action` varchar(45) DEFAULT 'admin' COMMENT 'action : admin, exclud, includ\n',
+  `action` varchar(45) DEFAULT 'admin' COMMENT 'action : admin, exclude, include\n',
   `deleted` int(11) DEFAULT 0 COMMENT 'trois 4 listes ne sont pas supprimable:\nlist admin, black liste interdir, liste permettre, list rest.\n\n',
   PRIMARY KEY (`id`),
   KEY `id_unique` (`list_name`),
