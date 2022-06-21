@@ -412,7 +412,7 @@ def parsexmppjsonfile(path):
 def generate_hash(path, package_id):
     source = "/var/lib/pulse2/packages/sharing/" + path + "/" + package_id
     dest = "/var/lib/pulse2/packages/hash/" + path + "/" + package_id
-    BLOCK_SIZE = 65536
+    BLOCK_SIZE = 65535
     
     if PkgsConfig("pkgs").hashing_algo:
         hash_type = PkgsConfig("pkgs").hashing_algo
