@@ -424,9 +424,15 @@ def generate_hash(path, package_id):
 
     if not os.path.exists(dest):
         os.makedirs(dest)
+        
+    source_file = os.listdir(source)
     
-    for file_package in os.listdir(source):
+    for file_package in sorted(source_file):
         with open(source + "/" + file_package, "rb") as _file:
+            try:
+                file_hash = hashlib.new(hash_type)
+            except:
+                logging.error("Wrong hash type")
             file_block = _file.read(BLOCK_SIZE) # Read from the file. Take in the amount declared above
             while len(file_block) > 0: # While there is still data being read from the file
                 file_hash.update(file_block) # Update the hash
@@ -448,6 +454,10 @@ def generate_hash(path, package_id):
             content += infile.read()
     
     content += salt
+    try:
+        file_hash = hashlib.new(hash_type)
+    except:
+        logging.error("Wrong hash type")
     file_hash.update(content)
     content = file_hash.hexdigest()
     
