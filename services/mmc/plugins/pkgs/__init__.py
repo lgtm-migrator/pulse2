@@ -428,7 +428,7 @@ def generate_hash(path, package_id):
     source_file = os.listdir(source)
     
     for file_package in sorted(source_file):
-        with open(source + "/" + file_package, "rb") as _file:
+        with open(os.path.join(source, file_packag), "rb") as _file:
             try:
                 file_hash = hashlib.new(hash_type)
             except:
@@ -439,7 +439,7 @@ def generate_hash(path, package_id):
                 file_block = _file.read(BLOCK_SIZE) # Read the next block from the file
             
         try:
-            with open(dest + "/" + file_package + ".hash", 'wb') as _file:
+            with open("%s.hash" % (os.path.join(dest, file_package)), 'wb') as _file:
                 _file.write(file_hash.hexdigest())
         except:
             logger.debug("The 'docs' directory does not exist")
@@ -450,7 +450,7 @@ def generate_hash(path, package_id):
         salt = PkgsConfig("pkgs").keyAES32
     filelist = os.listdir(dest)
     for file_package in sorted(filelist):
-        with open(dest + "/" + file_package, "rb") as infile:
+        with open(os.path.join(dest, file_package), "rb") as infile:
             content += infile.read()
     
     content += salt
