@@ -15,10 +15,34 @@ $password_urbackup = $ini_array['password'];
 $url_urbackup = $ini_array['url'];
 
 $interval_frequence_incremental_save = $_POST['update_freq_incr'];
+if ($interval_frequence_incremental_save == "")
+{
+    $interval_frequence_incremental_save = htmlspecialchars($_GET["current_inter_incr_backup"]);
+}
+
 $interval_frequence_full_save = $_POST['update_freq_full'];
+if ($interval_frequence_full_save == "")
+{
+    $interval_frequence_full_save = htmlspecialchars($_GET["current_inter_full_backup"]);
+}
+
 $exclude_files = $_POST['exclude_files'];
+if ($exclude_files == "")
+{
+    $exclude_files = htmlspecialchars($_GET["current_exclude_files"]);
+}
+
 $include_files = $_POST['include_files'];
+if ($include_files == "")
+{
+    $include_files = htmlspecialchars($_GET["current_include_files"]);
+}
+
 $default_dirs = $_POST['default_dirs'];
+if ($default_dirs == "")
+{
+    $default_dirs = htmlspecialchars($_GET["current_default_dirs"]);
+}
 
 $interval_frequence_incremental_save_hour_seconds = $interval_frequence_incremental_save*3600;
 $interval_frequence_full_save_day_seconds = $interval_frequence_full_save*86400;
