@@ -7,7 +7,31 @@ $p = new PageGenerator(_T("Profils", 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
+$groupname = htmlspecialchars($_GET["groupname"]);
+$need_name = htmlspecialchars($_GET["needname"]);
+$groupe_already_exist = htmlspecialchars($_GET["groupalreadyexist"]);
+
 $users_group_array = xmlrpc_get_clients();
+?>
+
+<?php
+if ($groupe_already_exist == "True")
+{
+    ?>
+    <script>
+        alert("Profil already exist with this name: "<?php echo $groupname; ?>);
+    </script>
+    <?php
+}
+
+if ($need_name == "True")
+{
+    ?>
+    <script>
+        alert("Profil need name");
+    </script>
+    <?php
+}
 ?>
 
 <br>
