@@ -99,14 +99,32 @@ $settings = $array['settings'];
 $interval_incremental_backup = $settings['update_freq_incr']/3600;
 $interval_full_backup = $settings['update_freq_full']/86400;
 
+$current_value_exclude_files = "";
+$current_value_include_files = "";
+$current_value_default_dirs = "";
+
+if ($settings['exclude_files'] != "")
+{
+    $current_value_exclude_files = "Current value: ";
+}
+
+if ($settings['include_files'] != "")
+{
+    $current_value_include_files = "Current value: ";
+}
+
+if ($settings['default_dirs'] != "")
+{
+    $current_value_default_dirs = "Current value: ";
+}
+
 ?>
 <br>
-<form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=validate_edit_group&amp;groupid=<?php echo $group_id; ?>&amp;groupname=<?php echo $group_name; ?>" method="post">
+<form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=validate_edit_group&amp;groupid=<?php echo $group_id; ?>&amp;groupname=<?php echo $group_name; ?>&amp;current_inter_incr_backup=<?php echo $interval_incremental_backup; ?>&amp;current_inter_full_backup=<?php echo $interval_full_backup; ?>&amp;current_exclude_files=<?php echo $settings['exclude_files']; ?>&amp;current_include_files=<?php echo $settings['include_files']; ?>&amp;current_default_dirs=<?php echo $settings['default_dirs']; ?>" method="post">
     <label><?php echo _T("Interval for incremental file backups (hour)", "urbackup"); ?></label><input placeholder="Current value: <?php echo $interval_incremental_backup; ?>" type="text" name="update_freq_incr" id="update_freq_incr"/><br>
     <label><?php echo _T("Interval for full file backups (day)", "urbackup"); ?></label><input placeholder="Current value: <?php echo $interval_full_backup; ?>" type="text" name="update_freq_full" id="update_freq_full"/><br>
-    <label><?php echo _T("Excluded files", "urbackup"); ?></label><input placeholder="Current value: <?php echo $settings['exclude_files']; ?>" type="text" name="exclude_files" id="exclude_files"/><br>
-    <label><?php echo _T("Included files", "urbackup"); ?></label><input placeholder="Current value: <?php echo $settings['include_files']; ?>" type="text" name="include_files" id="include_files"/><br>
-    <label><?php echo _T("Default directories to backup", "urbackup"); ?></label><input placeholder="Current value: <?php echo $settings['default_dirs']; ?>" type="text" name="default_dirs" id="default_dirs"/><br><br>
+    <label><?php echo _T("Excluded files", "urbackup"); ?></label><input placeholder="<?php echo $current_value_exclude_files; ?><?php echo $settings['exclude_files']; ?>" type="text" name="exclude_files" id="exclude_files"/><br>
+    <label><?php echo _T("Included files", "urbackup"); ?></label><input placeholder="<?php echo $current_value_include_files; ?><?php echo $settings['include_files']; ?>" type="text" name="include_files" id="include_files"/><br>
+    <label><?php echo _T("Default directories to backup", "urbackup"); ?></label><input placeholder="<?php echo $current_value_default_dirs; ?><?php echo $settings['default_dirs']; ?>" type="text" name="default_dirs" id="default_dirs"/><br><br>
     <input type="submit" value="Save">
 </form>
-
