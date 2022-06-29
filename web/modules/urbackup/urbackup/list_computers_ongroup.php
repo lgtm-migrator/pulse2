@@ -96,14 +96,17 @@ $clients = $array['navitems']['clients'];
 
 ?>
 <br>
-<h2><?php echo _T("Add member to this group", 'urbackup'); ?></h2>
+<h2><?php echo _T("Add member to this profil", 'urbackup'); ?></h2>
 <br>
 <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup&amp;groupname=<?php echo $group_name; ?>&amp;groupid=<?php echo $group_id; ?>" method="post">
     <select name="client">
         <?php
         foreach($clients as $client)
         {
-            echo '<option id="clientid" name="clientid" value="'.$client['id'].'">'.$client['name'].'</option>';
+            if ($client['group'] != $group_id)
+            {
+                echo '<option id="clientid" name="clientid" value="'.$client['id'].'">'.$client['name'].'</option>';
+            }
         }
         ?>
     </select>
@@ -118,9 +121,17 @@ $clients = $array['navitems']['clients'];
             <?php
             foreach($clients as $client)
             {
+                if ($client['group'] == 0)
+                {
+                    $groupname_client = "";
+                }
+                else
+                {
+                    $groupname_client = "(".$client['groupname'].")";
+                }
                 if ($client['group'] != $group_id)
                 {
-                    echo "<li value=".$client['id']." class='ui-draggable ui-draggable-handle ui-sortable-handle' style='width: 250px; height: 14px;'>".$client['name']."</li>";
+                    echo "<li value=".$client['id']." class='ui-draggable ui-draggable-handle ui-sortable-handle' style='width: 250px; height: 14px;'>".$client['name']." ".$groupname_client."</li>";
                 }
             }
             ?>
@@ -141,6 +152,10 @@ $clients = $array['navitems']['clients'];
         </ul>
     </div>
 </div>
+
+<?php
+
+?>
 
 <script>
 jQuery(function(){
