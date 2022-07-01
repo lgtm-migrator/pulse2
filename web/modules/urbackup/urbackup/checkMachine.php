@@ -13,17 +13,6 @@ $p->display();
 $clients = xmlrpc_get_backups_all_client();
 $clients = $clients["clients"];
 
-foreach ($clients as $client)
-{
-    if ($client["name"] == $clientname)
-    {
-        $exist = "true";
-        $id = $client["id"];
-    }
-    else
-        $exist = "false";
-}
-
 $ini_array = parse_ini_file("/etc/mmc/plugins/urbackup.ini");
 $username_urbackup = $ini_array['username'];
 $password_urbackup = $ini_array['password'];
@@ -103,6 +92,25 @@ $settings = $result;
 $array = json_decode(json_encode($settings), true);
 
 $groups = $array['navitems']['groups'];
+$clients_settings = $array['navitems']['clients'];
+
+foreach ($clients_settings as $client)
+{
+    if ($client["name"] == $clientname)
+    {
+        $id = $client["id"];
+        if ($client['groupname'] != "")
+        {
+            $exist = "true";
+        }
+        else
+        {
+            $exist = "false";
+        }
+    }
+    else
+        $exist = "false";
+}
 
 ?>
 <br>
@@ -113,7 +121,6 @@ $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.
 if ($exist == "true")
 {
     header("Location: ".$url);
-    echo "<a href='main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=".$id."'>Go to user backups</a>";
 }
 else
 {
@@ -121,8 +128,46 @@ else
 
     if ($create_client["already_exists"] == "1") 
     {
-        print_r(_T("User already exists" ,"urbackup"));
-        header("Location: ".$url);
+        foreach ($clients_settings as $client)
+        {
+            if ($client["name"] == $clientname)
+            {
+                if ($client['groupname'] == "")
+                {
+                    $check_client = xmlrpc_check_client($jidMachine, $create_client["new_clientid"], $create_client["new_authkey"]);
+                    ?>
+                    <div style="display:flex">
+                        <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $client["id"]; ?>" method="post">
+                            <div>
+                                <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
+                                <ul id="outProfil" name="outProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px; margin-right: 30px;">
+                                    <?php echo $client["name"]; ?>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3><?php echo _T("Choose profil to computer", "urbackup"); ?></h3>
+                                <select name="group" id="group">
+                                    <?php
+                                    foreach($groups as $group)
+                                    {
+                                        echo '<option value="'.$group['id'].'">'.$group['name'].'</option>';
+                                    }
+                                    ?>
+                                </select>
+                                <input type="submit" value="Add <?php echo $client["name"]; ?> on profil">
+                            </div>
+                        </form>
+                    </div>
+                    <?php
+                }
+                else
+                {
+                    print_r(_T("User already exists" ,"urbackup"));
+                    header("Location: ".$url);
+                }
+            }
+        }
+
     }
     else
     {
