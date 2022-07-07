@@ -41,13 +41,37 @@ foreach ($logs as $log)
     $secs=$log['time'];  //2033-12-06 08:53:20
     secs2date($secs,$date);
     $dt=$date->format('Y-m-d H:i:s');
+
+    $msg = $log['msg'];
+
+    $need_show_msg = "True";
+
+    if (strpos($log['msg'], 'FATAL:') !== false) {
+        $msg = "<span style='color:red'>".$msg."</span>";
+    }
+
+    if (strpos($log['msg'], 'Backup failed') !== false) {
+        $msg = "<span style='color:red'>".$msg."</span>";
+    }
+
+    if (strpos($log['msg'], 'Backup failed because of disk problems') !== false) {
+        $msg = "<span style='color:red'>Backup failed because of disk problems, no space left on disk (see previous messages)</span>";
+    }
+
+    if (strpos($log['msg'], 'Loading files') !== false) {
+        $need_show_msg = "False";
+    }
+
+    if ($need_show_msg == "True")
+    {
 ?>
         <tr >
             <td> <?php echo $log['id']; ?></td>
-            <td> <?php echo $log['msg']; ?></td>
+            <td> <?php echo $msg; ?>></td>
             <td> <?php echo $dt; ?></td>
         </tr>
 <?php
+    }
 }
 ?>
     </tbody>
