@@ -42,20 +42,23 @@ foreach ($logs as $log)
     secs2date($secs,$date);
     $dt=$date->format('Y-m-d H:i:s');
 
-    $msg = $log['msg'];
+    $msg = "<td>".$log['msg']."</td>";
 
     $need_show_msg = "True";
 
     if (strpos($log['msg'], 'FATAL:') !== false) {
-        $msg = "<span style='color:red'>".$msg."</span>";
+        $msg = $log['msg'];
+        $msg = "<td class='log_error'>".$msg."</td>";
     }
 
     if (strpos($log['msg'], 'Backup failed') !== false) {
-        $msg = "<span style='color:red'>".$msg."</span>";
+        $msg = $log['msg'];
+        $msg = "<td class='log_error'>".$msg."</td>";
     }
 
     if (strpos($log['msg'], 'Backup failed because of disk problems') !== false) {
-        $msg = "<span style='color:red'>Backup failed because of disk problems, no space left on disk (see previous messages)</span>";
+        $msg = $log['msg'];
+        $msg = "<td class='log_error'>"._T("Backup failed because of disk problems, no space left on disk (see previous messages)")."</td>";
     }
 
     if (strpos($log['msg'], 'Loading files') !== false) {
@@ -67,7 +70,7 @@ foreach ($logs as $log)
 ?>
         <tr >
             <td> <?php echo $log['id']; ?></td>
-            <td> <?php echo $msg; ?>></td>
+            <?php echo $msg; ?>
             <td> <?php echo $dt; ?></td>
         </tr>
 <?php
