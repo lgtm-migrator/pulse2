@@ -130,6 +130,18 @@ foreach($array_progress as $progress)
     {
         echo '<h2>'._T("Progress", 'urackup').'</h2>';
         echo '<br>';
+        $eta = $progress['eta_ms'];
+        $progress = $progress['pcdone'];
+
+        if ($progress == "100")
+        {
+            $eta = "0";
+        }
+
+        if ($progress == "-1")
+        {
+            $progress = "0";
+        }
         ?>
         <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
             <thead>
@@ -148,8 +160,8 @@ foreach($array_progress as $progress)
                     <td style='padding-left: 5px;'> <?php echo $progress['name']; ?></td>
                     <td> <?php echo $progress['action']; ?></td>
                     <td> <?php echo $progress['details']; ?></td>
-                    <td> <?php echo $progress['pcdone']."%"; ?></td>
-                    <td> <?php echo $progress['eta_ms']; ?></td>
+                    <td> <?php echo $progress."%"; ?></td>
+                    <td> <?php echo $eta; ?></td>
                     <td> <?php echo $progress['speed_bpms']; ?></td>
                     <td> <?php echo $progress['queue']; ?></td>
                 </tr>
