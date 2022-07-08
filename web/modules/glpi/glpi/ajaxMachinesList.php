@@ -479,10 +479,6 @@ if (in_array("xmppmaster", $_SESSION["supportModList"])){
 if (in_array("xmppmaster", $_SESSION["supportModList"])){
   if (in_array("urbackup", $_SESSION["supportModList"]))
     $n->addActionItem(new ActionItem(_("Urbackup"),"checkMachine","urbackup","urbackup", "urbackup", "urbackup"));
-
-  if ($msc_vnc_show_icon) {
-    $n->addActionItemArray($actionVncClient);
-  };
 }
 
 
