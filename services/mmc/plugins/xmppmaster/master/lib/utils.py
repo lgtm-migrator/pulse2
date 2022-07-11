@@ -53,6 +53,8 @@ import urllib.request, urllib.error, urllib.parse
 import tarfile
 import zipfile
 from functools import wraps
+import zlib
+import io
 
 logger = logging.getLogger()
 
@@ -1282,3 +1284,404 @@ class geolocalisation_agent:
             except BaseException:
                 pass
         return None
+
+
+class Converter:
+    """Object to simplify convertions from objects to base64 string"""
+
+    def __init__(self, data, **kwargs):
+        """A new instance of Converter determines what to do with the datas.
+        If the data is in base 64, it converts datas to bytes field or string,
+        depending on _bytes option.
+        In the other hand if the data is not in base 64 (str or bytes) it converts datas to
+        base 64 bytes field or str, depending on _bytes option.
+        In this conversion if the option compressed is set to True, the datas are compressed before base 64 conversion.
+
+        Params:
+            - data: mixed datas which will be converted
+            - kwargs: dict of options
+
+        kwargs Options:
+            - bytes: bool (default=False) to specify if the output format is bytes field or str.
+                False to convert the result into str
+                True to convert the result into bytes field
+            - compress: bool (default=False) to specify if the datas must be compressed before the conversion.
+                False to keep the datas
+                True to compress datas
+            - b64: bool (default: determined by the converter) to force the converter to consider incoming data as b64.
+                True: the incoming data is in base 64 format
+                False: the incoming data isn't in base 64 format
+            - loads: bool (default=False) to specify if the converter has to try to convert self.transform into dict/list object
+
+        Returns:
+            There is no return value because we are in the __init__ method.
+            To prevent this, the attribute self.transform stores the result of the conversion.
+
+        Attributes:
+            self.data = stores the incoming datas
+            self.transform = stores the output datas
+            self.bytes = stores the _bytes flag
+            self.compressed = stores the compressed flag
+            self.loads = stores the loads flag
+        """
+
+        self.data = data
+        self.transform = data
+        self.bytes = False
+        self.compressed = False
+        self.loads = False
+
+        # Set the options
+        if 'bytes' in kwargs and type(kwargs['bytes']) is bool:
+            self.bytes = kwargs['bytes']
+        if 'compress' in kwargs and type(kwargs['compress']) is bool:
+            self.compressed = kwargs['compress']
+
+        if 'loads' in kwargs and type(kwargs['loads']) is bool:
+            self.loads = kwargs['loads']
+
+        if 'b64' in kwargs and type(kwargs['b64']) is bool:
+            is_base64 = kwargs['b64']
+        else:
+            # Determines in which way the conversion must be done
+            is_base64 = Converter.is_base64(data)
+
+        # Obj to b64 conversion
+        if is_base64 is False:
+            is_compressed = Converter.is_compressed(self.transform)
+
+            if is_compressed is False and self.compressed is True:
+                self.transform = Converter.obj_to_bytes(self.transform)
+                self.transform = Converter.bytes_to_compress(self.transform)
+            elif is_compressed is True and self.compressed is False:
+                # In this case self.transform is already bytes field
+                self.transform = Converter.decompress_to_bytes(self.transform)
+            else:
+                self.transform = Converter.obj_to_bytes(self.transform)
+            self.transform = Converter.bytes_to_b64(self.transform, self.bytes)
+        else:
+            # B64 to obj conversion
+            self.transform = Converter.b64_to_bytes(self.transform)
+            try:
+                self.transform = Converter.decompress_to_bytes(self.transform)
+            except:
+                pass
+            if self.bytes is False:
+                try:
+                    tmp = Converter.bytes_to_str(self.transform)
+                    self.transform =  tmp
+                except:
+                    pass
+            if self.loads is True:
+                try:
+                    self.transform = json.loads(self.transform)
+                except:
+                    pass
+
+    @staticmethod
+    def obj_to_str(obj):
+        """Transform conventionnals objects to string object
+        Params:
+            obj: the input object can be :
+                - a list,
+                - a dict,
+                - a tuple,
+                - a string
+                - a ConfigParser object
+                - a file object (keep the cursor position).
+                    /!\ The file is NOT close at the end
+                    of the conversion
+        Returns:
+            str if success or False if failure
+        """
+        if type(obj) is str:
+            return obj
+        if type(obj) in (list, dict, tuple):
+            obj = json.dumps(obj)
+            return obj
+        elif isinstance(obj, configparser.ConfigParser):
+            obj = obj.__dict__['_sections'].__repr__()
+            return obj
+        if isinstance(obj, io.IOBase):
+            content = None
+            if obj.closed or obj.readable() is False:
+                with open(obj.name, "rb") as fp:
+                    content = fp.read()
+                    fp.close()
+                # here the content is in bytes
+                return bytes.decode(content, "utf-8")
+            else:
+                position = obj.tell()
+                obj.seek(0, 0)
+                content = obj.read()
+                obj.seek(position, 0)
+                if type(content) is str:
+                    return content
+                else:
+                    return bytes.decode(content, "utf-8")
+        else:
+            return False
+
+    @staticmethod
+    def str_to_bytes(string):
+        """Convert str object to bytes field
+        Params:
+            - string: the string we want to convert to bytes field
+        Returns:
+            A bytes field if success or False if failure
+        """
+        if type(string) is str:
+            string = bytes(string, 'utf-8')
+            return string
+        else:
+            return False
+
+    @staticmethod
+    def obj_to_bytes(obj):
+        """Convert conventionnals objects to bytes field
+        Params:
+            obj: the object we want to convert to bytes field. The object could be
+                - a list
+                - a dict
+                - a string
+                - a tuple
+                - a configParserObject
+                - a file object (keep the cursor position).
+                    /!\ The file is NOT close at the end
+                    of the conversion
+        Returns:
+            Field of bytes if success or False if failure
+        """
+        # obj is already bytes
+        if type(obj) is bytes:
+            return obj
+
+        if isinstance(obj, io.IOBase):
+            content = None
+            if obj.closed or obj.readable() is False:
+                with open(obj.name, "rb") as fp:
+                    content = fp.read()
+                    fp.close()
+                # here the content is in bytes
+                return content
+            else:
+                position = obj.tell()
+                obj.seek(0, 0)
+                content = obj.read()
+                obj.seek(position, 0)
+                if type(content) is bytes:
+                    return content
+                else:
+                    return Converter.str_to_bytes(content)
+
+        obj = Converter.obj_to_str(obj)
+        return Converter.str_to_bytes(obj)
+
+    @staticmethod
+    def bytes_to_str(field):
+        """Transform the specified bytes field to str
+        Params:
+            field: bytes field
+        Returns: str
+        """
+        field = bytes.decode(field, "utf-8")
+        return field
+
+    @staticmethod
+    def bytes_to_b64(field, _bytes=False):
+        """Convert bytes field to base64
+        Params:
+            field: the bytes field we want to convert to base64
+            _bytes (default = False) : a flag to specify if the result must be
+                 a string (_bytes = False) or a bytes field (_bytes = True)
+        Returns:
+            base64 bytes field or str
+        """
+        if type(field) is bool:
+            return False
+
+        field = base64.b64encode(field)
+        if _bytes is False:
+            field = bytes.decode(field, "utf-8")
+        return field
+
+    @staticmethod
+    def str_to_b64(string, _bytes=False):
+        """Convert a string to base64
+        Params:
+            string : the string we want to convert to base64
+            _bytes (default = False) : Specify if the result is bytes field or string
+        Returns:
+            base64 bytes field or str
+        """
+        string = Converter.str_to_bytes(field)
+        string = base64.b64encode(field)
+        if _bytes is False:
+            string = bytes.decode(field, "utf-8")
+        return string
+
+    @staticmethod
+    def obj_to_b64(obj, _bytes=False):
+        """Convert a conventionnal object to base64.
+        Params:
+            - obj : can be
+                - a string
+                - a bytes field
+                - a list
+                - a dict
+                - a tuple
+                - a ConfigParser
+            - _bytes (default = False) : Specify if the result is bytes field or string
+        Returns:
+            base64 bytes field or str
+            """
+        obj = Converter.obj_to_bytes(obj)
+        if obj is False:
+            return False
+        obj = Converter.bytes_to_b64(obj, _bytes)
+        return obj
+
+    @staticmethod
+    def b64_to_bytes(b64):
+        """Convert base64 string or bytes field to bytes field
+        Params:
+            base64 : can be encoded string or encoded bytes field.
+        Returns:
+            decoded bytes field
+        """
+        if type(b64) not in (bytes, str):
+            return False
+
+        if type(b64) is str:
+            # Convert b64-byte before converting b64
+            b64 = bytes(b64, "utf-8")
+        # convert
+        try:
+            b64 = base64.b64decode(b64, validate=True)
+        except Exception as err:
+            return False
+        return b64
+
+    @staticmethod
+    def b64_to_str(b64):
+        """Convert base64 string or bytes field to string
+        Params:
+            base64 : can be encoded string or encoded bytes field.
+        Returns:
+            decoded string
+        """
+        if type(b64) not in (bytes, str):
+            return False
+
+        if type(b64) is str:
+            # Convert b64-byte before converting b64
+            b64 = bytes(b64, "utf-8")
+        # convert
+        try:
+            b64 = base64.b64decode(b64, validate=True)
+        except Exception as err:
+            return False
+        b64 = bytes.decode(b64, "utf-8")
+        return b64
+
+    @staticmethod
+    def is_base64(b64):
+        """Test if the input is base64 bytes field or string
+        Params:
+            b64 : challeged bytes field or string
+        Returns:
+            Bool True if b64 is a valid base64, else False
+        """
+        if type(b64) not in (bytes, str):
+            return False
+
+        if type(b64) is str:
+            # Convert b64-byte before converting b64
+            b64 = bytes(b64, "utf-8")
+        # convert
+        try:
+            b64 = base64.b64decode(b64, validate=True)
+        except Exception as err:
+            return False
+        return True
+
+    @staticmethod
+    def bytes_to_compress(data):
+        """Compress the specified incoming datas in gzip format.
+        Params:
+            data: bytes field which will be compressed
+        Returns:
+            Gzip compressed bytes field
+        """
+        compressed = zlib.compress(data, 9)
+        return compressed
+
+    @staticmethod
+    def str_to_compress(string):
+        """Compress incoming str value.
+        Params:
+            string: str which will be compressed
+        Returns:
+            Gzip comrpessed bytes field"""
+        string = Converter.str_to_bytes(string)
+        compressed = Converter.bytes_to_compress(string)
+        return compressed
+
+    @staticmethod
+    def decompress_to_bytes(compressed):
+        """Decompress Gzip bytes field to bytes field
+        Params:
+            compressed: Gzipped bytes field
+        Returns:
+            uncompressed bytes field"""
+        data = zlib.decompress(compressed)
+        return data
+
+    @staticmethod
+    def decompress_to_str(compressed):
+        """Decompress Gzip bytes field to str
+        Params:
+            compressed: Gzipped bytes field
+        Returns:
+            uncompressed str"""
+        data = zlib.decompress(compressed)
+        data = Converter.bytes_to_str(data)
+        return data
+
+    @staticmethod
+    def is_compressed(data):
+        """Test if the specified bytes field is compressed
+        Params:
+            data : bytes field
+        Returns:
+            bool, True if the bytes field is compressed, False if not"""
+        compressed = True
+        try:
+            zlib.decompress(data)
+        except:
+            compressed = False
+        return compressed
+
+    def __str__(self):
+        """ Gives a printable representation of the self.transform value.
+        If self.transform is a base 64, split every 76 chars to corresponds to rfc4648
+
+        Returns:
+            str
+        """
+        content = self.transform
+        if Converter.is_base64(self.transform):
+            if type(self.transform) is str:
+                return '\n'.join(self.transform[pos:pos+76] for pos in range(0, len(self.transform), 76))
+            else:
+                return "%s"%self.transform
+        else:
+            return "%s"%self.transform
+
+    def __repr__(self):
+        """Gives an official representation value for the transformed value
+
+        Returns :
+            mixed values: may be dict, list, string, bytes, depending on the transformation
+        """
+        return self.transform
