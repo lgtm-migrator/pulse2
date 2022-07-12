@@ -117,7 +117,7 @@ if($criterion == '')
       $criterion = "ERROR HASH MISSING";
       break;
     case 'aborthashinvalid':
-      $criterion = "ABROT HASH INVALID";
+      $criterion = "ABORT HASH INVALID";
       break;
   }
 }
