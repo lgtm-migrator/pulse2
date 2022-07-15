@@ -30,9 +30,7 @@ import time
 import http.cookiejar
 import urllib.request
 import urllib.parse
-import urllib.error
 import urllib.request
-import urllib.error
 import urllib.parse
 
 
