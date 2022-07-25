@@ -1,4 +1,3 @@
-usr/share/doc/pulse2/* usr/share/doc/pulse2-common
 usr/share/mmc/conf/apache/pulse.conf
 etc/apache2/conf-available/pulse.conf
 usr/share/doc/mmc/contrib/xmppmaster
