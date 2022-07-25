@@ -22,11 +22,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-import logging
-import time
-import twisted.internet.reactor
-from mmc.plugins.msc.database import MscDatabase
-
 # def checkPool():
 # ret = True
 # try :

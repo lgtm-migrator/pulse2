@@ -22,11 +22,7 @@
 #
 # file pluginsmaster/plugin_applicationdeployment.py
 
-import base64
 import json
-import os
-import mmc.plugins.xmppmaster.master.lib.utils
-import pprint
 import logging
 
 

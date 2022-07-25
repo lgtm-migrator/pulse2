@@ -28,7 +28,6 @@ Class to manage msc mmc-agent plugin
 # Big modules
 import logging
 import time
-import datetime
 import re
 import os
 
@@ -46,7 +45,6 @@ from mmc.plugins.msc.config import MscConfig
 from mmc.plugins.msc.machines import Machines, Machine
 from mmc.plugins.dyngroup.database import DyngroupDatabase
 from mmc.plugins.dyngroup.config import DGConfig
-import mmc.plugins.msc.actions
 import mmc.plugins.msc.keychain
 import mmc.plugins.msc.package_api
 
@@ -61,9 +59,9 @@ from pulse2.managers.location import ComputerLocationManager
 
 # ORM mappings
 import pulse2.database.msc.orm.commands_on_host
+from pulse2.utils import noNoneList
 
 from pulse2.version import getVersion, getRevision  # pyflakes.ignore
-from pulse2.utils import noNoneList
 
 APIVERSION = "0:0:0"
 

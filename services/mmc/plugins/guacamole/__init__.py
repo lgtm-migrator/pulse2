@@ -25,7 +25,6 @@
 Plugin to manage the interface with xmppmaster
 """
 import logging
-import os, sys
 from mmc.plugins.guacamole.config import guacamoleConfig
 
 from pulse2.version import getVersion, getRevision  # pyflakes.ignore

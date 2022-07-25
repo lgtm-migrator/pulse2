@@ -52,7 +52,6 @@ import imp
 import logging
 import logging.config
 import xmlrpc.client
-import xmlrpc.server
 from logging.handlers import TimedRotatingFileHandler
 import os
 import sys
@@ -61,17 +60,12 @@ import glob
 import time
 import pwd
 import grp
-import string
 import threading
 import re
 import zipfile
-from stat import ST_CTIME
-import slixmpp
 import traceback
-import types
 import time
 import sys
-import hashlib
 
 import random
 
@@ -1283,7 +1277,7 @@ class MMCApp(object):
             code = pm.loadPlugins()
             if code:
                 logger.debug(
-                    "The initialisation of the XMLRPC Server returned the code: " % code
+                    "The initialisation of the XMLRPC Server returned the code: %s " % code
                 )
                 return code
 

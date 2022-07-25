@@ -21,9 +21,6 @@
 # MA 02110-1301, USA.
 
 import logging
-
-# Au cas où on souhaite appeler des configs d'autres modules
-from mmc.support.config import PluginConfig, PluginConfigFactory
 from mmc.plugins.admin.config import AdminConfig
 
 # import pour la database

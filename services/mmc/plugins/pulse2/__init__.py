@@ -48,7 +48,6 @@ from mmc.plugins.pulse2.pulse import Pulse2Pulse2Manager
 
 from pulse2.version import getVersion, getRevision  # pyflakes.ignore
 
-
 import logging
 import subprocess
 import json
@@ -273,6 +272,10 @@ class RpcProxy(RpcProxyI):
         @deferred
         def _getProductUpdates():
             updMgrPath = "/usr/share/pulse-update-manager/pulse-update-manager"
+
+            if os.path.exists(updMgrPath):
+                return False
+
             global last_update_check_ts, available_updates
             o, e, ec = self.runinshell("%s -l --json" % updMgrPath)
 
