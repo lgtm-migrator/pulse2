@@ -3,32 +3,32 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$p = new PageGenerator(_T("Profils", 'urbackup'));
+$p = new PageGenerator(_T("Profiles", 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
 $groupname = htmlspecialchars($_GET["groupname"]);
 $need_name = htmlspecialchars($_GET["needname"]);
-$groupe_already_exist = htmlspecialchars($_GET["groupalreadyexist"]);
+
 
 $users_group_array = xmlrpc_get_clients();
-?>
 
-<?php
-if ($groupe_already_exist == "True")
-{
-    ?>
-    <script>
-        alert("Profil already exist with this name: "<?php echo $groupname; ?>);
-    </script>
-    <?php
-}
+$groupe_already_exist = htmlspecialchars($_GET["groupalreadyexist"]);
 
 if ($need_name == "True")
 {
     ?>
     <script>
-        alert("Profil need name");
+        alert("Profile need name");
+    </script>
+    <?php
+}
+
+if ($groupe_already_exist == "True")
+{
+    ?>
+    <script>
+        alert("Profile already exist with this name");
     </script>
     <?php
 }
@@ -36,11 +36,9 @@ if ($need_name == "True")
 
 <br>
 <br>
-<h1><?php echo _T("Create profil :", "urbackup"); ?></h1>
-<br>
 <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=create_group" method="post">
-    <label><?php echo _T("Profil name :", 'urbackup'); ?></label><input type="text" name="groupname" id="groupname"/>
-    <input type="submit" name="subcreate" id="subcreate" value="Create profil">
+    <label><?php echo _T("Profile name :", 'urbackup'); ?></label><input type="text" name="groupname" id="groupname"/>
+    <input type="submit" name="subcreate" id="subcreate" value="Create profile">
 </form>
 
 <br>
@@ -50,12 +48,12 @@ if ($need_name == "True")
 $group_array = $users_group_array['navitems']['groups'];
 ?>
 
-<h1> <?php echo _T("Profils list :", 'urbackup'); ?> </h1>
+<h1> <?php echo _T("Profile list :", 'urbackup'); ?> </h1>
 <br>
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
         <tr>
-            <th style='text-align: left;'> <?php echo _T("Profil name", 'urbackup'); ?> </th>
+            <th style='text-align: left;'> <?php echo _T("Name", 'urbackup'); ?> </th>
             <th style='text-align: right;'> <?php echo _T("Actions", 'urbackup'); ?> </th>
         </tr>
     </thead>
