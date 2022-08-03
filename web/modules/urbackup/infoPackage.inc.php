@@ -75,7 +75,7 @@ $page = new Page("download_file", _T('Download file', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/download_file.php");
 $submod->addPage($page);
 
-$page = new Page("usersgroups", _T('Users and groups list', 'urbackup'));
+$page = new Page("usersgroups", _T('Profiles', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/usersgroups.php");
 $submod->addPage($page);
 
