@@ -6,7 +6,7 @@ require_once("modules/urbackup/includes/xmlrpc.php");
 $clientname = htmlspecialchars($_GET["cn"]);
 $jidMachine = htmlspecialchars($_GET["jid"]);
 
-$p = new PageGenerator(_T("Check if ".$clientname." exist", 'urbackup'));
+$p = new PageGenerator(_T("Profile assignment for ".$clientname, 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -115,11 +115,20 @@ foreach ($clients_settings as $client)
 ?>
 <br>
 <?php
-
-$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id;
+$groupname = "";
+$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname;
 
 if ($exist == "true")
 {
+    foreach ($clients_settings as $client)
+    {
+        if ($client["name"] == $clientname)
+        {
+            $groupname = $client['groupname'];
+            $groupid = $client['groupname'];
+        }
+    }
+    $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname;
     header("Location: ".$url);
 }
 else
@@ -136,13 +145,12 @@ else
                 {
                     $check_client = xmlrpc_check_client($jidMachine, $create_client["new_clientid"], $create_client["new_authkey"]);
                     ?>
-                    <div style="display:flex">
-                        <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $client["id"]; ?>" method="post">
+                        <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $client["id"]; ?>&amp;clientname=<?php echo $clientname; ?>&amp;groupname=<?php echo $group['name']; ?>" method="post">
                             <div>
                                 <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
-                                <ul id="outProfil" name="outProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px; margin-right: 30px;">
-                                    <?php echo $client["name"]; ?>
-                                </ul>
+                                <br>
+                                <p style="font-weight: bold;"><?php echo "    ".$client["name"]; ?></p>
+                                <br>
                             </div>
                             <div>
                                 <h3><?php echo _T("Choose profil to computer", "urbackup"); ?></h3>
@@ -157,29 +165,28 @@ else
                                 <input type="submit" value="Add <?php echo $client["name"]; ?> on profil">
                             </div>
                         </form>
-                    </div>
                     <?php
                 }
                 else
                 {
                     print_r(_T("User already exists" ,"urbackup"));
+                    $groupname = $client['groupname'];
+                    $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname;
                     header("Location: ".$url);
                 }
             }
         }
-
     }
     else
     {
         $check_client = xmlrpc_check_client($jidMachine, $create_client["new_clientid"], $create_client["new_authkey"]);
         ?>
-        <div style="display:flex">
-            <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $create_client["new_clientid"]; ?>" method="post">
+            <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $create_client["new_clientid"]; ?>&amp;clientname=<?php echo $clientname; ?>&amp;groupname=<?php echo $group['name']; ?>" method="post">
                 <div>
                     <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
-                    <ul id="outProfil" name="outProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px; margin-right: 30px;">
-                        <?php echo $create_client["new_clientname"]; ?>
-                    </ul>
+                    <br>
+                    <p style="font-weight: bold;"><?php echo "    ".$client["name"]; ?></p>
+                    <br>
                 </div>
                 <div>
                     <h3><?php echo _T("Choose profil to computer", "urbackup"); ?></h3>
@@ -194,7 +201,6 @@ else
                     <input type="submit" value="Add <?php echo $create_client["new_clientname"]; ?> on profil">
                 </div>
             </form>
-        </div>
         <?php
     }
 }
