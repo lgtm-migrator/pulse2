@@ -8,7 +8,7 @@ $client_id = htmlspecialchars($_GET["clientid"]);
 
 $group_id_new = "-".$group_id;
 
-$p = new PageGenerator(_T("Assign member to profil", 'urbackup'));
+$p = new PageGenerator(_T("Assign member to profile", 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -105,7 +105,7 @@ $array_progress = json_decode(json_encode($addgroup), true);
 <br>
 <?php
 
-$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id;
+$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id.'&clientname='.$username_urbackup.'&groupname='.$groupname;
 
 header("Location: ".$url);
 ?>
