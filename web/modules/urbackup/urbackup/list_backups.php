@@ -3,7 +3,11 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$p = new PageGenerator(_T("List Backups by Client", 'urbackup'));
+$clientname = htmlspecialchars($_GET["clientname"]);
+$groupname = htmlspecialchars($_GET["groupname"]);
+$groupid = htmlspecialchars($_GET["groupid"]);
+
+$p = new PageGenerator(_T("Backups List ".$clientname, 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -14,6 +18,7 @@ $url_urbackup = $ini_array['url'];
 
 $client_id = htmlspecialchars($_GET["clientid"]);
 $backupstate = htmlspecialchars($_GET["backupstate"]);
+$backuptype = htmlspecialchars($_GET["backuptype"]);
 
 //-----------------------------------START LOGIN FUNCTION
 $url = $url_urbackup."?a=login";
@@ -97,14 +102,13 @@ $reviews = $result;
 $array = json_decode(json_encode($reviews), true);
 
 $can_delete = $array['can_delete'];
-$name = $array['clientname'];
 
 if ($can_delete == "true")
     $delete = "true";
 else
     $delete = "false";
 
-$backups = $array["backups"];
+$backups = $array['backups'];
 
 //Formatage de date
 function secs2date($secs,$date)
@@ -135,18 +139,31 @@ function formatBytes($bytes, $precision = 2)
 <br>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start incremental backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=start_backup&amp;backuptype=incremental&amp;clientid=<?php echo $client_id ?>">Start incremental backup</a>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=start_backup&amp;backuptype=full&amp;clientid=<?php echo $client_id ?>">Start full backup</a>
+<a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete_client&amp;clientid=<?php echo $client_id ?>">Delete this client</a>
 <br>
 <br>
-<label><?php echo _T("Client name: ", 'urbackup').$name; ?></label>
+<a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=list_computers_ongroup&amp;groupid=<?php echo $groupid ?>&groupname=<?php echo $groupname ?>"><?php echo _T("Profile name: ".$groupname, 'urbackup'); ?></a>
 <br>
 <?php
 if ($backupstate == "false")
 {
-    ?>
-    <script>
-        alert("Incremental backup failed, be sure client urbackup is installed on computer or is online.");
-    </script>
-    <?php
+    if ($backuptype == "incremental") 
+    {
+        ?>
+        <script>
+            alert("Incremental backup failed, be sure client urbackup is installed on computer or is online.");
+        </script>
+        <?php
+    }
+    
+    if ($backuptype == "full")
+    {
+        ?>
+        <script>
+            alert("Full backup failed, be sure client urbackup is installed on computer or is online.");
+        </script>
+        <?php
+    }
 }
 ?>
 <h2> <?php echo _T("File save", 'urbackup'); ?> </h2>
