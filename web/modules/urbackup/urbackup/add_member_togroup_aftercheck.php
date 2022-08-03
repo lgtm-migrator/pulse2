@@ -5,6 +5,7 @@ require_once("modules/urbackup/includes/xmlrpc.php");
 
 $group_id = $_POST['group'];
 $client_id = htmlspecialchars($_GET["clientid"]);
+$clientname = htmlspecialchars($_GET["clientname"]);
 
 $group_id_new = "-".$group_id;
 
@@ -105,7 +106,7 @@ $array_progress = json_decode(json_encode($addgroup), true);
 <br>
 <?php
 
-$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id.'&clientname='.$username_urbackup.'&groupname='.$groupname;
+$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id.'&clientname='.$clientname.'&groupname='.$groupname;
 
 header("Location: ".$url);
 ?>
