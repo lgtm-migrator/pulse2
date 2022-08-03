@@ -131,16 +131,29 @@ foreach($array_progress as $progress)
         echo '<h2>'._T("Progress", 'urackup').'</h2>';
         echo '<br>';
         $eta = $progress['eta_ms'];
-        $progress = $progress['pcdone'];
+        $eta = $eta/1000;
 
-        if ($progress == "100")
+        $progresss = $progress['pcdone'];
+
+        if ($progresss == "100")
         {
             $eta = "0";
+            $progresss = "Ending of backup, available soon... ".$progresss;
         }
 
-        if ($progress == "-1")
+        if ($progress['action'] == "1")
         {
-            $progress = "0";
+            $action = "Incremental Backup";
+        }
+
+        if ($progress['action'] == "2")
+        {
+            $action = "Full Backup";
+        }
+
+        if ($progresss == "-1")
+        {
+            $progresss = "0";
         }
         ?>
         <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
@@ -150,7 +163,7 @@ foreach($array_progress as $progress)
                 <th> <?php echo _T("Action", 'urbackup'); ?> </th>
                 <th> <?php echo _T("Details", 'urbackup'); ?> </th>
                 <th> <?php echo _T("Progress", 'urbackup'); ?> </th>
-                <th> <?php echo _T("ETA (ms)", 'urbackup'); ?> </th>
+                <th> <?php echo _T("ETA (second(s))", 'urbackup'); ?> </th>
                 <th> <?php echo _T("Speed (bpms)", 'urbackup'); ?> </th>
                 <th> <?php echo _T("File in queue", 'urbackup'); ?> </th>
                 </tr>
@@ -158,9 +171,9 @@ foreach($array_progress as $progress)
             <tbody>
                 <tr>
                     <td style='padding-left: 5px;'> <?php echo $progress['name']; ?></td>
-                    <td> <?php echo $progress['action']; ?></td>
+                    <td> <?php echo $action; ?></td>
                     <td> <?php echo $progress['details']; ?></td>
-                    <td> <?php echo $progress."%"; ?></td>
+                    <td> <?php echo $progresss."%"; ?></td>
                     <td> <?php echo $eta; ?></td>
                     <td> <?php echo $progress['speed_bpms']; ?></td>
                     <td> <?php echo $progress['queue']; ?></td>
