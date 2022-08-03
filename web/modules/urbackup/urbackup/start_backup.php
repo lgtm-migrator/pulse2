@@ -30,7 +30,7 @@ foreach($start_backup as $back)
     else
     {
         $backupstate = "false";
-        $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id."&backupstate=".$backupstate;
+        $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$client_id."&backupstate=".$backupstate."&backuptype=".$type_backup;
         header("Location: ".$url);  
     }
 }
