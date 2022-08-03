@@ -38,7 +38,7 @@ if ($group_already_exist == "False")
 <br>
 <br>
 <?php
-$url = 'main.php?module=urbackup&submod=urbackup&action=usersgroups&groupalreadyexist='.$group_already_exist.'&groupname='.$groupname.'&needname='.$need_name.'';
+$url = 'main.php?module=urbackup&submod=urbackup&action=usersgroups&groupname='.$groupname.'&needname='.$need_name.'&groupalreadyexist='.$group_already_exist;
 
 header("Location: ".$url);
 ?>
