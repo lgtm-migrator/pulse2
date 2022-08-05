@@ -6,7 +6,7 @@ require_once("modules/urbackup/includes/xmlrpc.php");
 $clientname = htmlspecialchars($_GET["cn"]);
 $jidMachine = htmlspecialchars($_GET["jid"]);
 
-$p = new PageGenerator(_T("Profile assignment for ".$clientname, 'urbackup'));
+$p = new PageGenerator(_T("Assign profile to computer ".$clientname, 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -149,7 +149,7 @@ else
                             <div>
                                 <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
                                 <br>
-                                <p style="font-weight: bold;"><?php echo "    ".$client["name"]; ?></p>
+                                <p style="font-weight: bold;"><?php echo "    ".$clientname; ?></p>
                                 <br>
                             </div>
                             <div>
@@ -162,7 +162,7 @@ else
                                     }
                                     ?>
                                 </select>
-                                <input type="submit" value="Add <?php echo $client["name"]; ?> on profil">
+                                <input type="submit" value="Add <?php echo $clientname; ?> on profile">
                             </div>
                         </form>
                     <?php
@@ -185,7 +185,7 @@ else
                 <div>
                     <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
                     <br>
-                    <p style="font-weight: bold;"><?php echo "    ".$client["name"]; ?></p>
+                    <p style="font-weight: bold;"><?php echo "    ".$clientname; ?></p>
                     <br>
                 </div>
                 <div>
