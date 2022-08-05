@@ -142,7 +142,8 @@ function formatBytes($bytes, $precision = 2)
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete_client&amp;clientid=<?php echo $client_id ?>">Delete this client</a>
 <br>
 <br>
-<a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=list_computers_ongroup&amp;groupid=<?php echo $groupid ?>&groupname=<?php echo $groupname ?>"><?php echo _T("Profile name: ".$groupname, 'urbackup'); ?></a>
+<?php echo _T("Profile name: ", 'urbackup'); ?><a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=list_computers_ongroup&amp;groupid=<?php echo $groupid ?>&groupname=<?php echo $groupname ?>"><?php echo $groupname; ?></a>
+<br>
 <br>
 <?php
 if ($backupstate == "false")
