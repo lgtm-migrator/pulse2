@@ -4,8 +4,8 @@ Priority: extra
 Maintainer: Nicolas Lécureuil <nicolas.lecureuil@siveo.net>
 Build-Depends: debhelper (>= 5.0.37.2), lsb-release, python3-all (>= 3.9), gettext, autotools-dev, xsltproc, docbook-xsl, docbook-xml
 Standards-Version: 3.9.3
-Homepage: http://projects.mandriva.org/projects/mmc/
-X-Python-Version: >= 2.6
+Homepage: https://github.com/pulse-project/pulse2
+X-Python-Version: >= 3.9
 
 Package: pulse2
 Architecture: all
@@ -506,7 +506,7 @@ Description: Management Console password policy plugin
 Package: python-mmc-dashboard
 Architecture: all
 Section: python
-Depends: ${misc:Depends}, ${python:Depends}, python-mmc-base (= ${source:Version}), python3-psutil (>= 0.6.1)
+Depends: ${misc:Depends}, ${python:Depends}, python-mmc-base (= ${source:Version}), python3-psutil (>= 0.6.1), python3-distro
 Description: Management Console dashboard plugin
  Provides a simple dashboard in MMC.
 
@@ -533,7 +533,7 @@ Description: Generate reports within MMC framework
 
 Package: mmc-agent
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-mmc-base (= ${source:Version}), python3-openssl | python3-pyopenssl, python3 (>= 3.9), ldap-utils, python3-posix-ipc
+Depends: ${misc:Depends}, ${python:Depends}, python-mmc-base (= ${source:Version}), python3-openssl | python3-pyopenssl, python3 (>= 3.9), ldap-utils, python3-posix-ipc, python3-gi
 Description: Management Console Agent
  XMLRPC server of the MMC API.
 

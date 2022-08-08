@@ -1,4 +1,4 @@
-usr/lib/python3.?/*-packages/mmc/agent.py
+usr/lib/python3/*-packages/mmc/agent.py
 usr/sbin/mmc-agent
 usr/sbin/mmc-add-schema
 usr/sbin/mds-report
@@ -9,5 +9,5 @@ usr/share/man/man1/mmc-add-schema*
 usr/share/man/man1/mmc-agent*
 usr/share/man/man1/mmc-stats*
 usr/share/man/man1/mmc-helper*
-usr/share/doc/mmc/contrib/monit/mmc-agent
+usr/share/doc/pulse2/contrib/monit/mmc-agent
 usr/lib/systemd/system/mmc-agent.service

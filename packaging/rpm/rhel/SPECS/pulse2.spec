@@ -922,6 +922,7 @@ Requires:   python-mmc-base
 Requires:   ajax-php-file-manager
 Requires:   python3-memory-profiler
 Requires:   python3-posix-ipc
+Requires:   python3-gi
 
 %description -n mmc-agent
 XMLRPC server of the Console API.
@@ -1054,7 +1055,8 @@ Requires:   python-base
 Requires:   python
 %endif
 Requires:   python-mmc-base >= %{version}
-Requires:   python-psutil >= 0.6.1
+Requires:   python3-psutil >= 0.6.1
+Requires:   python3-distro
 
 %description -n python-mmc-dashboard
 Console dashboard plugin
