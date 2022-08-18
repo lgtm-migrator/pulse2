@@ -112,9 +112,15 @@ foreach ($files as $file)
             <td>
                 <?php
                 if ($dir == "false")
+                {
                     echo '<a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid='.$client_id.'&amp;backupid='.$backup_id.'&amp;volumename='.$final_path.'">'.$file['name'].'</a>';
+                }
                 else
+                {
+                    echo '<input type="checkbox" id="selectedItem" name="check">';
                     echo $file['name'];
+                }
+                    
                 ?>
             </td>
             <td> <?php echo $size; ?></td>
@@ -141,3 +147,6 @@ foreach ($files as $file)
 ?>
     </tbody>
 </table>
+
+<a class='btn btn-small btn-primary' title=<?php echo _T("DOWNLOAD SELECTED ITEM(S)", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=download_file&amp;timestamp=<?php echo $nowtime; ?>&amp;clientname=<?php echo $client_name; ?>&amp;clientid=<?php echo $client_id; ?>&amp;backupid=<?php echo $backup_id; ?>&amp;volumename=<?php echo $final_path; ?>&amp;filename=<?php echo $file['name'] ?>&amp;path=<?php echo $path ?>">Download selected item(s)</a>
+<a class='btn btn-small btn-primary' title=<?php echo _T("RESTORE SELECTED ITEM(S)", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=restore_file&amp;clientid=<?php echo $client_id; ?>&amp;backupid=<?php echo $backup_id; ?>&amp;volumename=<?php echo $final_path; ?>&amp;shahash=<?php echo $shahash; ?>&amp;beforepath=<?php echo $path; ?>&amp;filename=<?php echo $file['name'] ?>">Restore selected item(s)</a>
