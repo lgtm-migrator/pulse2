@@ -63,6 +63,10 @@ $page = new Page("deleting_group", _T('Delete group', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/deleting_group.php");
 $submod->addPage($page);
 
+$page = new Page("deleting_client", _T('Delete client', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/deleting_client.php");
+$submod->addPage($page);
+
 $page = new Page("all_files_backup", _T('List of files from on backup', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/all_files_backup.php");
 $submod->addPage($page);

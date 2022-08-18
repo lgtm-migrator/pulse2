@@ -39,6 +39,11 @@ function xmlrpc_check_client($jidmachine, $clientid, $authkey){
     return xmlCall("urbackup.check_client", [$jidmachine, $clientid, $authkey]);
 }
 
+function xmlrpc_remove_client($jidmachine){
+    // Call agent to send command
+    return xmlCall("urbackup.remove_client", [$jidmachine]);
+}
+
 function xmlrpc_get_settings_global(){
     // Return all settings
     return xmlCall("urbackup.get_settings_general", []);
