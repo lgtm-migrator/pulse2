@@ -116,7 +116,7 @@ foreach ($clients_settings as $client)
 <br>
 <?php
 $groupname = "";
-$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname;
+$url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname.'&jidmachine='.$jidMachine;
 
 if ($exist == "true")
 {
@@ -128,7 +128,7 @@ if ($exist == "true")
             $groupid = $client['groupname'];
         }
     }
-    $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname;
+    $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname.'&jidmachine='.$jidMachine;
     header("Location: ".$url);
 }
 else
@@ -145,7 +145,7 @@ else
                 {
                     $check_client = xmlrpc_check_client($jidMachine, $create_client["new_clientid"], $create_client["new_authkey"]);
                     ?>
-                        <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $client["id"]; ?>&amp;clientname=<?php echo $clientname; ?>&amp;groupname=<?php echo $group['name']; ?>" method="post">
+                        <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $client["id"]; ?>&amp;clientname=<?php echo $clientname; ?>&amp;groupname=<?php echo $group['name']; ?>&amp;jidmachine=<?php echo $jidMachine; ?>" method="post">
                             <div>
                                 <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
                                 <br>
@@ -171,7 +171,7 @@ else
                 {
                     print_r(_T("User already exists" ,"urbackup"));
                     $groupname = $client['groupname'];
-                    $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname;
+                    $url = 'main.php?module=urbackup&submod=urbackup&action=list_backups&clientid='.$id.'&clientname='.$clientname.'&groupname='.$groupname.'&jidmachine='.$jidMachine;
                     header("Location: ".$url);
                 }
             }
@@ -181,7 +181,7 @@ else
     {
         $check_client = xmlrpc_check_client($jidMachine, $create_client["new_clientid"], $create_client["new_authkey"]);
         ?>
-            <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $create_client["new_clientid"]; ?>&amp;clientname=<?php echo $clientname; ?>&amp;groupname=<?php echo $group['name']; ?>" method="post">
+            <form name="form" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup_aftercheck&amp;clientid=<?php echo $create_client["new_clientid"]; ?>&amp;clientname=<?php echo $clientname; ?>&amp;groupname=<?php echo $group['name']; ?>&amp;jidmachine=<?php echo $jidMachine; ?>" method="post">
                 <div>
                     <h3><?php echo _T("Computer name", "urbackup"); ?></h3>
                     <br>

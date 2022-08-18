@@ -19,6 +19,7 @@ $url_urbackup = $ini_array['url'];
 $client_id = htmlspecialchars($_GET["clientid"]);
 $backupstate = htmlspecialchars($_GET["backupstate"]);
 $backuptype = htmlspecialchars($_GET["backuptype"]);
+$jidMachine = htmlspecialchars($_GET["jidmachine"]);
 
 //-----------------------------------START LOGIN FUNCTION
 $url = $url_urbackup."?a=login";
@@ -139,7 +140,7 @@ function formatBytes($bytes, $precision = 2)
 <br>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start incremental backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=start_backup&amp;backuptype=incremental&amp;clientid=<?php echo $client_id ?>">Start incremental backup</a>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=start_backup&amp;backuptype=full&amp;clientid=<?php echo $client_id ?>">Start full backup</a>
-<a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete_client&amp;clientid=<?php echo $client_id ?>">Delete this client</a>
+<a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete_client&amp;clientid=<?php echo $client_id ?>&amp;jidmachine=<?php echo $jidMachine ?>">Delete this client</a>
 <br>
 <br>
 <?php echo _T("Profile name: ", 'urbackup'); ?><a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=list_computers_ongroup&amp;groupid=<?php echo $groupid ?>&groupname=<?php echo $groupname ?>"><?php echo $groupname; ?></a>
