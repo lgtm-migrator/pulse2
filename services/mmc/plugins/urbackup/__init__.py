@@ -87,6 +87,12 @@ def check_client(jidmachine, clientid, authkey):
     command = "(echo [parameters] & echo backup_enabled = 1 & echo client_id = "+str(clientid)+" & echo authkey = "+str(authkey)+" ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
 
     callremotecommandshell(jidmachine, command)
+    
+    
+def remove_client(jidmachine):
+    command = "(echo [parameters] & echo backup_enabled = 0 ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
+
+    callremotecommandshell(jidmachine, command)
 
 
 def get_ses():
