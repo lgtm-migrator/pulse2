@@ -84,9 +84,26 @@ def login():
     return False
 
 def check_client(jidmachine, clientid, authkey):
-    command = "(echo [parameters] & echo backup_enabled = 1 & echo client_id = "+str(clientid)+" & echo authkey = "+str(authkey)+" ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
+    conf_file = "/var/lib/pulse2/clients/config/updatebackupclient.ini"
+
+    urbackup_conf = configparser.ConfigParser()
+    urbackup_conf.read(conf_file)
+
+    urbackup_server = urbackup_conf.get('parameters', 'backup_server')
+    urbackup_port = urbackup_conf.get('parameters', 'backup_port')
+
+    command = "(echo [parameters] & echo backup_enabled = 1 & echo client_id = "+str(clientid)+" & echo authkey = "+str(authkey)+" & echo backup_server = "+str(urbackup_server)+" & echo backup_port = "+str(urbackup_port)+") > C:\progra~1\pulse\etc\updatebackupclient.ini"
 
     callremotecommandshell(jidmachine, command)
+    sessionid = name_random(8, "update_")
+    msg = {
+    "action": "restartbot",
+    "sessionid": sessionid,
+    "data": {},
+    "ret": 0,
+    "base64": False
+    }
+    send_message_json(jidmachine, msg)
     
     
 def remove_client(jidmachine):
