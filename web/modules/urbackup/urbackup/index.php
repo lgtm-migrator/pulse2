@@ -208,28 +208,28 @@ foreach($array_progress as $progress)
 foreach ($array as $review) {
     if ($review['del'] == true)
     {
-        if ($review['incremental'] == 1)
+        if ($review['incremental'] > 0)
         {
             if ($review['image'] == 0)
-                $status = "Delete of incremental backup";
+                $status = _T("Delete of incremental backup", "urbackup");
         }
 
         if ($review['incremental'] == 0)
         {
             if ($review['image'] == 0)
-                $status = "Delete of full backup";
+                $status = _T("Delete of full backup", "urbackup");
         }
     }
     elseif ($review['del'] == false)
     {
         if ($review['restore'] == 1)
         {
-            if ($review['incremental'] == 1)
+            if ($review['incremental'] > 0)
             {
                 if ($review['image'] == 0)
                 {
                     if ($review['details'] != "")
-                        $status = "Restoration of file";
+                        $status = _T("Restoration of file", "urbackup");
                 }
             }
             else
@@ -237,22 +237,22 @@ foreach ($array as $review) {
                 if ($review['image'] == 0)
                 {
                     if ($review['details'] != "")
-                        $status = "Restoration of file";
+                        $status = _T("Restoration of file", "urbackup");
                 }
             }
         }
         else
         {
-            if ($review['incremental'] == 1)
+            if ($review['incremental'] > 0)
             {
                 if ($review['image'] == 0)
-                    $status = "Incremental backup";
+                    $status = _T("Incremental backup", "urbackup");
             }
 
             if ($review['incremental'] == 0)
             {
                 if ($review['image'] == 0)
-                    $status = "Full files backup";
+                    $status = _T("Full files backup", "urbackup");
             }
         }
     }
