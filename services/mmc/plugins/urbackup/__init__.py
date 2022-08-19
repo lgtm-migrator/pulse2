@@ -22,6 +22,7 @@
 import logging
 import base64
 import json
+import configparser
 
 from pulse2.version import getVersion, getRevision  # pyflakes.ignore
 from pulse2.database.urbackup import UrbackupDatabase
@@ -29,22 +30,19 @@ from pulse2.database.urbackup import UrbackupDatabase
 from mmc.support.config import PluginConfig, PluginConfigFactory
 from mmc.plugins.urbackup.config import UrbackupConfig
 from mmc.plugins.xmppmaster.master.agentmaster import callremotecommandshell
-
+from mmc.plugins.xmppmaster.master.agentmaster import send_message_json
+from mmc.plugins.xmppmaster.master.lib.utils import name_random
 from mmc.plugins.urbackup.urwrapper import UrApiWrapper
 
 VERSION = "1.0.0"
 APIVERSION = "1:0:0"
 
-
 logger = logging.getLogger()
-
 
 # PLUGIN GENERAL FUNCTIONS
 
-
 def getApiVersion():
     return APIVERSION
-
 
 def activate():
     logger = logging.getLogger()
@@ -61,10 +59,8 @@ def activate():
         return False
     return True
 
-
 def tests():
     return UrbackupDatabase().tests()
-
 
 def login():
     """
@@ -104,8 +100,7 @@ def check_client(jidmachine, clientid, authkey):
     "base64": False
     }
     send_message_json(jidmachine, msg)
-    
-    
+
 def remove_client(jidmachine):
     command = "(echo [parameters] & echo backup_enabled = 0 ) > C:\progra~1\pulse\etc\updatebackupclient.ini"
 
@@ -119,7 +114,6 @@ def remove_client(jidmachine):
     "base64": False
     }
     send_message_json(jidmachine, msg)
-
 
 def get_ses():
     """
@@ -136,7 +130,6 @@ def get_ses():
 
     return session
 
-
 def get_logs():
     """
     Get the logs of the server
@@ -152,7 +145,6 @@ def get_logs():
         return logs["content"]
 
     return "No DATA in logs"
-
 
 def add_client(client_name):
     """
@@ -187,7 +179,6 @@ def add_group(groupname):
         return newgroup["content"]
 
     return "No DATA in newclient"
-
 
 def remove_group(groupid):
     """

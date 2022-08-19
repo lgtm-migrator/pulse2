@@ -1,15 +1,35 @@
 <?php
+/*
+ * (c) 2022 Siveo, http://www.siveo.net/
+ *
+ * $Id$
+ *
+ * This file is part of Pulse
+ *
+ * MMC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MMC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with MMC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 require_once("modules/pulse2/version.php");
 
 $mod = new Module("urbackup");
 $mod->setVersion("1.0");
-//$mod->setRevision('');
-$mod->setDescription(_T("Urbackup", "urbackup"));
+$mod->setDescription(_T("Backup", "urbackup"));
 $mod->setAPIVersion("1:0:0");
 $mod->setPriority(2000);
 
 $submod = new SubModule("urbackup");
-$submod->setDescription(_T("Urbackup", "urbackup"));
+$submod->setDescription(_T("Backup", "urbackup"));
 $submod->setVisibility(True);
 $submod->setImg('modules/urbackup/graph/navbar/urbackup');
 $submod->setDefaultPage("urbackup/urbackup/index");

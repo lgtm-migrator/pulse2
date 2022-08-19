@@ -265,7 +265,7 @@ Description: Pulse 2 BackupPC plugin for MMC agent
 Package: python-mmc-urbackup
 Architecture: all
 Section: python
-Pre-Depends: urbackup
+Pre-Depends: urbackup-server
 Depends: ${misc:Depends}, ${python:Depends}, pulse2-common(= ${binary:Version}), python-pulse2-common-database-urbackup (= ${binary:Version}), python-pyquery
 Description: Pulse 2 Urbackup plugin for MMC agent
  Pulse 2 is Open Source computer system management for medium and large
