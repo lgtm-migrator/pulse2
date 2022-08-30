@@ -207,7 +207,7 @@ class extract_cab:
         print ("cretion table %s"%self.NAME_TABLE)
         try:
             cursor = self.db.cursor()
-            cmd="""CREATE TABLEIF NOT EXISTS %s (
+            cmd="""CREATE TABLE IF NOT EXISTS %s (
                 `updateid` varchar(38) NOT NULL,
                 `revisionid` varchar(16) NOT NULL,
                 `creationdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
