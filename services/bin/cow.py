@@ -20,7 +20,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 #
-#
+# file : cow.py
+
+
+###  version de .net  \HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full
+#version edge powershell.exe "(Get-AppxPackage Microsoft.MicrosoftEdge).Version"
+
+#version de mrt.exec  (voir meta data)
+        #(Get-ChildItem 'C:\Windows\System32\mrt.exe').VersionInfo | Format-List *
+        #(Get-ChildItem 'C:\Windows\System32\mrt.exe').VersionInfo.ProductVersion
+
+
 
 from scrapy import Selector
 from tqdm import tqdm
@@ -129,11 +139,11 @@ def test_executable():
 
 class extract_cab:
     NAME_BASE="base_wsusscn2"
-    NAME_TABLE="update_datadebug"
-    NAME_UPDATE_TABLE="data_simple_updatedebug"
-    
+    NAME_TABLE="update_data"
+    NAME_UPDATE_TABLE="data_simple_update"
+
     CONF_FILE="/etc/cow/cow.init"
-    
+
 
     def __init__(
         self, updatetempfiles_path="/tmp/winupdate", path_file_extract="wsusscn2.cab"
@@ -160,7 +170,7 @@ class extract_cab:
         self.ind1 = os.path.join(self.directory_output, "index1.xml")
         self.pk = os.path.join(self.directory_output, "package.xml")
         self.ind = os.path.join(self.directory_output, "index.xml")
-        
+
     def create_connection(self):
         try:
             self.db = MySQLdb.connect(
@@ -170,11 +180,11 @@ class extract_cab:
                 passwd=self.passwd,
                 db=self.NAME_BASE
             )
-            #cursor = self.db.cursor()                     
+            #cursor = self.db.cursor()
         except Exception as e:
             print("\n%s" % (traceback.format_exc()))
             return False
-        return self.create_table()   
+        return self.create_table()
 
     def read_config(self):
         self.host = "localhost"
@@ -187,21 +197,23 @@ class extract_cab:
             #charge config
             if Config.has_option('connection', 'host'):
                 self.host = Config.get('connection', 'host')
-            
+
             if Config.has_option('connection', 'user'):
                 self.user = Config.get('connection', 'user')
-            
+
             if Config.has_option('connection', 'port'):
                 self.port = Config.get('connection', 'port')
-            
+
             if Config.has_option('connection', 'password'):
                 self.passwd = Config.get('connection', 'password')
-    
+
     def create_table(self):
         print ("cretion tables")
         self.create_table_wsu()
         self.create_table_update_wsu()
         return True
+
+
 
     def create_table_wsu(self):
         print ("cretion table %s"%self.NAME_TABLE)
@@ -209,26 +221,37 @@ class extract_cab:
             cursor = self.db.cursor()
             cmd="""CREATE TABLE IF NOT EXISTS %s (
                 `updateid` varchar(38) NOT NULL,
-                `revisionid` varchar(38) NOT NULL,
+                `revisionid` varchar(16) NOT NULL,
                 `creationdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-                `company` varchar(120) DEFAULT NULL,
-                `product` varchar(1024) DEFAULT NULL,
-                `productfamily` varchar(120) DEFAULT NULL,
-                `updateclassification` text DEFAULT NULL,
-                `prerequisite`text DEFAULT NULL,
-                `title` text DEFAULT NULL,
-                `description` text DEFAULT NULL,
-                `msrcseverity` text DEFAULT NULL,
-                `msrcnumber` text DEFAULT NULL,
-                `kb` text DEFAULT NULL,
-                `languages` text DEFAULT NULL,
-                `category` text DEFAULT NULL,
-                `supersededby` text DEFAULT NULL,
+                `company` varchar(36) DEFAULT '',
+                `product` varchar(1024) DEFAULT '',
+                `productfamily` varchar(36) DEFAULT '',
+                `updateclassification` varchar(36) DEFAULT '',
+                `prerequisite` varchar(4096) DEFAULT '',
+                `title` varchar(1024) DEFAULT '',
+                `description` varchar(4096) DEFAULT '',
+                `msrcseverity` varchar(16) DEFAULT '',
+                `msrcnumber` varchar(16) DEFAULT '',
+                `kb` varchar(16) DEFAULT '',
+                `languages` varchar(16) DEFAULT '',
+                `category` varchar(128) DEFAULT '',
+                `supersededby` varchar(3072) DEFAULT '',
                 `supersedes` text DEFAULT NULL,
-                PRIMARY KEY (`updateid`),
-                UNIQUE KEY `id_UNIQUE` (`updateid`),
-                UNIQUE KEY `id_UNIQUE1` (`revisionid`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;"""%(self.NAME_TABLE)
+                `payloadfiles` varchar(2048) DEFAULT '',
+                `revisionnumber` varchar(30) DEFAULT '',
+                `bundledby_revision` varchar(30) DEFAULT '',
+                `isleaf` varchar(6) DEFAULT '',
+                `issoftware` varchar(30) DEFAULT '',
+                `deploymentaction` varchar(30) DEFAULT '',
+                    PRIMARY KEY (`updateid`),
+                    UNIQUE KEY `id_UNIQUE` (`updateid`),
+                    UNIQUE KEY `id_UNIQUE1` (`revisionid`),
+                    KEY `indproduct` (`product`(768)),
+                    KEY `indkb` (`kb`),
+                    KEY `indclassification` (`updateclassification`),
+                    KEY `ind_remplacerpar` (`supersededby`(768)),
+                    KEY `indcategory` (`category`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4  ;"""%(self.NAME_TABLE)
             cursor.execute(cmd)
             return True
         except Exception as e:
@@ -243,6 +266,7 @@ class extract_cab:
                 `updateid` varchar(38) NOT NULL COMMENT 'creationdate',
                 `creationdate` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
                 `updateclassification` text DEFAULT NULL,
+                `category` text DEFAULT NULL,
                 `title` text DEFAULT NULL,
                 `description` text DEFAULT NULL,
                 `kb` text DEFAULT NULL,
@@ -255,7 +279,7 @@ class extract_cab:
         except Exception as e:
             print("\n%s" % (traceback.format_exc()))
             return False
-   
+
 
     def update(self):
         if self.create_connection():
@@ -272,7 +296,7 @@ class extract_cab:
         """
         if not output_file:
             output_file="MSPatches.csv"
-    
+
         fileout = open(output_file, "w")
         fileout.write(
             '"Update ID","Creation Date","Update Classification","Title","Description","KB ID","MSRC Severity","MSRC Number"\n'
@@ -284,19 +308,17 @@ class extract_cab:
             print("connection error")
             return
 
-        dde = "select updateid,creationdate,updateclassification,title,description,kb,msrcseverity,msrcnumber from %s where updateclassification not in ('','None') order by creationdate desc;"%(self.NAME_TABLE)
-        
+
+        dde = "select updateid,creationdate,updateclassification,title,description,kb,msrcseverity,msrcnumber from %s where updateclassification not in ('') order by creationdate desc;"%(self.NAME_TABLE)
+
         record = cursor.execute(dde)
-        
+
         for i in cursor.fetchall():
             cursor1 = self.db.cursor()
             dda="select title from "+self.NAME_TABLE+" where updateid='" + i[2] + "';"
-            #print(dda)
             if cursor1.execute(dda):
                 updateclassification = cursor1.fetchone()[0]
-                #print updateclassification
                 cursor1.close()
-                
                 datetimeupdate = i[1].strftime("%m/%d/%Y, %H:%M:%S")
                 fileout.write(
                     '"'
@@ -318,10 +340,11 @@ class extract_cab:
                     + '"'
                     + "\n"
                 )
-                
-                self.write_table_update_wsu( 
-                                        i[0], 
+
+                self.write_table_update_wsu(
+                                        i[0],
                                         datetimeupdate,
+                                        i[2],
                                         updateclassification,
                                         i[3],
                                         i[4],
@@ -335,27 +358,29 @@ class extract_cab:
                                 updateid,
                                 creationdate,
                                 updateclassification,
+                                category,
                                 title,
                                 description,
                                 kb,
                                 msrcseverity,
                                 msrcnumber ):
-        
-        try:            
+        try:
             cursor = self.db.cursor()
-            cmd="""INSERT INTO `%s`.`%s` ( `updateid`, 
+            cmd="""INSERT INTO `%s`.`%s` ( `updateid`,
                         `creationdate`,
                         `updateclassification`,
+                        `category`,
                         `title`,
                         `description`,
                         `kb`,
                         `msrcseverity`,
                         `msrcnumber`)
-                        VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s','%s');""" %(self.NAME_BASE,
+                        VALUES ( '%s', '%s', '%s','%s','%s', '%s', '%s', '%s','%s');""" %(self.NAME_BASE,
                                 self.NAME_UPDATE_TABLE,
-                                updateid, 
+                                updateid,
                                 creationdate,
                                 MySQLdb.escape_string(updateclassification),
+                                category,
                                 MySQLdb.escape_string(title),
                                 MySQLdb.escape_string(description),
                                 kb,
@@ -370,14 +395,14 @@ class extract_cab:
                 print("\n%s" % (traceback.format_exc()))
         except Exception as e:
             print("\n%s" % (traceback.format_exc()))
-        
+
         finally:
             cursor.close()
-        
-            
-            
-       
-        
+
+
+
+
+
     def decompresse_all_cab(self):
         onlyfiles = [f for f in os.listdir(self.directory_output) if f.endswith(".cab")]
         onlyfiles.remove(self.name_file)
@@ -517,18 +542,18 @@ class extract_cab:
                     break
         fileextract={}
         rep=os.path.join(self.directory_output, "package%s" % choix)
-        c=os.path.join(rep, "c", str(nbrange)) 
+        c=os.path.join(rep, "c", str(nbrange))
         l=os.path.join(rep, "l", "en", str(nbrange))
         s=os.path.join(rep, "s",  str(nbrange))
         x=os.path.join(rep, "x",  str(nbrange))
         out=os.path.join(rep, "%s.xml" % str(nbrange))
-        
+
         filenames=[]
-        
+
         if  os.path.exists(c):
             filenames.append(c)
             fileextract["supersedes_file"]=c
-            
+
         if  os.path.exists(l):
             fileextract["title_description_file"]=l
             filenames.append(l)
@@ -542,18 +567,17 @@ class extract_cab:
         for name in filenames:
             with open(name) as f:
                 stringconcat_ascii += f.read()
-                
+
         stringconcat_ascii += "</concat>"
         stringconcat_ascii = re.sub(
                 r"[^\x00-\x7f]",
                 "",
                 stringconcat_ascii.replace("\n", "").replace("\r", "").replace("\t", "").strip(" "))
-        #print (filenames)
-        #if len(stringconcat_ascii) >  6000:
-        print( "creation file %s" % out)
+
+        #print( "creation file %s" % out)
         with open(out, "w") as new_file:
             new_file.write(stringconcat_ascii)
-      
+
         return stringconcat_ascii
 
 
@@ -571,8 +595,37 @@ class extract_cab:
         )
         root = etree.parse(os.path.join(self.directory_output, "package.xml"))
         cursor = self.db.cursor()
-        for element_update in root.iterfind(".//Update"):
+
+        for element_update in root.iterfind(".//Updates/Update"):
+            #print ("kkkk%s"%element_update)
+            #return
             att = element_update.attrib
+            #print (att)
+            fileinstall = element_update.find("PayloadFiles/File")
+            payloadfiles=""
+            if fileinstall is not None:
+                payloadfiles = fileinstall.get("Id","")
+
+            BundledBysearch= element_update.find("BundledBy/Revision")
+            bundledby_revision=""
+            if BundledBysearch is not None:
+                bundledby_revision=BundledBysearch.get("Id","")
+            creationdate=""
+            creationdate= att["CreationDate"]
+            revisionnumber=""
+            revisionnumber= att["RevisionNumber"]
+            isleaf=""
+            if "IsLeaf" in att:
+                isleaf = att["IsLeaf"]
+            issoftware=""
+            if "IsSoftware" in att:
+                issoftware = att["IsSoftware"]
+            deploymentaction=""
+            if "DeploymentAction" in att:
+                deploymentaction = att["DeploymentAction"]
+
+
+
             UpdateId = att["UpdateId"]
             RevisionId = att["RevisionId"]
 
@@ -616,64 +669,64 @@ class extract_cab:
                     UpdateClassification.append(Categories.attrib["id"])
                 elif typea.endswith("y"):
                     ProductFamily.append(Categories.attrib["id"])
-        
+
             supersededby=Category_Company=Category_Product=Category_ProductFamily=Category_UpdateClassification=prerequisites=title=description=moreinfourl=supersedes=""
-        
+
             Category_Company=",".join(Company)
             Category_Product=",".join(Product)
             Category_ProductFamily=",".join(ProductFamily)
             Category_UpdateClassification=",".join(UpdateClassification)
             prerequisites=",".join(Prerequisitel)
             supersededby=",".join(Supersededbyl)
-            
-            
+
+
             #print("supersededby %s" % supersededby)
             try:
                 #print("supersededby %s" % supersededby)
                 revisiondata = element_update.attrib["RevisionId"]
-                
+
                 filexmlreisonid = self.file_contient(
                     int(revisiondata)
                 )
-                
-                root = etree.fromstring(filexmlreisonid)
+
+                root1 = etree.fromstring(filexmlreisonid)
             except Exception as e:
                 print (str(e))
                 print ("error creation file RevisionId %s" %RevisionId)
                 continue
             try:
-                Title = root.find("LocalizedProperties/Title")
+                Title = root1.find("LocalizedProperties/Title")
                 title = Title.text
             except:
                 # pas de title
                 pass
-            
+
             try:
-                Description = root.find("LocalizedProperties/Description")
+                Description = root1.find("LocalizedProperties/Description")
                 description=Description.text
             except:
                 pass
-            
+
             try:
-                Moreinfourl = root.find("LocalizedProperties/MoreInfoUrl")
+                Moreinfourl = root1.find("LocalizedProperties/MoreInfoUrl")
                 moreinfourl=Moreinfourl.text
             except:
                 pass
-            
-            
+
+
             Supersedes=[]
-            for Upid in root.iterfind(".//SupersededUpdates/UpdateIdentity"):
+            for Upid in root1.iterfind(".//SupersededUpdates/UpdateIdentity"):
                 self.normalize_attr(Upid)
                 if "updateid" in Upid.attrib:
                     Supersedes.append(Upid.attrib["updateid"])
-                    
+
             supersedes=",".join(Supersedes)
 
-            
-            
-          
+
+
+
             defaultpropertieslanguage=msrcseverity=isbeta=kbarticleid=securitybulletinid = ""
-            ExtendedProperties = root.find("ExtendedProperties")
+            ExtendedProperties = root1.find("ExtendedProperties")
             self.normalize_attr(ExtendedProperties)
             if "defaultpropertieslanguage" in ExtendedProperties.attrib:
                 defaultpropertieslanguage = ExtendedProperties.attrib['defaultpropertieslanguage']
@@ -681,98 +734,153 @@ class extract_cab:
                 msrcseverity = ExtendedProperties.attrib['msrcseverity']
             if "isbeta" in ExtendedProperties.attrib:
                 isbeta = ExtendedProperties.attrib['isbeta']
-            
+
             try:
                 KBArticleID = ExtendedProperties.find("KBArticleID")
                 kbarticleid=KBArticleID.text
             except:
                 pass
-            
+
             try:
                 SecurityBulletinID = ExtendedProperties.find("SecurityBulletinID")
                 securitybulletinid=SecurityBulletinID.text
             except:
                 pass
-            
+
             categorytype=""
             try:
-                Categoryinformation = root.find("HandlerSpecificData/CategoryInformation")
+                Categoryinformation = root1.find("HandlerSpecificData/CategoryInformation")
                 self.normalize_attr(Categoryinformation)
                 if "categorytype" in Categoryinformation.attrib:
                     categorytype = Categoryinformation.attrib['categorytype']
             except:
                 pass
 
-            ###################"
-            #print("######################injection in base######################")
-            #print ("UpdateId %s" % UpdateId)
-            #print ("RevisionId %s"% RevisionId)
-            #print ("description %s" % description)
-            #print ("title %s" % title)  
-            #print ("Moreinfourl %s" % moreinfourl)
-            #print ("supersededby %s" % supersededby)
-            #print ("Category_Company %s" % moreinfourl)
-            #print ("Category_Product %s" % moreinfourl)
-            #print ("Category_ProductFamily %s" % Category_ProductFamily)
-            #print ("Category_UpdateClassification %s" % Category_UpdateClassification)
-            #print ("prerequisites %s" % prerequisites)
-            #print ("supersedes %s" % supersedes)
-            #print ("securitybulletinid %s" % securitybulletinid)
-            #print ("categorytype %s" % categorytype)
-            #print ("kbarticleid %s" % kbarticleid)
-            #print ("isbeta %s" % isbeta)
-            #print ("msrcseverity %s" % msrcseverity)
-            #print ("defaultpropertieslanguage %s" % defaultpropertieslanguage)
-            #print("######################end in base######################")
-
-            try:
-                cmd="""INSERT INTO `%s`.`%s` ( `updateid`, 
-                `revisionid`,
-                `company`,
-                `product`,
-                `productfamily`,
-                `updateclassification`,
-                `prerequisite`,
-                `title`, 
-                `description`,
-                `msrcseverity`, 
-                `msrcnumber`, 
-                `kb`, 
-                `languages`,
-                `category`,
-                `supersededby`, 
-                `supersedes`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');""" %(self.NAME_BASE,
-                    self.NAME_TABLE,
-                    UpdateId,
-                    RevisionId,
-                    MySQLdb.escape_string(Category_Company),
-                    MySQLdb.escape_string(Category_Product),
-                    MySQLdb.escape_string(Category_ProductFamily),
-                    MySQLdb.escape_string(Category_UpdateClassification),
-                    MySQLdb.escape_string(prerequisites),
-                    MySQLdb.escape_string(title),
-                    MySQLdb.escape_string(description),
-                    msrcseverity,
-                    securitybulletinid,
-                    kbarticleid,
-                    defaultpropertieslanguage,
-                    categorytype,
-                    supersededby,
-                    supersedes
-                    )
-                #print (cmd)
-                cursor.execute(cmd)
-                self.db.commit()
-                
-                self.insertion_in_base+=1
-            except Exception as e:
-                print("\n%s" % (traceback.format_exc()))
-
-        
-        #self.db.close()
 
 
 
+            if payloadfiles:
+                pathcalcule="/OfflineSyncPackage/FileLocations/FileLocation[@Id='%s']/@Url"%payloadfiles
+                eee= root.xpath(pathcalcule)
+                payloadfiles = eee[0]
+
+
+            if not creationdate:
+                try:
+                    cmd="""INSERT INTO `%s`.`%s` ( `updateid`,
+                    `revisionid`,
+                    `company`,
+                    `product`,
+                    `productfamily`,
+                    `updateclassification`,
+                    `prerequisite`,
+                    `title`,
+                    `description`,
+                    `msrcseverity`,
+                    `msrcnumber`,
+                    `kb`,
+                    `languages`,
+                    `category`,
+                    `supersededby`,
+                    `supersedes`,
+                    `payloadfiles`,
+                    `revisionnumber`,
+                    `bundledby_revision`,
+                    `isleaf`,
+                    `issoftware`,
+                    `deploymentaction`
+                    ) VALUES ( '%s', '%s',  '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' , '%s', '%s');""" %(self.NAME_BASE,
+                        self.NAME_TABLE,
+                        UpdateId,
+                        RevisionId,
+                        MySQLdb.escape_string(Category_Company),
+                        MySQLdb.escape_string(Category_Product),
+                        MySQLdb.escape_string(Category_ProductFamily),
+                        MySQLdb.escape_string(Category_UpdateClassification),
+                        MySQLdb.escape_string(prerequisites),
+                        MySQLdb.escape_string(title),
+                        MySQLdb.escape_string(description),
+                        msrcseverity,
+                        securitybulletinid,
+                        kbarticleid,
+                        defaultpropertieslanguage,
+                        categorytype,
+                        supersededby,
+                        supersedes,
+                        payloadfiles,
+                        revisionnumber,
+                        bundledby_revision,
+                        isleaf,
+                        issoftware,
+                        deploymentaction
+                        )
+                    #print (cmd)
+                    cursor.execute(cmd)
+                    self.db.commit()
+                    self.insertion_in_base+=1
+                except Exception as e:
+                    print("\n%s" % (traceback.format_exc()))
+            else:
+                try:
+                    cmd="""INSERT INTO `%s`.`%s` ( `updateid`,
+                    `creationdate`,
+                    `revisionid`,
+                    `company`,
+                    `product`,
+                    `productfamily`,
+                    `updateclassification`,
+                    `prerequisite`,
+                    `title`,
+                    `description`,
+                    `msrcseverity`,
+                    `msrcnumber`,
+                    `kb`,
+                    `languages`,
+                    `category`,
+                    `supersededby`,
+                    `supersedes`,
+                    `payloadfiles`,
+                    `revisionnumber`,
+                    `bundledby_revision`,
+                    `isleaf`,
+                    `issoftware`,
+                    `deploymentaction`
+                    ) VALUES ( '%s', '%s', '%s','%s', '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' , '%s', '%s');""" %(self.NAME_BASE,
+                        self.NAME_TABLE,
+                        UpdateId,
+                        creationdate,
+                        RevisionId,
+                        MySQLdb.escape_string(Category_Company),
+                        MySQLdb.escape_string(Category_Product),
+                        MySQLdb.escape_string(Category_ProductFamily),
+                        MySQLdb.escape_string(Category_UpdateClassification),
+                        MySQLdb.escape_string(prerequisites),
+                        MySQLdb.escape_string(title),
+                        MySQLdb.escape_string(description),
+                        msrcseverity,
+                        securitybulletinid,
+                        kbarticleid,
+                        defaultpropertieslanguage,
+                        categorytype,
+                        supersededby,
+                        supersedes,
+                        payloadfiles,
+                        revisionnumber,
+                        bundledby_revision,
+                        isleaf,
+                        issoftware,
+                        deploymentaction
+                        )
+                    #print (cmd)
+                    cursor.execute(cmd)
+                    self.db.commit()
+                    self.insertion_in_base+=1
+                except Exception as e:
+                    print("\n%s" % (traceback.format_exc()))
+
+            cursorproc = self.db.cursor()
+            cursorproc.execute("call update_updateclassification();")
+            self.db.commit()
 
 
 def solve_supersede_updateids(applicable_updates):
@@ -856,55 +964,14 @@ def help():
     )
 
 
-def export(output_file):
-    fileout = open(output_file, "w")
-    finalupdates_query = (
-        str(final_updates_list).replace("u'", "'").replace("[", "(").replace("]", ")")
-    )
-    fileout.write(
-        '"Update ID","Creation Date","Update Classification","Title","Description","KB ID","MSRC Severity","MSRC Number"\n'
-    )
-    record = c.execute(
-        "select updateid,creationdate,updateclassification,title,description,kb,msrcseverity,msrcnumber from MSPatchTable where updateid in "
-        + finalupdates_query
-        + " order by creationdate desc;"
-    )
-    for i in tqdm(record.fetchall(), total=final_updates_list.__len__()):
-        updateclassification = c.execute(
-            "select title from MSPatchTable where updateid='" + i[2] + "';"
-        ).fetchone()[0]
-        fileout.write(
-            '"'
-            + i[0]
-            + '","'
-            + i[1]
-            + '","'
-            + updateclassification
-            + '","'
-            + i[3]
-            + '","'
-            + i[4]
-            + '","'
-            + i[5]
-            + '","'
-            + i[6]
-            + '","'
-            + i[7]
-            + '"'
-            + "\n"
-        )
-    fileout.close()
-    print("\n\n Report exported Successfully !!")
-
-
 if __name__ == "__main__":
 
     # Quit the process if we don't want to continue
     signal.signal(signal.SIGINT, lambda x, y: sys.exit(0))
-    
-    
-    
-    
+
+
+
+
     logging.basicConfig(
         filename="logout",
         filemode="a",
@@ -968,3 +1035,201 @@ if __name__ == "__main__":
             help()
     else:
         help()
+
+#procedure stockee utiliser par le programme
+
+#USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `update_updateclassification`;
+
+#USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `base_wsusscn2`.`update_updateclassification`;
+#;
+
+#DELIMITER $$
+#USE `base_wsusscn2`$$
+#CREATE DEFINER=`root`@`localhost` PROCEDURE `update_updateclassification`()
+#BEGIN
+  #DECLARE is_done INTEGER DEFAULT 0;
+  #-- déclarer la variable qui va contenir les noms des clients récupérer par le curseur .
+  #DECLARE c_title varchar(2040)  DEFAULT "";
+  #DECLARE c_udateid varchar(2040)  DEFAULT "";
+  #-- déclarer le curseur
+  #DECLARE client_cursor CURSOR FOR
+   #select title, updateid FROM base_wsusscn2.update_data where updateid in
+   #(SELECT distinct updateclassification FROM base_wsusscn2.update_data where updateclassification not in (''));
+
+  #-- déclarer le gestionnaire NOT FOUND
+  #DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+    #-- ouvrir le curseur
+  #OPEN client_cursor;
+  #-- parcourir la liste des noms des clients et concatèner tous les noms où chaque nom est séparé par un point-virgule(;)
+  #get_list: LOOP
+  #FETCH client_cursor INTO c_title,c_udateid;
+
+  #IF is_done = 1 THEN
+  #LEAVE get_list;
+  #END IF;
+
+  #-- traitement
+  #UPDATE `base_wsusscn2`.`update_data` SET `updateclassification` = c_title WHERE (`updateclassification` = c_udateid);
+
+  #END LOOP get_list;
+  #-- fermer le curseur
+  #CLOSE client_cursor;
+#END$$
+
+#DELIMITER ;
+#;
+
+#" procedure stockee renvoi les mise à jour
+#USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `create_update_result`;
+
+#USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `base_wsusscn2`.`create_update_result`;
+#;
+
+#DELIMITER $$
+#USE `base_wsusscn2`$$
+#CREATE DEFINER=`root`@`localhost` PROCEDURE `create_update_result`( in FILTERtable varchar(2048), in KB_LIST varchar(2048), in createtbleresult int)
+#BEGIN
+#DECLARE _next TEXT DEFAULT NULL;
+#DECLARE _nextlen INT DEFAULT NULL;
+#DECLARE _value TEXT DEFAULT NULL;
+#DECLARE _list MEDIUMTEXT;
+
+#DECLARE kb_next TEXT DEFAULT NULL;
+#DECLARE kb_nextlen INT DEFAULT NULL;
+#DECLARE kb_value TEXT DEFAULT NULL;
+#DECLARE kb_updateid  varchar(50) DEFAULT NULL;
+#-- clean table
+#drop table if EXISTS tmp_kb_updateid;
+#drop table IF EXISTS tmp_t1;
+#drop table IF EXISTS tmp_my_mise_a_jour;
+#drop table IF EXISTS tmp_result_procedure;
+#CREATE TABLE IF NOT EXISTS `tmp_kb_updateid` (
+  #`c1` varchar(64) NOT NULL,
+  #PRIMARY KEY (`c1`),
+  #UNIQUE KEY `c1_UNIQUE` (`c1`)
+#) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+#truncate tmp_kb_updateid;
+
+#iteratorkb:
+#LOOP
+  #-- exit the loop if the list seems empty or was null;
+  #-- this extra caution is necessary to avoid an endless loop in the proc.
+  #IF CHAR_LENGTH(TRIM(kb_list)) = 0 OR kb_list IS NULL THEN
+    #LEAVE iteratorkb;
+  #END IF;
+
+  #-- capture the next value from the list
+  #SET kb_next = SUBSTRING_INDEX(kb_list,',',1);
+
+  #-- save the length of the captured value; we will need to remove this
+  #-- many characters + 1 from the beginning of the string
+  #-- before the next iteration
+  #SET kb_nextlen = CHAR_LENGTH(kb_next);
+
+  #-- trim the value of leading and trailing spaces, in case of sloppy CSV strings
+  #SET kb_value = TRIM(kb_next);
+
+  #-- insert the extracted value into the target table
+  #-- select updateid into kb_updateid from base_wsusscn2.update_data where kb = kb_value;
+  #-- select kb_updateid;
+  #INSERT IGNORE INTO tmp_kb_updateid (c1) VALUES (kb_value );
+
+  #-- rewrite the original string using the `INSERT()` string function,
+  #-- args are original string, start position, how many characters to remove,
+  #-- and what to "insert" in their place (in this case, we "insert"
+  #-- an empty string, which removes kb_nextlen + 1 characters)
+  #SET kb_list = INSERT(kb_list,1,kb_nextlen + 1,'');
+#END LOOP;
+
+
+
+
+#-- ------ generation table kb tmp_kb_updateid -----------
+#-- call list_kb_machine(KBLIST);
+#-- les updatesid des mise a jour deja installer seront inclus dans la table des update excluts tmp_t1
+
+#-- creation table filter
+#CREATE TABLE IF NOT EXISTS tmp_my_mise_a_jour AS (SELECT * FROM
+    #base_wsusscn2.update_data
+#WHERE
+    #title LIKE FILTERtable and title not like "%Dynamic Cumulative Update%");
+
+#SELECT
+    #GROUP_CONCAT(DISTINCT supersedes
+        #ORDER BY supersedes ASC
+        #SEPARATOR ',')
+#INTO _list FROM
+    #base_wsusscn2.tmp_my_mise_a_jour;
+
+#CREATE TABLE IF NOT EXISTS `tmp_t1` (
+    #`c1` VARCHAR(64) NOT NULL,
+    #PRIMARY KEY (`c1`),
+    #UNIQUE KEY `c1_UNIQUE` (`c1`)
+#)  ENGINE=INNODB DEFAULT CHARSET=UTF8;
+#truncate tmp_t1;
+#iterator:
+#LOOP
+  #-- exit the loop if the list seems empty or was null;
+  #-- this extra caution is necessary to avoid an endless loop in the proc.
+  #IF CHAR_LENGTH(TRIM(_list)) = 0 OR _list IS NULL THEN
+    #LEAVE iterator;
+  #END IF;
+
+  #-- capture the next value from the list
+  #SET _next = SUBSTRING_INDEX(_list,',',1);
+
+  #-- save the length of the captured value; we will need to remove this
+  #-- many characters + 1 from the beginning of the string
+  #-- before the next iteration
+  #SET _nextlen = CHAR_LENGTH(_next);
+
+  #-- trim the value of leading and trailing spaces, in case of sloppy CSV strings
+  #SET _value = TRIM(_next);
+
+  #-- insert the extracted value into the target table
+
+  #INSERT IGNORE INTO tmp_t1 (c1) VALUES (_value);
+
+  #-- rewrite the original string using the `INSERT()` string function,
+  #-- args are original string, start position, how many characters to remove,
+  #-- and what to "insert" in their place (in this case, we "insert"
+  #-- an empty string, which removes _nextlen + 1 characters)
+  #SET _list = INSERT(_list,1,_nextlen + 1,'');
+#END LOOP;
+#DELETE FROM `base_wsusscn2`.`tmp_t1`
+#WHERE
+    #(`c1` = '');
+
+#-- injection les update_id deja installer dans tmp_t1
+ #INSERT IGNORE INTO tmp_t1  select updateid from base_wsusscn2.update_data where kb in (select c1 from tmp_kb_updateid);
+
+#CREATE TABLE tmp_result_procedure AS (SELECT * FROM
+    #tmp_my_mise_a_jour
+#WHERE
+    #updateid NOT IN (SELECT
+            #c1
+        #FROM
+            #tmp_t1));
+
+#-- on supprime les updateid qui sont dans select c1 from tmp_kb_updateid
+#DELETE FROM tmp_result_procedure WHERE updateid IN (select c1 from tmp_kb_updateid);
+#drop table IF EXISTS tmp_t1;
+#drop table IF EXISTS tmp_my_mise_a_jour;
+#drop table IF EXISTS tmp_kb_updateid;
+#SELECT
+    #*
+#FROM
+    #tmp_result_procedure;
+	#if    createtbleresult = 0 then
+		#drop table IF EXISTS tmp_result_procedure;
+	#END IF;
+#END$$
+
+#DELIMITER ;
+#;
+
+
