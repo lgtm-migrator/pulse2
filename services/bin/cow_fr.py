@@ -218,26 +218,31 @@ class extract_cab:
             cursor = self.db.cursor()
             cmd="""CREATE TABLE IF NOT EXISTS %s (
                 `updateid` varchar(38) NOT NULL,
-                `revisionid` varchar(38) NOT NULL,
+                `revisionid` varchar(16) NOT NULL,
                 `creationdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-                `company` varchar(120) DEFAULT NULL,
-                `product` varchar(1024) DEFAULT NULL,
-                `productfamily` varchar(120) DEFAULT NULL,
-                `updateclassification` text DEFAULT NULL,
-                `prerequisite`text DEFAULT NULL,
-                `title` text DEFAULT NULL,
-                `description` text DEFAULT NULL,
-                `msrcseverity` text DEFAULT NULL,
-                `msrcnumber` text DEFAULT NULL,
-                `kb` text DEFAULT NULL,
-                `languages` text DEFAULT NULL,
-                `category` text DEFAULT NULL,
-                `supersededby` text DEFAULT NULL,
+                `company` varchar(36) DEFAULT '',
+                `product` varchar(1024) DEFAULT '',
+                `productfamily` varchar(36) DEFAULT '',
+                `updateclassification` varchar(36) DEFAULT '',
+                `prerequisite` varchar(4096) DEFAULT '',
+                `title` varchar(1024) DEFAULT '',
+                `description` varchar(4096) DEFAULT '',
+                `msrcseverity` varchar(16) DEFAULT '',
+                `msrcnumber` varchar(16) DEFAULT '',
+                `kb` varchar(16) DEFAULT '',
+                `languages` varchar(16) DEFAULT '',
+                `category` varchar(128) DEFAULT '',
+                `supersededby` varchar(3072) DEFAULT '',
                 `supersedes` text DEFAULT NULL,
-                PRIMARY KEY (`updateid`),
-                UNIQUE KEY `id_UNIQUE` (`updateid`),
-                UNIQUE KEY `id_UNIQUE1` (`revisionid`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;"""%(self.NAME_TABLE)
+                    PRIMARY KEY (`updateid`),
+                    UNIQUE KEY `id_UNIQUE` (`updateid`),
+                    UNIQUE KEY `id_UNIQUE1` (`revisionid`),
+                    KEY `indproduct` (`product`(768)),
+                    KEY `indkb` (`kb`),
+                    KEY `indclassification` (`updateclassification`),
+                    KEY `ind_remplacerpar` (`supersededby`(768)),
+                    KEY `indcategory` (`category`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4  ;"""%(self.NAME_TABLE)
             cursor.execute(cmd)
             return True
         except Exception as e:
@@ -248,7 +253,7 @@ class extract_cab:
         print ("cretion table %s"%self.NAME_UPDATE_TABLE)
         try:
             cursor = self.db.cursor()
-            cmd="""CREATE TABLE  IF NOT EXISTS `%s`(
+            cmd="""CREATE TABLE IF NOT EXISTS `%s`(
                 `updateid` varchar(38) NOT NULL COMMENT 'creationdate',
                 `creationdate` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
                 `updateclassification` text DEFAULT NULL,
