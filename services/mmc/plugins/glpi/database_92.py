@@ -6644,8 +6644,8 @@ ON
 ORDER BY
  glpi_operatingsystems.name, glpi_operatingsystemversions.name ASC;"""
         res = self.db.execute(sql)
-        result = [{"os": os.decode("utf-8"), "version": version.decode("utf-8"), "count": 1} for os, version in res]
-
+        #result = [{"os": os.decode("utf-8"), "version": version.decode("utf-8"), "count": 1} for os, version in res]
+        result = [{"os": os, "version": version, "count": 1} for os, version in res]
         def _add_element(element, list):
             """Private function which merge the element to the specified list.
             Params:
