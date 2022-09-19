@@ -232,7 +232,7 @@ class extract_cab:
                 `updateclassification` varchar(36) DEFAULT '',
                 `prerequisite` varchar(4096) DEFAULT '',
                 `title` varchar(1024) DEFAULT '',
-                `description` varchar(4096) DEFAULT '',
+                `description` varchar(3096) DEFAULT '',
                 `msrcseverity` varchar(16) DEFAULT '',
                 `msrcnumber` varchar(16) DEFAULT '',
                 `kb` varchar(16) DEFAULT '',
@@ -246,6 +246,7 @@ class extract_cab:
                 `isleaf` varchar(6) DEFAULT '',
                 `issoftware` varchar(30) DEFAULT '',
                 `deploymentaction` varchar(30) DEFAULT '',
+                `title_short` varchar(1024) DEFAULT '',
                     PRIMARY KEY (`updateid`),
                     UNIQUE KEY `id_UNIQUE` (`updateid`),
                     UNIQUE KEY `id_UNIQUE1` (`revisionid`),
@@ -899,6 +900,7 @@ class extract_cab:
             cursorproc.execute("call update_updateproductfamily();")
             cursorproc.execute("call update_update_product();")
             cursorproc.execute("call add_new_remplace();")
+            cursorproc.execute("call update_datetime();")
             self.db.commit()
                     
 
@@ -1481,6 +1483,47 @@ if __name__ == "__main__":
       #select "" into c_supersedes ;
 	#end if;
 	     #END WHILE;
+#END$$
+
+#DELIMITER ;
+#;
+
+
+#USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `update_datetime`;
+
+#USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `base_wsusscn2`.`update_datetime`;
+#;
+
+#DELIMITER $$
+#USE `base_wsusscn2`$$
+#CREATE DEFINER=`root`@`localhost` PROCEDURE `update_datetime`()
+#BEGIN
+  #UPDATE `base_wsusscn2`.`update_data`
+#SET
+    #`creationdate` = STR_TO_DATE(concat(SUBSTRING(title, 1, 7),'-01'),'%Y-%m-%d %h:%i%s')
+#WHERE
+    #(`updateid` IN (SELECT
+            #updateid
+        #FROM
+            #update_data
+        #WHERE
+            #title REGEXP ('^[0-9]{4}-[0-9]{2} *')));
+
+
+#UPDATE `base_wsusscn2`.`update_data`
+#SET
+    #`title_short` = TRIM(SUBSTR(SUBSTR(title, 9, CHAR_LENGTH(title)),
+            #1,
+            #LENGTH(SUBSTR(title, 9, CHAR_LENGTH(title))) - 11))
+#WHERE
+    #(`updateid` IN (SELECT
+            #updateid
+        #FROM
+            #update_data
+        #WHERE
+            #title REGEXP ('^[0-9]{4}-[0-9]{2} .*\(kB[0-9]{7}\)$')));
 #END$$
 
 #DELIMITER ;

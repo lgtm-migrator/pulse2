@@ -1232,4 +1232,27 @@ if __name__ == "__main__":
 #DELIMITER ;
 #;
 
+#USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `base_wsusscn2`.`update_datetime`;
+#;
+
+#DELIMITER $$
+#USE `base_wsusscn2`$$
+#CREATE DEFINER=`root`@`localhost` PROCEDURE `update_datetime`()
+#BEGIN
+  #UPDATE `base_wsusscn2`.`update_data`
+#SET
+    #`datetitle` = STR_TO_DATE(concat(SUBSTRING(title, 1, 7),'-01'),'%Y-%m-%d %h:%i%s')
+#WHERE
+    #(`updateid` IN (SELECT
+            #updateid
+        #FROM
+            #update_data
+        #WHERE
+            #title REGEXP ('^[0-9]{4}-[0-9]{2} *')));
+
+#END$$
+
+#DELIMITER ;
+#;
 
