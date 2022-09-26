@@ -402,41 +402,44 @@ CREATE TABLE `up_offline_machine` (
   CONSTRAINT `fk_up_offline_machine_ind` FOREIGN KEY (`machineid`) REFERENCES `machines` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-
-
-USE `xmppmaster`;
-DROP procedure IF EXISTS `init_table_download_from_kb`;
-
-USE `xmppmaster`;
-DROP procedure IF EXISTS `xmppmaster`.`init_table_download_from_kb`;
-;
-
-DELIMITER $$
-USE `xmppmaster`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `init_table_download_from_kb`()
 BEGIN
 DROP TABLE IF EXISTS `xmppmaster`.`up_download_from_kb`;
 create table up_download_from_kb as
 (SELECT
-    SUBSTRING_INDEX(SUBSTRING(payloadfiles,
-                LENGTH(SUBSTRING_INDEX(payloadfiles, '-kb', 1)) + 4),
-            '_',
-            1) AS ckb,
-    SUBSTRING(payloadfiles,
-        LENGTH(SUBSTRING_INDEX(payloadfiles, '-kb', 1)) + 4,
-        6) AS kb,
-    updateid,
-    payloadfiles
+    revisionid, updateid, payloadfiles, ckb, kb, dateupdate
 FROM
-    xmppmaster.update_data
-WHERE
-    payloadfiles NOT LIKE ''
+    (SELECT revisionid,
+        SUBSTRING_INDEX(SUBSTRING(payloadfiles, LENGTH(SUBSTRING_INDEX(payloadfiles, '-kb', 1)) + 4), '_', 1) AS ckb,
+            SUBSTRING(payloadfiles, LENGTH(SUBSTRING_INDEX(payloadfiles, '-kb', 1)) + 4, 6) AS kb,
+            updateid,
+            payloadfiles,
+            LEFT( SUBSTRING(payloadfiles, LENGTH(SUBSTRING_INDEX(payloadfiles, '/20', 1)) + 2),7) as dateupdate
+    FROM
+        xmppmaster.update_data
+    WHERE
+        payloadfiles LIKE 'http%' ) as ff
+        where kb not like ''
 );
-END$$
 
-DELIMITER ;
-;
+DROP TABLE IF EXISTS `xmppmaster`.`up_download_not_kb`;
+create table up_download_not_kb as
+(SELECT
+   revisionid,  updateid, payloadfiles, dateupdate
+FROM
+    (SELECT revisionid,
+        SUBSTRING_INDEX(SUBSTRING(payloadfiles, LENGTH(SUBSTRING_INDEX(payloadfiles, '-kb', 1)) + 4), '_', 1) AS ckb,
+            SUBSTRING(payloadfiles, LENGTH(SUBSTRING_INDEX(payloadfiles, '-kb', 1)) + 4, 6) AS kb,
+            updateid,
+            payloadfiles,
+            LEFT( SUBSTRING(payloadfiles, LENGTH(SUBSTRING_INDEX(payloadfiles, '/20', 1)) + 2),7) as dateupdate
+    FROM
+        xmppmaster.update_data
+    WHERE
+        payloadfiles LIKE 'http%' ) as ff
+        where kb like ''
+);
+END
 
 -- ----------------------------------------------------------------------
 -- Database version
