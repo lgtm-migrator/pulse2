@@ -30,12 +30,15 @@ START TRANSACTION;
 -- this table is the update_data table image of table base_wsusscn2.update_data
 -- ----------------------------------------------------------------------
 USE `xmppmaster`;
+DROP procedure IF EXISTS `up_reinit_table_update_data`;
 
-DROP TABLE IF EXISTS  xmppmaster.update_datacopy;
-DROP procedure IF EXISTS `xmppmaster`.`reinit_table_update_data`;
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_reinit_table_update_data`;
+;
+
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE  PROCEDURE `reinit_table_update_data`()
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_reinit_table_update_data`()
 begin
         set  @existtable_in_base_wsusscn2 := ( select EXISTS (
             SELECT *
@@ -79,7 +82,6 @@ begin
             ALTER TABLE `xmppmaster`.`update_datacopy`
                 ADD INDEX `ind_category` (`category` ASC);
 
-
             ALTER TABLE `xmppmaster`.`update_datacopy`
                 ADD INDEX `ind_product_family` (`productfamily` ASC) ;
 
@@ -94,9 +96,6 @@ begin
 
             ALTER TABLE `xmppmaster`.`update_datacopy`
             ADD INDEX `ind_revisionnumber` (`revisionnumber` ASC) ;
-
-            ALTER TABLE `xmppmaster`.`update_data`
-            ADD INDEX `ind_title_short` (`title_short` ASC) ;
 
 
 		DROP TABLE IF EXISTS xmppmaster.update_data ;
@@ -114,7 +113,7 @@ begin
                 `updateclassification` varchar(36) CHARACTER SET utf8mb4 DEFAULT '',
                 `prerequisite` varchar(4096) CHARACTER SET utf8mb4 DEFAULT '',
                 `title` varchar(1024) CHARACTER SET utf8mb4 DEFAULT '',
-                `description` varchar(3096) CHARACTER SET utf8mb4 DEFAULT '',
+                `description` varchar(4096) CHARACTER SET utf8mb4 DEFAULT '',
                 `msrcseverity` varchar(16) CHARACTER SET utf8mb4 DEFAULT '',
                 `msrcnumber` varchar(16) CHARACTER SET utf8mb4 DEFAULT '',
                 `kb` varchar(16) CHARACTER SET utf8mb4 DEFAULT '',
@@ -128,7 +127,6 @@ begin
                 `isleaf` varchar(6) CHARACTER SET utf8mb4 DEFAULT '',
                 `issoftware` varchar(30) CHARACTER SET utf8mb4 DEFAULT '',
                 `deploymentaction` varchar(30) CHARACTER SET utf8mb4 DEFAULT '',
-                `title_short` varchar(512) CHARACTER SET utf8mb4 DEFAULT '',
                     PRIMARY KEY (`updateid`),
                     UNIQUE KEY `updateid_UNIQUE` (`updateid`),
                     KEY `ind_product` (`product`(768)),
@@ -140,8 +138,7 @@ begin
                     KEY `ind_product_family` (`productfamily`),
                     KEY `ind_msrcseverity` (`msrcseverity`),
                     KEY `ind_msrcnumber` (`msrcnumber`),
-                    KEY `ind_revisionnumber` (`revisionnumber`),
-                    KEY `ind_title_short` (`title_short`)
+                    KEY `ind_revisionnumber` (`revisionnumber`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
      END$$
 
@@ -149,7 +146,7 @@ DELIMITER ;
 ;
 
 -- Execute the procedure
-call reinit_table_update_data();
+call up_reinit_table_update_data();
 
 -- Drop the procedure
 -- drop procedure intit_table_update_data;
@@ -164,21 +161,20 @@ call reinit_table_update_data();
 -- cette procedure renvois les kbs a installer
 -- -------------------------------------------------------
 USE `xmppmaster`;
-DROP procedure IF EXISTS `mmc_search_kb_windows`;
+DROP procedure IF EXISTS `up_search_kb_windows`;
 
 USE `xmppmaster`;
-DROP procedure IF EXISTS `xmppmaster`.`mmc_search_kb_windows`;
+DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_windows`;
 ;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE  PROCEDURE `mmc_search_kb_windows`( in FILTERtable varchar(2048), in KB_LIST varchar(2048))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_search_kb_windows`( in FILTERtable varchar(2048), in KB_LIST varchar(2048))
 BEGIN
 DECLARE _next TEXT DEFAULT NULL;
 DECLARE _nextlen INT DEFAULT NULL;
 DECLARE _value TEXT DEFAULT NULL;
 DECLARE _list MEDIUMTEXT;
-
 DECLARE kb_next TEXT DEFAULT NULL;
 DECLARE kb_nextlen INT DEFAULT NULL;
 DECLARE kb_value TEXT DEFAULT NULL;
@@ -258,6 +254,7 @@ SELECT
 INTO _list FROM
     tmp_my_mise_a_jour;
 
+
 CREATE temporary TABLE IF NOT EXISTS `tmp_t1` (
     `c1` VARCHAR(64) NOT NULL,
     PRIMARY KEY (`c1`),
@@ -317,6 +314,321 @@ SELECT
 FROM
     tmp_result_procedure;
 drop temporary table tmp_result_procedure;
+END$$
+
+DELIMITER ;
+;
+
+-- -------------------------------------------------------
+-- cette procedure permet de rechercher les updates pour windows
+-- plus de parametre de recherche
+-- Exemple
+-- call up_search_kb_windows1( "","%Windows 10%","%21H2%","Critical","%x64%",
+--       "5015730,5003791,5012170,5016616,5006753,5007273,5014035,5015895,5005699");
+-- 1er parametre le filtre dans title
+-- 2eme parametre les kb trouver sur la machine wmic qfe
+-- cette procedure renvois les kbs a installer
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_search_kb_windows1`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_windows1`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_search_kb_windows1`( in FILTERtable varchar(2048),
+                                           in PRODUCTtable varchar(80),
+                                           in VERSIONtable varchar(20),
+                                           in MSRSEVERITYtable varchar(40),
+                                           in ARCHItable varchar(20),
+                                           in KB_LIST varchar(2048))
+BEGIN
+	DECLARE _next TEXT DEFAULT NULL;
+	DECLARE _nextlen INT DEFAULT NULL;
+	DECLARE _value TEXT DEFAULT NULL;
+	DECLARE _list MEDIUMTEXT;
+
+	DECLARE kb_next TEXT DEFAULT NULL;
+	DECLARE kb_nextlen INT DEFAULT NULL;
+	DECLARE kb_value TEXT DEFAULT NULL;
+	DECLARE kb_updateid  varchar(50) DEFAULT NULL;
+	-- declare name table temporaire
+	-- tmp_kb_updateid contient les updateid correspondant a la liste klist
+	DECLARE tmp_kb_updateid varchar(90) DEFAULT "tmp_kb_updateid";
+
+	DECLARE tmp_t1 varchar(90) DEFAULT "tmp_t1";
+	DECLARE tmp_my_mise_a_jour varchar(90) DEFAULT "tmp_my_mise_a_jour";
+	DECLARE tmp_result_procedure varchar(90) DEFAULT "tmp_result_procedure";
+
+	DECLARE msrseverity varchar(40) DEFAULT "Critical";
+	DECLARE produc_windows varchar(80) DEFAULT '%Windows 10%';
+	DECLARE archi varchar(20) DEFAULT "%x64%";
+	DECLARE version varchar(20) DEFAULT "%21H2%";
+	DECLARE filterp varchar(2048) DEFAULT "%%";
+-- attribution de nom aleatoire au table temporaire
+-- uuid random des table
+SELECT
+    CONCAT('tmp_kb_updateid_',
+            REPLACE(UUID(), '-', ''))
+                        INTO tmp_kb_updateid;
+
+SELECT CONCAT('tmp_t1_', REPLACE(UUID(), '-', ''))
+                        INTO tmp_t1;
+SELECT
+    CONCAT('tmp_my_mise_a_jour_',
+            REPLACE(UUID(), '-', ''))
+                        INTO tmp_my_mise_a_jour;
+
+SELECT
+    CONCAT('tmp_result_procedure_',
+            REPLACE(UUID(), '-', ''))
+                        INTO tmp_result_procedure;
+
+-- initialise produc_windows Windows 10 si pas ""
+if PRODUCTtable  !="" THEN
+    SELECT
+        CONCAT('%',PRODUCTtable,'%') INTO produc_windows;
+END IF;
+
+-- initialise version 21H2 si pas ""
+if VERSIONtable !="" THEN
+    SELECT
+        CONCAT('%',VERSIONtable,'%') INTO version;
+END IF;
+
+-- initialise archi 21H2 si pas ""
+if ARCHItable !="" THEN
+    SELECT
+        CONCAT('%',ARCHItable,'%') INTO archi;
+END IF;
+
+-- initialise filter %% si ""
+if FILTERtable != "" THEN
+    SELECT
+        CONCAT('%',FILTERtable,'%') INTO filterp;
+END IF;
+
+if MSRSEVERITYtable != "" THEN
+	SELECT
+		CONCAT('%',MSRSEVERITYtable,'%') INTO msrseverity;
+END IF;
+
+CREATE temporary TABLE IF NOT EXISTS `tmp_kb_updateid` (
+  `c1` varchar(64) NOT NULL,
+  PRIMARY KEY (`c1`),
+  UNIQUE KEY `c1_UNIQUE` (`c1`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+truncate tmp_kb_updateid;
+
+iteratorkb:
+LOOP
+  -- exit the loop if the list seems empty or was null;
+  -- this extra caution is necessary to avoid an endless loop in the proc.
+  IF CHAR_LENGTH(TRIM(kb_list)) = 0 OR kb_list IS NULL THEN
+    LEAVE iteratorkb;
+  END IF;
+
+  -- capture the next value from the list
+  SET kb_next = SUBSTRING_INDEX(kb_list,',',1);
+
+  -- save the length of the captured value; we will need to remove this
+  -- many characters + 1 from the beginning of the string
+  -- before the next iteration
+  SET kb_nextlen = CHAR_LENGTH(kb_next);
+
+  -- trim the value of leading and trailing spaces, in case of sloppy CSV strings
+  SET kb_value = TRIM(kb_next);
+  -- insert the extracted value into the target table
+  -- select updateid into kb_updateid from xmppmaster.update_data where kb = kb_value;
+  -- select kb_updateid;
+  INSERT IGNORE INTO tmp_kb_updateid (c1) VALUES (kb_value );
+
+  -- rewrite the original string using the `INSERT()` string function,
+  -- args are original string, start position, how many characters to remove,
+  -- and what to "insert" in their place (in this case, we "insert"
+  -- an empty string, which removes kb_nextlen + 1 characters)
+  SET kb_list = INSERT(kb_list,1,kb_nextlen + 1,'');
+END LOOP;
+-- ------ generation table kb tmp_kb_updateid -----------
+-- call list_kb_machine(KBLIST);
+-- les updatesid des mise a jour deja installer seront inclus dans la table des update excluts tmp_t1
+
+-- depuis la table general on cree 1 table des mise à jour possible
+-- on utilise le filter pour definir filter
+-- msrcseverity  uniquement  'Critical'
+
+CREATE temporary TABLE IF NOT EXISTS tmp_my_mise_a_jour AS (SELECT * FROM
+    xmppmaster.update_data
+WHERE
+    title LIKE filterp
+    and title not like "%Dynamic Cumulative Update%"
+    and supersededby in (null,"" )
+    AND msrcseverity LIKE msrseverity
+    AND product LIKE produc_windows
+    AND title LIKE archi
+    AND title LIKE version
+    );
+SELECT
+    GROUP_CONCAT(DISTINCT supersedes
+        ORDER BY supersedes ASC
+        SEPARATOR ',')
+INTO _list FROM
+    tmp_my_mise_a_jour;
+
+CREATE temporary TABLE IF NOT EXISTS `tmp_t1` (
+    `c1` VARCHAR(64) NOT NULL,
+    PRIMARY KEY (`c1`),
+    UNIQUE KEY `c1_UNIQUE` (`c1`)
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8;
+truncate tmp_t1;
+iterator:
+LOOP
+  -- exit the loop if the list seems empty or was null;
+  -- this extra caution is necessary to avoid an endless loop in the proc.
+  IF CHAR_LENGTH(TRIM(_list)) = 0 OR _list IS NULL THEN
+    LEAVE iterator;
+  END IF;
+
+  -- capture the next value from the list
+  SET _next = SUBSTRING_INDEX(_list,',',1);
+
+  -- save the length of the captured value; we will need to remove this
+  -- many characters + 1 from the beginning of the string
+  -- before the next iteration
+  SET _nextlen = CHAR_LENGTH(_next);
+  -- trim the value of leading and trailing spaces, in case of sloppy CSV strings
+  SET _value = TRIM(_next);
+  -- insert the extracted value into the target table
+  INSERT IGNORE INTO tmp_t1 (c1) VALUES (_value);
+  -- rewrite the original string using the `INSERT()` string function,
+  -- args are original string, start position, how many characters to remove,
+  -- and what to "insert" in their place (in this case, we "insert"
+  -- an empty string, which removes _nextlen + 1 characters)
+  SET _list = INSERT(_list,1,_nextlen + 1,'');
+END LOOP;
+DELETE FROM `tmp_t1`
+WHERE
+    (`c1` = '');
+-- injection les update_id deja installer dans tmp_t1
+ INSERT IGNORE INTO tmp_t1  select updateid from xmppmaster.update_data where kb in (select c1 from tmp_kb_updateid);
+
+CREATE temporary TABLE tmp_result_procedure AS (SELECT * FROM
+    tmp_my_mise_a_jour
+WHERE
+    updateid NOT IN (SELECT
+            c1
+        FROM
+            tmp_t1));
+-- on supprime les updateid qui sont dans select c1 from tmp_kb_updateid
+DELETE FROM tmp_result_procedure
+WHERE
+    updateid IN (SELECT
+        c1
+    FROM
+        tmp_kb_updateid);
+drop temporary table tmp_kb_updateid;
+drop temporary table tmp_t1;
+drop temporary table tmp_my_mise_a_jour;
+SELECT
+    *
+FROM
+    tmp_result_procedure;
+drop temporary table tmp_result_procedure;
+
+END$$
+
+DELIMITER ;
+;
+
+-- ------ generation table kb tmp_kb_updateid -----------
+-- call list_kb_machine(KBLIST);
+-- les updatesid des mise a jour deja installer seront inclus dans la table des update excluts tmp_t1
+
+-- depuis la table general on cree 1 table des mise à jour possible
+-- on utilise le filter pour definir filter
+-- msrcseverity  uniquement  'Critical'
+
+CREATE temporary TABLE IF NOT EXISTS tmp_my_mise_a_jour AS (SELECT * FROM
+    xmppmaster.update_data
+WHERE
+    title LIKE filterp
+    and title not like "%Dynamic Cumulative Update%"
+    and supersededby in (null,"" )
+    AND msrcseverity LIKE msrseverity
+    AND product LIKE produc_windows
+    AND title LIKE archi
+    AND title LIKE version
+    );
+SELECT
+    GROUP_CONCAT(DISTINCT supersedes
+        ORDER BY supersedes ASC
+        SEPARATOR ',')
+INTO _list FROM
+    tmp_my_mise_a_jour;
+
+CREATE temporary TABLE IF NOT EXISTS `tmp_t1` (
+    `c1` VARCHAR(64) NOT NULL,
+    PRIMARY KEY (`c1`),
+    UNIQUE KEY `c1_UNIQUE` (`c1`)
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8;
+truncate tmp_t1;
+iterator:
+LOOP
+  -- exit the loop if the list seems empty or was null;
+  -- this extra caution is necessary to avoid an endless loop in the proc.
+  IF CHAR_LENGTH(TRIM(_list)) = 0 OR _list IS NULL THEN
+    LEAVE iterator;
+  END IF;
+
+  -- capture the next value from the list
+  SET _next = SUBSTRING_INDEX(_list,',',1);
+
+  -- save the length of the captured value; we will need to remove this
+  -- many characters + 1 from the beginning of the string
+  -- before the next iteration
+  SET _nextlen = CHAR_LENGTH(_next);
+  -- trim the value of leading and trailing spaces, in case of sloppy CSV strings
+  SET _value = TRIM(_next);
+  -- insert the extracted value into the target table
+  INSERT IGNORE INTO tmp_t1 (c1) VALUES (_value);
+  -- rewrite the original string using the `INSERT()` string function,
+  -- args are original string, start position, how many characters to remove,
+  -- and what to "insert" in their place (in this case, we "insert"
+  -- an empty string, which removes _nextlen + 1 characters)
+  SET _list = INSERT(_list,1,_nextlen + 1,'');
+END LOOP;
+DELETE FROM `tmp_t1`
+WHERE
+    (`c1` = '');
+-- injection les update_id deja installer dans tmp_t1
+ INSERT IGNORE INTO tmp_t1  select updateid from xmppmaster.update_data where kb in (select c1 from tmp_kb_updateid);
+
+CREATE temporary TABLE tmp_result_procedure AS (SELECT * FROM
+    tmp_my_mise_a_jour
+WHERE
+    updateid NOT IN (SELECT
+            c1
+        FROM
+            tmp_t1));
+-- on supprime les updateid qui sont dans select c1 from tmp_kb_updateid
+DELETE FROM tmp_result_procedure
+WHERE
+    updateid IN (SELECT
+        c1
+    FROM
+        tmp_kb_updateid);
+drop temporary table tmp_kb_updateid;
+drop temporary table tmp_t1;
+drop temporary table tmp_my_mise_a_jour;
+SELECT
+    *
+FROM
+    tmp_result_procedure;
+drop temporary table tmp_result_procedure;
+
 END$$
 
 DELIMITER ;
@@ -402,7 +714,17 @@ CREATE TABLE `up_offline_machine` (
   CONSTRAINT `fk_up_offline_machine_ind` FOREIGN KEY (`machineid`) REFERENCES `machines` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `init_table_download_from_kb`()
+-- -------------------------------------------------------
+-- cette procedure permet de genere les table
+-- up_download_from_kb and
+-- up_download_not_kb
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_table_download_from_kb`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_table_download_from_kb`()
 BEGIN
 DROP TABLE IF EXISTS `xmppmaster`.`up_download_from_kb`;
 create table up_download_from_kb as
@@ -421,7 +743,6 @@ FROM
         payloadfiles LIKE 'http%' ) as ff
         where kb not like ''
 );
-
 DROP TABLE IF EXISTS `xmppmaster`.`up_download_not_kb`;
 create table up_download_not_kb as
 (SELECT
@@ -439,7 +760,10 @@ FROM
         payloadfiles LIKE 'http%' ) as ff
         where kb like ''
 );
-END
+END$$
+
+DELIMITER ;
+
 
 -- ----------------------------------------------------------------------
 -- Database version
@@ -447,5 +771,3 @@ END
 UPDATE version SET Number = 72;
 
 COMMIT;
-
-
