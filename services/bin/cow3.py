@@ -228,7 +228,7 @@ class extract_cab:
                 `creationdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
                 `compagny` varchar(36) DEFAULT '',
                 `product` varchar(1024) DEFAULT '',
-                `productfamily` varchar(36) DEFAULT '',
+                `productfamily` varchar(52) DEFAULT '',
                 `updateclassification` varchar(36) DEFAULT '',
                 `prerequisite` varchar(4096) DEFAULT '',
                 `title` varchar(1024) DEFAULT '',

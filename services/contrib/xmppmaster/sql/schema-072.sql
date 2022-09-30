@@ -109,7 +109,7 @@ begin
                 `creationdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
                 `company` varchar(36) CHARACTER SET utf8mb4 DEFAULT '',
                 `product` varchar(1024) CHARACTER SET utf8mb4 DEFAULT '',
-                `productfamily` varchar(36) CHARACTER SET utf8mb4 DEFAULT '',
+                `productfamily` varchar(52) CHARACTER SET utf8mb4 DEFAULT '',
                 `updateclassification` varchar(36) CHARACTER SET utf8mb4 DEFAULT '',
                 `prerequisite` varchar(4096) CHARACTER SET utf8mb4 DEFAULT '',
                 `title` varchar(1024) CHARACTER SET utf8mb4 DEFAULT '',
@@ -154,7 +154,7 @@ call up_reinit_table_update_data();
 -- -------------------------------------------------------
 -- cette procedure permet de rechercher les updates pour windows
 -- Exemple
--- call mmc_search_kb_windows( "%Windows 10 Version 21H2 for x64-based%",
+-- call up_search_kb_windows( "%Windows 10 Version 21H2 for x64-based%",
 --       "5015730,5003791,5012170,5016616,5006753,5007273,5014035,5015895,5005699");
 -- 1er parametre le filtre dans title
 -- 2eme parametre les kb trouver sur la machine wmic qfe
