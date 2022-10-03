@@ -763,6 +763,92 @@ FROM
 END$$
 
 DELIMITER ;
+-- -------------------------------------------------------
+-- cette procedure permet de chercher les mise a jour pour les software Malicious
+-- parametre  Produit windows, archirexture, major du kb installer, minor du kb installer
+-- exemple : call up_windows_malicious_software_tool("Windows 10", "x64", 5, 104);
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_windows_malicious_software_tool`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_windows_malicious_software_tool`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_windows_malicious_software_tool`(in PRODUCTtable varchar(80),
+                                                                                 in ARCHItable varchar(20),
+                                                                                 in major integer,
+                                                                                 in minor integer)
+proc_Exit:BEGIN
+    DECLARE version varchar(10) DEFAULT NULL;
+    DECLARE  titleval varchar(1024) DEFAULT NULL;
+    DECLARE major_update INT DEFAULT 0;
+    DECLARE minor_update INT DEFAULT 0;
+    DECLARE position_str INT DEFAULT 0;
+    -- product and architecture
+    DECLARE produc_windows varchar(80) DEFAULT '%Windows 10%';
+	DECLARE archi varchar(20) DEFAULT "%x64%";
+-- initialise produc_windows Windows 10 si pas ""
+if PRODUCTtable  !="" THEN
+    SELECT
+        CONCAT('%',PRODUCTtable,'%') INTO produc_windows;
+END IF;
+-- initialise archi x64 si pas ""
+if ARCHItable !="" THEN
+    SELECT
+        CONCAT('%',ARCHItable,'%') INTO archi;
+END IF;
+
+SELECT
+    title
+FROM
+    xmppmaster.update_data
+WHERE
+    title LIKE '%Windows Malicious Software Removal Tool%' and
+    title LIKE archi
+        AND product LIKE produc_windows
+ORDER BY revisionid DESC
+LIMIT 0 , 1 INTO titleval;
+
+SELECT INSTR(titleval, '- v') INTO position_str;
+
+SELECT SUBSTR(titleval, position_str + 3, 5) INTO version;
+SELECT LEFT(version, 2) INTO major_update;
+SELECT RIGHT(version, 3) INTO minor_update;
+
+if major > major_update then
+	SELECT
+    *
+FROM
+    xmppmaster.update_data
+WHERE
+    title LIKE '%Windows Malicious Software Removal Tool%' and
+    title LIKE archi
+        AND product LIKE produc_windows
+ORDER BY revisionid DESC
+LIMIT 0 , 1;
+	LEAVE proc_Exit;
+end if;
+if minor > minor_update then
+	SELECT
+    *
+FROM
+    xmppmaster.update_data
+WHERE
+    title LIKE '%Windows Malicious Software Removal Tool%'  and
+    title LIKE archi
+        AND product LIKE produc_windows
+ORDER BY revisionid DESC
+LIMIT 0 , 1;
+    LEAVE proc_Exit;
+end if;
+END$$
+
+DELIMITER ;
+;
 
 
 -- ----------------------------------------------------------------------
