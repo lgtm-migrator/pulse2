@@ -336,46 +336,52 @@ $logs = $logs_global['logdata'];
     </thead>
     <tbody>
 <?php 
+
+array_multisort(array_column($logs, 'id'), SORT_DESC, $logs);
+
 foreach ($logs as $log)
 {
-    $date=new dateTime();
-
-    $secs=$log['time'];  //2033-12-06 08:53:20
-    secs2date($secs,$date);
-    $dt=$date->format('Y-m-d H:i:s');
-
-    $msg = "<td>".$log['msg']."</td>";
-
-    $need_show_msg = "True";
-
-    if (strpos($log['msg'], 'FATAL:') !== false) {
-        $msg = $log['msg'];
-        $msg = "<td class='log_error'>".$msg."</td>";
-    }
-
-    if (strpos($log['msg'], 'Backup failed') !== false) {
-        $msg = $log['msg'];
-        $msg = "<td class='log_error'>".$msg."</td>";
-    }
-
-    if (strpos($log['msg'], 'Backup failed because of disk problems') !== false) {
-        $msg = $log['msg'];
-        $msg = "<td class='log_error'>"._T("Backup failed because of disk problems, no space left on disk (see previous messages)")."</td>";
-    }
-
-    if (strpos($log['msg'], 'Loading files') !== false) {
-        $need_show_msg = "False";
-    }
-
-    if ($need_show_msg == "True")
+    if ($log['loglevel'] != '0')
     {
-?>
-        <tr >
-            <td> <?php echo $log['id']; ?></td>
-            <?php echo $msg; ?>
-            <td> <?php echo $dt; ?></td>
-        </tr>
-<?php
+        $date=new dateTime();
+
+        $secs=$log['time'];  //2033-12-06 08:53:20
+        secs2date($secs,$date);
+        $dt=$date->format('Y-m-d H:i:s');
+    
+        $msg = "<td>".$log['msg']."</td>";
+    
+        $need_show_msg = "True";
+    
+        if (strpos($log['msg'], 'FATAL:') !== false) {
+            $msg = $log['msg'];
+            $msg = "<td class='log_error'>".$msg."</td>";
+        }
+    
+        if (strpos($log['msg'], 'Backup failed') !== false) {
+            $msg = $log['msg'];
+            $msg = "<td class='log_error'>".$msg."</td>";
+        }
+    
+        if (strpos($log['msg'], 'Backup failed because of disk problems') !== false) {
+            $msg = $log['msg'];
+            $msg = "<td class='log_error'>"._T("Backup failed because of disk problems, no space left on disk (see previous messages)")."</td>";
+        }
+    
+        if (strpos($log['msg'], 'Loading files') !== false) {
+            $need_show_msg = "False";
+        }
+    
+        if ($need_show_msg == "True")
+        {
+    ?>
+            <tr >
+                <td> <?php echo $log['id']; ?></td>
+                <?php echo $msg; ?>
+                <td> <?php echo $dt; ?></td>
+            </tr>
+    <?php
+        }
     }
 }
 ?>
