@@ -23,5 +23,4 @@ $sidemenu= new SideMenu();
 $sidemenu->setClass("urbackup");
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Review", 'urbackup'), "urbackup", "urbackup", "index"));
 $sidemenu->addSideMenuItem(new SideMenuItem(_T("Profiles", 'urbackup'), "urbackup", "urbackup", "usersgroups"));
-$sidemenu->addSideMenuItem(new SideMenuItem(_T("Logs", 'urbackup'), "urbackup", "urbackup", "logs"));
 ?>
