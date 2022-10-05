@@ -27,9 +27,32 @@ require_once("modules/urbackup/includes/xmlrpc.php");
 $client_id = htmlspecialchars($_GET["clientid"]);
 $backup_id = htmlspecialchars($_GET["backupid"]);
 $volume_name = htmlspecialchars($_GET["volumename"]);
+$groupname = htmlspecialchars($_GET["groupname"]);
+$jidmachine = htmlspecialchars($_GET["jidmachine"]);
 
 $files = xmlrpc_get_backup_files($client_id, $backup_id, $volume_name);
 $path = $files['path'];
+
+if ($path == "")
+{
+    $path = "/";
+}
+
+if ($volume_name == "")
+{
+    $volume_name = "/";
+}
+else
+{
+    $before_pathh = explode("/",$volume_name);
+    array_pop($before_pathh);
+    array_shift($before_pathh);
+    foreach($before_pathh as $key)
+    {
+        $new_path .= "/".$key;
+    }
+}
+
 $client_name = $files['clientname'];
 $files = $files['files'];
 
@@ -60,13 +83,20 @@ function formatBytes($bytes, $precision = 2) {
 
     return round($bytes, $precision) . ' ' . $units[$pow]; 
 }
-
 ?>
 
 <br>
 <label><?php echo _T(" Path: ", 'urbackup').$path; ?></label>
 <br>
-
+<?php 
+if ($path != "/") { 
+?>
+    <a class='btn btn-small btn-primary' title=<?php echo _T("Back to previous path", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid=<?php echo $client_id ?>&amp;backupid=<?php echo $backup_id ?>&amp;volumename=<?php echo $new_path ?>"><?php echo _T("Back to previous path", 'urbackup'); ?></a>
+<?php 
+}
+?>
+<a class='btn btn-small btn-primary' title=<?php echo _T("Back to backup list", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=<?php echo $client_id ?>&amp;clientname=<?php echo $client_name ?>&amp;groupname=<?php echo $groupname ?>&amp;jidmachine=<?php echo $jidmachine ?>"><?php echo _T("Back to backup list", 'urbackup'); ?></a>
+<br>
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
         <tr style='text-align: left;'>
@@ -107,6 +137,8 @@ foreach ($files as $file)
 
     $date=new dateTime();
 
+    $before_path = trim($path, $file['name']);
+
     $secs=$file['creat'];  //2033-12-06 08:53:20
     secs2date($secs,$date);
     $create_date=$date->format('Y-m-d H:i:s');
@@ -134,7 +166,7 @@ foreach ($files as $file)
                 <?php
                 if ($dir == "false")
                 {
-                    echo '<a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid='.$client_id.'&amp;backupid='.$backup_id.'&amp;volumename='.$final_path.'">'.$file['name'].'</a>';
+                    echo '<a href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid='.$client_id.'&amp;backupid='.$backup_id.'&amp;filename='.$file['name'].'&amp;beforepath='.$before_path.'&amp;volumename='.$final_path.'">'.$file['name'].'</a>';
                 }
                 else
                 {
@@ -154,7 +186,7 @@ foreach ($files as $file)
                 if ($dir == "false")
                 {
                     echo '<li class="display">';
-                        echo '<a title='._T("Browse", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid='.$client_id.'&amp;backupid='.$backup_id.'&amp;volumename='.$final_path.'">&nbsp;</a>';
+                        echo '<a title='._T("Browse", 'urbackup').' href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid='.$client_id.'&amp;backupid='.$backup_id.'&amp;filename='.$file['name'].'&amp;beforepath='.$before_path.'&amp;volumename='.$final_path.'">&nbsp;</a>';
                     echo '</li>';
                 }
                 ?>
