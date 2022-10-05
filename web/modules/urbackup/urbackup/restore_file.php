@@ -55,3 +55,5 @@ else
 }
 
 ?>
+<br>
+<a class='btn btn-small btn-primary' title=<?php echo _T("Back to backup list", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=all_files_backup&amp;clientid=<?php echo $client_id ?>&amp;backupid=<?php echo $backup_id ?>&amp;volumename=<?php echo $path ?>"><?php echo _T("Back to backup list", 'urbackup'); ?></a>
