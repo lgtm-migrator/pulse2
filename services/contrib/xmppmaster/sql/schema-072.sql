@@ -24,6 +24,18 @@
 -- ----------------------------------------------------------------------
 
 START TRANSACTION;
+
+CREATE TABLE IF NOT EXISTS `up_packages` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 -- ----------------------------------------------------------------------
 -- CREATE TABLE update_data
 -- this table are the updates windows
@@ -147,6 +159,24 @@ DELIMITER ;
 
 -- Execute the procedure
 call up_reinit_table_update_data();
+
+
+
+-- ----------------------------------------------------------------------
+-- CREATE TABLE up_machine_windows
+-- this table are the updates machine
+-- this table contient les updates des machines possible
+-- ----------------------------------------------------------------------
+
+CREATE TABLE `up_machine_windows` (
+  `id_machine` int(11) NOT NULL,
+  `update_id` varchar(38) NOT NULL,
+  `kb` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id_machine`,`update_id`),
+  KEY `up_machine_windows_id_machine1_idx` (`id_machine`),
+  CONSTRAINT `fk_up_machine_windows_1` FOREIGN KEY (`id_machine`) REFERENCES `machines` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+
 
 -- Drop the procedure
 -- drop procedure intit_table_update_data;
@@ -845,6 +875,73 @@ ORDER BY revisionid DESC
 LIMIT 0 , 1;
     LEAVE proc_Exit;
 end if;
+END$$
+
+DELIMITER ;
+;
+
+
+-- -------------------------------------------------------
+-- cette procedure permet de faire le lien entre les update kb et les fichier a recuperer.
+-- actuellement restreint a ("Windows 10", "x64", );
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packageid`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_init_packageid`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packageid`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+
+	DECLARE c_title varchar(2040)  DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+
+
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title
+	FROM
+		xmppmaster.update_data
+	WHERE
+		product like '%Windows 10%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title,
+    updateid, payloadfiles
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND payloadfiles LIKE @kb
+        AND supersededby LIKE @rev;
+
+  END LOOP get_list;
+
+  CLOSE client_cursor;
 END$$
 
 DELIMITER ;
