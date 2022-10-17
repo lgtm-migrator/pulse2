@@ -24,7 +24,7 @@
 -- ----------------------------------------------------------------------
 
 START TRANSACTION;
-
+USE `xmppmaster`;
 CREATE TABLE IF NOT EXISTS `up_packages` (
   `updateid` varchar(36) NOT NULL,
   `kb` varchar(16) NOT NULL,
@@ -572,7 +572,7 @@ END$$
 
 DELIMITER ;
 ;
-
+/*
 -- ------ generation table kb tmp_kb_updateid -----------
 -- call list_kb_machine(KBLIST);
 -- les updatesid des mise a jour deja installer seront inclus dans la table des update excluts tmp_t1
@@ -662,7 +662,7 @@ drop temporary table tmp_result_procedure;
 END$$
 
 DELIMITER ;
-;
+;*/
 
 
 DELIMITER $$

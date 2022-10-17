@@ -227,26 +227,26 @@ class extract_cab:
                 `revisionid` varchar(16) NOT NULL,
                 `creationdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
                 `compagny` varchar(36) DEFAULT '',
-                `product` varchar(1024) DEFAULT '',
-                `productfamily` varchar(52) DEFAULT '',
+                `product` varchar(512) DEFAULT '',
+                `productfamily` varchar(100) DEFAULT '',
                 `updateclassification` varchar(36) DEFAULT '',
-                `prerequisite` varchar(4096) DEFAULT '',
-                `title` varchar(1024) DEFAULT '',
-                `description` varchar(3096) DEFAULT '',
+                `prerequisite` varchar(2000) DEFAULT '',
+                `title` varchar(500) DEFAULT '',
+                `description` varchar(2048) DEFAULT '',
                 `msrcseverity` varchar(16) DEFAULT '',
                 `msrcnumber` varchar(16) DEFAULT '',
                 `kb` varchar(16) DEFAULT '',
                 `languages` varchar(16) DEFAULT '',
-                `category` varchar(128) DEFAULT '',
-                `supersededby` varchar(3072) DEFAULT '',
+                `category` varchar(80) DEFAULT '',
+                `supersededby` varchar(2048) DEFAULT '',
                 `supersedes` text DEFAULT NULL,
-                `payloadfiles` varchar(2048) DEFAULT '',
+                `payloadfiles` varchar(1024) DEFAULT '',
                 `revisionnumber` varchar(30) DEFAULT '',
                 `bundledby_revision` varchar(30) DEFAULT '',
                 `isleaf` varchar(6) DEFAULT '',
                 `issoftware` varchar(30) DEFAULT '',
                 `deploymentaction` varchar(30) DEFAULT '',
-                `title_short` varchar(1024) DEFAULT '',
+                `title_short` varchar(500) DEFAULT '',
                     PRIMARY KEY (`updateid`),
                     UNIQUE KEY `id_UNIQUE` (`updateid`),
                     UNIQUE KEY `id_UNIQUE1` (`revisionid`),
@@ -1399,6 +1399,9 @@ if __name__ == "__main__":
 #;
 
 #-- creation table annexe des remplacement
+
+#DELIMITER ;
+#-- creation table pour superedes
 #USE `base_wsusscn2`;
 #DROP procedure IF EXISTS `update_update_remplaces`;
 
@@ -1413,49 +1416,49 @@ if __name__ == "__main__":
   #DECLARE is_done INTEGER DEFAULT 0;
   #-- déclarer la variable qui va contenir les noms des clients récupérer par le curseur .
   #DECLARE c_updateid varchar(2048)  DEFAULT "";
-  #DECLARE c_supersedes  varchar(4096)  DEFAULT "";
+  #DECLARE c_supersedes  varchar(9096)  DEFAULT "";
   #DECLARE supersedeselt varchar(2048)  DEFAULT "";
    #declare counpp int default 0;
   #-- déclarer le curseur
   #DECLARE client_cursor CURSOR FOR
-   #select updateid, supersedes FROM base_wsusscn2.update_data where supersedes not like '' ;
+   #select updateid, supersedes FROM base_wsusscn2.update_data where supersedes not like '' limit 5;
   #-- déclarer le gestionnaire NOT FOUND
   #DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
  #drop table IF EXISTS `data_supersedes`;
- #CREATE TABLE IF NOT EXISTS `data_supersedes` (
+ #CREATE TABLE `data_supersedes` (
   #`id` int(11) NOT NULL AUTO_INCREMENT,
   #`updateid` varchar(37) NOT NULL,
- #`title` varchar(1024) DEFAULT NULL,
- #PRIMARY KEY (`id`)
- #) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+  #`title` varchar(1024) DEFAULT NULL,
+  #PRIMARY KEY (`id`),
+  #UNIQUE KEY `uniid` (`updateid`,`title`) USING HASH
+#) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
   #-- ouvrir le curseur
+  #-- set counpp = 0;
   #OPEN client_cursor;
   #-- parcourir la liste des noms des clients et concatèner tous les noms où chaque nom est séparé par un point-virgule(;)
   #get_list: LOOP
-  #FETCH client_cursor INTO c_updateid, c_supersedes;
-	
-  #IF is_done = 1 THEN
-  #LEAVE get_list;
-  #END IF;
-  
-     #if (LENGTH(c_supersedes) >= 36) then 
-     #set counpp = counpp+1;
-     #call _add_new_remplace(c_updateid, c_supersedes);
-   #-- select c_updateid, c_supersedes;
-    #end if;
-  #-- traitement
+	  #FETCH client_cursor INTO c_updateid, c_supersedes;
+	 #-- select LENGTH(c_supersedes);
+	  #IF is_done = 1 THEN
+		#LEAVE get_list;
+	  #END IF;
+		  #if (LENGTH(c_supersedes) >= 36) then
+			#select c_updateid, c_supersedes;
+		  #call _add_new_remplace(c_updateid, c_supersedes);
+		 #end if;
+	  #-- traitement
   #END LOOP get_list;
   #-- fermer le curseur
   #CLOSE client_cursor;
-  #select counpp ;
 #END$$
 
 #DELIMITER ;
-#;
 #--  private procedure
 #USE `base_wsusscn2`;
+#DROP procedure IF EXISTS `_add_new_remplace`;
+
+#USE `base_wsusscn2`;
 #DROP procedure IF EXISTS `base_wsusscn2`.`_add_new_remplace`;
-#;
 
 #DELIMITER $$
 #USE `base_wsusscn2`$$
@@ -1464,21 +1467,23 @@ if __name__ == "__main__":
 #DECLARE supersedeselt VARCHAR(4096) default "";
 #DECLARE c_TITLE VARCHAR(4096) default "";
 #DECLARE c_supersedes VARCHAR(4096) default "";
-
 #select TRIM(c_supersedestxt) into c_supersedes;
-
+#-- faire tant que uuid dans c_supersedes
  #WHILE ( (LENGTH(TRIM(c_supersedes)) >= 36) and (SELECT SUBSTR(TRIM(c_supersedes), 9 ,1 ) = "-") ) do
- #select c_supersedes, LENGTH(TRIM(c_supersedes));
+ #-- select c_supersedes, LENGTH(TRIM(c_supersedes));
 	#select "" into supersedeselt;
+    #-- 1er element dans supersedeselt
 	#SELECT SUBSTRING_INDEX(c_supersedes , ',', 1 ) into supersedeselt;
-    #SELECT SUBSTR(c_supersedes, LENGTH(supersedeselt)+2 ) into c_supersedestxt;
+    #-- on retire cet element de la chaine
+    #SELECT SUBSTR(c_supersedes, LENGTH(supersedeselt)+2 ) into c_supersedes;
     #if LENGTH(TRIM(supersedeselt)) = 36 then
-      #--      select TRIM(c_supersedes) into c_supersedes;
-       #--     if supersedeselt != "" and TRIM(uuid) != "" then
-				#SELECT title FROM base_wsusscn2.update_data WHERE updateid LIKE supersedeselt INTO c_TITLE;
-			#if TRIM(c_TITLE) != "" then 
-					#INSERT IGNORE INTO `base_wsusscn2`.`data_supersedes` (`updateid`, `title`) 	VALUES (uuid, c_TITLE); 
-			#end if;
+       #-- select TRIM(c_supersedes) into c_supersedes;
+         #-- if supersedeselt != "" and TRIM(uuid) != "" then
+			#SELECT title FROM base_wsusscn2.update_data WHERE updateid LIKE supersedeselt INTO c_TITLE;
+			#if TRIM(c_TITLE) != "" then
+					#INSERT IGNORE INTO `base_wsusscn2`.`data_supersedes` (`updateid`, `title`) 	VALUES (uuid, c_TITLE);
+			#-- end if;
+         #end if;
     #else
       #select "" into c_supersedes ;
 	#end if;
@@ -1486,7 +1491,7 @@ if __name__ == "__main__":
 #END$$
 
 #DELIMITER ;
-#;
+
 
 
 #USE `base_wsusscn2`;
