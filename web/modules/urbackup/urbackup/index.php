@@ -341,7 +341,11 @@ array_multisort(array_column($logs, 'id'), SORT_DESC, $logs);
 
 foreach ($logs as $log)
 {
-    if ($log['loglevel'] != '0')
+    if (strpos($log['msg'], "Looking") === 0 or strpos($log['msg'], "Session") === 0)
+    {
+
+    }
+    else
     {
         $date=new dateTime();
 
