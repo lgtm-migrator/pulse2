@@ -71,16 +71,16 @@ function secs2date($secs,$date)
         $date->setTimestamp($secs);
 }
 
-function formatBytes($bytes, $precision = 2) { 
-    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+function formatBytes($bytes, $precision = 2) {
+    $units = array('B', 'KB', 'MB', 'GB', 'TB');
 
-    $bytes = max($bytes, 0); 
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
-    $pow = min($pow, count($units) - 1); 
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
 
     $bytes /= pow(1024, $pow);
 
-    return round($bytes, $precision) . ' ' . $units[$pow]; 
+    return round($bytes, $precision) . ' ' . $units[$pow];
 }
 
 
@@ -104,7 +104,7 @@ function get_backup_with_filename($client_id, $backup_id, $path, $filename, $new
             }
 
             $date=new dateTime();
-            
+
             $secs=$file['creat'];  //2033-12-06 08:53:20
             secs2date($secs,$date);
             $create_date=$date->format('Y-m-d H:i:s');
@@ -132,7 +132,7 @@ function get_backup_with_filename($client_id, $backup_id, $path, $filename, $new
         else
         {
             $date=new dateTime();
-            
+
             $secs=$file['creat'];  //2033-12-06 08:53:20
             secs2date($secs,$date);
             $create_date=$date->format('Y-m-d H:i:s');
