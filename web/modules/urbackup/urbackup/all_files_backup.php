@@ -96,6 +96,12 @@ if ($path != "/") {
 }
 ?>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Back to backup list", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=list_backups&amp;clientid=<?php echo $client_id ?>&amp;clientname=<?php echo $client_name ?>&amp;groupname=<?php echo $groupname ?>&amp;jidmachine=<?php echo $jidmachine ?>"><?php echo _T("Back to backup list", 'urbackup'); ?></a>
+<form id="searchBest" method="post" style="width:285px; float:right;" action="main.php?module=urbackup&amp;submod=urbackup&amp;action=result_search_file&amp;clientid=<?php echo $client_id ?>&amp;backupid=<?php echo $backup_id ?>">
+    <input type="text" class="searchfieldreal" name="filenamesearch" id="filenamesearch">
+    <img class="searchfield" src="graph/croix.gif" alt="suppression" style="position:relative;">
+    <input type="submit" value="Search" style="margin-left: 15px;">
+</form>
+
 <br>
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
