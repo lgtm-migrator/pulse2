@@ -71,6 +71,10 @@ $page = new Page("list_computers_ongroup", _T('List computer on group', 'urbacku
 $page->setFile("modules/urbackup/urbackup/list_computers_ongroup.php");
 $submod->addPage($page);
 
+$page = new Page("result_search_file", _T('File research by name', 'urbackup'));
+$page->setFile("modules/urbackup/urbackup/result_search_file.php");
+$submod->addPage($page);
+
 $page = new Page("validate_edit_group", _T('Validate save settings', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/validate_edit_group.php");
 $submod->addPage($page);
