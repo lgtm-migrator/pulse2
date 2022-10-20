@@ -46,13 +46,18 @@ function xmlrpc_add_client($clientname){
     return xmlCall("urbackup.add_client", [$clientname]);
 }
 
+function xmlrpc_get_stats(){
+    // Return stats by client
+    return xmlCall("urbackup.get_stats", []);
+}
+
 function xmlrpc_add_group($groupname){
     // Create new group
     return xmlCall("urbackup.add_group", [$groupname]);
 }
 
 function xmlrpc_remove_group($groupid){
-    // Create new group
+    // Remove group
     return xmlCall("urbackup.remove_group", [$groupid]);
 }
 
