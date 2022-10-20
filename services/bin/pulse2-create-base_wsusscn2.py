@@ -816,6 +816,8 @@ class extract_cab:
                         supersededby,
                         supersedes,
                         payloadfiles,
+
+
                         revisionnumber,
                         bundledby_revision,
                         isleaf,

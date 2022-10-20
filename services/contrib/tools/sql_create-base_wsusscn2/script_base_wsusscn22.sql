@@ -1,5 +1,5 @@
 
-CREATE DATABASE IF NOT EXISTS `base_wsusscn2` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+CREATE DATABASE IF NOT EXISTS `` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
 USE `base_wsusscn2`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
