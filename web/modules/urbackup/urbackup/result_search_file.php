@@ -159,12 +159,6 @@ function get_backup_with_filename($client_id, $backup_id, $path, $filename, $new
         }
     }
 }
-
-#SI UN RES, ENVOYER A ALL_FILES_BACKUP avec le path
-
-#SI PLUSIEURS RESU, MONTRER LA LISTE AVEC UN BOUTON, ALLER A -> AVEC LE PATH
-
-
 ?>
     </tbody>
 </table>
