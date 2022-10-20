@@ -148,7 +148,7 @@ $stats = xmlrpc_get_stats();
 <br>
 <h2><?php echo _T("Statistics by client", 'urbackup'); ?></h2>
 <?php
-
+$all_size = 0;
 ?>
 <table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
     <thead>
@@ -161,15 +161,14 @@ $stats = xmlrpc_get_stats();
     <?php
     foreach ($stats["usage"] as $stat)
     {
-        $files_size = formatBytes($stat['files']);
-        ?>
-        <tr>
-            <td style='padding-left: 5px;'> <?php echo $stat['name']; ?></td>
-            <td> <?php echo $files_size; ?></td>
-        </tr>
-    <?php
+        $all_size = $all_size + $stat['files'];
+        $files_size = formatBytes($all_size);
     }
     ?>
+        <tr>
+            <td style='padding-left: 5px;'> Space on disk used by all client</td>
+            <td> <?php echo $files_size; ?></td>
+        </tr>
     </tbody>
 </table>
 <?php
