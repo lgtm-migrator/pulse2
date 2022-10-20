@@ -157,8 +157,43 @@ function formatBytes($bytes, $precision = 2)
 
     return round($bytes, $precision) . ' ' . $units[$pow]; 
 }
+
+$stats = xmlrpc_get_stats();
+
 ?>
+<h2><?php echo _T("Statistics by client", 'urbackup'); ?></h2>
+<?php
+
+?>
+<table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
+    <thead>
+        <tr style='text-align: left;'>
+        <th> <?php echo _T("Computer name", 'urbackup'); ?> </th>
+        <th> <?php echo _T("File size", 'urbackup'); ?> </th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php
+    foreach ($stats["usage"] as $stat)
+    {
+        if ($stat['name'] == $clientname)
+        {
+            $files_size = formatBytes($stat['files']);
+            ?>
+            <tr>
+                <td style='padding-left: 5px;'> <?php echo $stat['name']; ?></td>
+                <td> <?php echo $files_size; ?></td>
+            </tr>
+            <?php
+        }
+    }
+    ?>
+    </tbody>
+</table>
+
 <br>
+<br>
+
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start incremental backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=start_backup&amp;backuptype=incremental&amp;clientid=<?php echo $client_id ?>">Start incremental backup</a>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=start_backup&amp;backuptype=full&amp;clientid=<?php echo $client_id ?>">Start full backup</a>
 <a class='btn btn-small btn-primary' title=<?php echo _T("Start full backup", 'urbackup'); ?> href="main.php?module=urbackup&amp;submod=urbackup&amp;action=delete_client&amp;clientid=<?php echo $client_id ?>&amp;jidmachine=<?php echo $jidMachine ?>">Delete this client</a>
