@@ -174,7 +174,7 @@ else
                                 <br>
                             </div>
                             <div>
-                                <h3><?php echo _T("Choose profil to computer", "urbackup"); ?></h3>
+                                <h3><?php echo _T("Choose profile to computer", "urbackup"); ?></h3>
                                 <select name="group" id="group">
                                     <?php
                                     foreach($groups as $group)
@@ -210,7 +210,7 @@ else
                     <br>
                 </div>
                 <div>
-                    <h3><?php echo _T("Choose profil to computer", "urbackup"); ?></h3>
+                    <h3><?php echo _T("Choose profile to computer", "urbackup"); ?></h3>
                     <select name="group" id="group">
                         <?php
                         foreach($groups as $group)
@@ -219,7 +219,7 @@ else
                         }
                         ?>
                     </select>
-                    <input type="submit" value="Add <?php echo $create_client["new_clientname"]; ?> on profil">
+                    <input type="submit" value="Add <?php echo $create_client["new_clientname"]; ?> on profile">
                 </div>
             </form>
         <?php
