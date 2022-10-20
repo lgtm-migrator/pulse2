@@ -126,6 +126,13 @@ class UrApiWrapper:
         response = self.request("add_client", params)
 
         return response
+    
+    def get_stats(self):
+        self.login()
+        params = {"ses": self.ses}
+        response = self.request("usage", params)
+
+        return response
 
     def add_group(self, groupname):
         self.login()

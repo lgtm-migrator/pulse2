@@ -165,6 +165,22 @@ def add_client(client_name):
 
     return "No DATA in newclient"
 
+def get_stats():
+    """
+    Return all stats by client, size of file, size of image and clientname
+
+    Returns:
+        Image size,
+        File size
+    """
+    api = UrApiWrapper()
+    stats = api.get_stats()
+    stats = api.response(stats)
+    if "content" in stats:
+        return stats["content"]
+
+    return "No DATA in stats"
+
 def add_group(groupname):
     """
     Create groupe
