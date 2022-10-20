@@ -141,10 +141,45 @@ $progress = $result['progress'];
 $array_progress = json_decode(json_encode($progress), true);
 //-----------------------------------END GET_PROGRESS
 
+$stats = xmlrpc_get_stats();
+
+?>
+<br>
+<br>
+<h2><?php echo _T("Statistics by client", 'urbackup'); ?></h2>
+<?php
+
+?>
+<table class="listinfos" border="1px" cellspacing="0" cellpadding="5" >
+    <thead>
+        <tr style='text-align: left;'>
+        <th> <?php echo _T("Computer name", 'urbackup'); ?> </th>
+        <th> <?php echo _T("File size", 'urbackup'); ?> </th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php
+    foreach ($stats["usage"] as $stat)
+    {
+        $files_size = formatBytes($stat['files']);
+        ?>
+        <tr>
+            <td style='padding-left: 5px;'> <?php echo $stat['name']; ?></td>
+            <td> <?php echo $files_size; ?></td>
+        </tr>
+    <?php
+    }
+    ?>
+    </tbody>
+</table>
+<?php
+
 ?>
 <br>
 <br>
 <?php
+
+
 foreach($array_progress as $progress)
 {
     if (!empty($progress))
@@ -268,12 +303,16 @@ foreach ($array as $review) {
             {
                 if ($review['image'] == 0)
                     $status = _T("Incremental backup", "urbackup");
+                else
+                    $status = _T("Incremental image", "urbackup");
             }
 
             if ($review['incremental'] == 0)
             {
                 if ($review['image'] == 0)
                     $status = _T("Full files backup", "urbackup");
+                else
+                    $status = _T("Full files image", "urbackup");
             }
         }
     }
