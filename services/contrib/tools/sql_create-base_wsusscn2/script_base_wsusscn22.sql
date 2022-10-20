@@ -1,131 +1,25 @@
+-- MariaDB dump 10.19  Distrib 10.6.7-MariaDB, for debian-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: base_wsusscn2
+-- ------------------------------------------------------
+-- Server version	10.6.7-MariaDB-2ubuntu1.1
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-CREATE DATABASE IF NOT EXISTS `` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+--
+-- Current Database: `base_wsusscn2`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `base_wsusscn2` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
 USE `base_wsusscn2`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `data_simple_update` (
-  `updateid` varchar(38) NOT NULL COMMENT 'creationdate',
-  `creationdate` datetime DEFAULT current_timestamp(),
-  `updateclassification` text DEFAULT NULL,
-  `category` text DEFAULT NULL,
-  `title` text DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `kb` text DEFAULT NULL,
-  `msrcseverity` text DEFAULT NULL,
-  `msrcnumber` text DEFAULT NULL,
-  PRIMARY KEY (`updateid`)
-);
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `data_simple_update1` (
-  `updateid` varchar(38) NOT NULL COMMENT 'creationdate',
-  `creationdate` datetime DEFAULT current_timestamp(),
-  `updateclassification` text DEFAULT NULL,
-  `category` text DEFAULT NULL,
-  `title` text DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `kb` text DEFAULT NULL,
-  `msrcseverity` text DEFAULT NULL,
-  `msrcnumber` text DEFAULT NULL,
-  PRIMARY KEY (`updateid`)
-);
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `data_supersedes` (
-  `id` int(11) NOT NULL,
-  `updateid` varchar(37) NOT NULL,
-  `title` varchar(1024) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniid` (`updateid`,`title`)
-);
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `data_supersedes1` (
-  `id` int(11) NOT NULL,
-  `updateid` varchar(37) NOT NULL,
-  `title` varchar(1024) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniid` (`updateid`,`title`)
-);
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `update_data` (
-  `updateid` varchar(38) NOT NULL,
-  `revisionid` varchar(16) NOT NULL,
-  `creationdate` timestamp NOT NULL DEFAULT current_timestamp(),
-  `compagny` varchar(36) DEFAULT '',
-  `product` varchar(512) DEFAULT '',
-  `productfamily` varchar(100) DEFAULT '',
-  `updateclassification` varchar(36) DEFAULT '',
-  `prerequisite` varchar(2000) DEFAULT '',
-  `title` varchar(500) DEFAULT '',
-  `description` varchar(2048) DEFAULT '',
-  `msrcseverity` varchar(16) DEFAULT '',
-  `msrcnumber` varchar(16) DEFAULT '',
-  `kb` varchar(16) DEFAULT '',
-  `languages` varchar(16) DEFAULT '',
-  `category` varchar(80) DEFAULT '',
-  `supersededby` varchar(2048) DEFAULT '',
-  `supersedes` text DEFAULT NULL,
-  `payloadfiles` varchar(1024) DEFAULT '',
-  `revisionnumber` varchar(30) DEFAULT '',
-  `bundledby_revision` varchar(30) DEFAULT '',
-  `isleaf` varchar(6) DEFAULT '',
-  `issoftware` varchar(30) DEFAULT '',
-  `deploymentaction` varchar(30) DEFAULT '',
-  `title_short` varchar(500) DEFAULT '',
-  PRIMARY KEY (`updateid`),
-  UNIQUE KEY `id_UNIQUE` (`updateid`),
-  UNIQUE KEY `id_UNIQUE1` (`revisionid`),
-  KEY `indproduct` (`product`),
-  KEY `indkb` (`kb`),
-  KEY `indclassification` (`updateclassification`),
-  KEY `ind_remplacerpar` (`supersededby`(768)),
-  KEY `indcategory` (`category`)
-);
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `update_data1` (
-  `updateid` varchar(38) NOT NULL,
-  `revisionid` varchar(16) NOT NULL,
-  `creationdate` timestamp NOT NULL DEFAULT current_timestamp(),
-  `compagny` varchar(36) DEFAULT '',
-  `product` varchar(1024) DEFAULT '',
-  `productfamily` varchar(100) DEFAULT '',
-  `updateclassification` varchar(36) DEFAULT '',
-  `prerequisite` varchar(4096) DEFAULT '',
-  `title` varchar(500) DEFAULT '',
-  `description` varchar(4096) DEFAULT '',
-  `msrcseverity` varchar(16) DEFAULT '',
-  `msrcnumber` varchar(16) DEFAULT '',
-  `kb` varchar(16) DEFAULT '',
-  `languages` varchar(16) DEFAULT '',
-  `category` varchar(128) DEFAULT '',
-  `supersededby` varchar(3072) DEFAULT '',
-  `supersedes` text DEFAULT NULL,
-  `payloadfiles` varchar(2048) DEFAULT '',
-  `revisionnumber` varchar(30) DEFAULT '',
-  `bundledby_revision` varchar(30) DEFAULT '',
-  `isleaf` varchar(6) DEFAULT '',
-  `issoftware` varchar(30) DEFAULT '',
-  `deploymentaction` varchar(30) DEFAULT '',
-  `title_short` varchar(500) DEFAULT '',
-  PRIMARY KEY (`updateid`),
-  UNIQUE KEY `id_UNIQUE` (`updateid`),
-  UNIQUE KEY `id_UNIQUE1` (`revisionid`),
-  KEY `indproduct` (`product`(768)),
-  KEY `indkb` (`kb`),
-  KEY `indclassification` (`updateclassification`),
-  KEY `ind_remplacerpar` (`supersededby`(768)),
-  KEY `indcategory` (`category`)
-);
-/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'base_wsusscn2'
+--
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -308,7 +202,7 @@ WHERE
         FROM
             update_data
         WHERE
-            title REGEXP ('^[0-9]{4}-[0-9]{2} .*\(kB[0-9]{7}\)$')));
+            title REGEXP ('^[0-9]{4}-[0-9]{2} .*\\(kB[0-9]{7}\\)$')));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -564,6 +458,1444 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_create_product_tables`()
+BEGIN
+	-- cette procedure stockee genere les tables pour different produit
+    -- list des procedure a appeler pour generer les tables updates
+	call up_init_packages_Win10_X64_1903();
+	call up_init_packages_Win10_X64_21H2();
+	call up_init_packages_Win10_X64_21H1();
+	call up_init_packages_office_2003_64bit();
+	call up_init_packages_office_2007_64bit();
+	call up_init_packages_office_2010_64bit();
+	call up_init_packages_office_2013_64bit();
+	call up_init_packages_office_2016_64bit();
+	call up_init_packages_Vstudio_2005();
+	call up_init_packages_Vstudio_2008();
+	call up_init_packages_Vstudio_2010();
+	call up_init_packages_Vstudio_2012();
+	call up_init_packages_Vstudio_2013();
+	call up_init_packages_Vstudio_2015();
+	call up_init_packages_Vstudio_2017();
+	call up_init_packages_Vstudio_2019();
+	call up_init_packages_Vstudio_2022();
+	call up_init_packages_Win11_X64();
+	call up_init_packages_Win_Malicious_X64();
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_office_2003_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2003%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%' 
+        AND title NOT LIKE '%Server%' 
+        AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2003_64bit`;
+CREATE TABLE `up_packages_office_2003_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2003_64bit`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_office_2007_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2007%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%' 
+        AND title NOT LIKE '%Server%' 
+        AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2007_64bit`;
+CREATE TABLE `up_packages_office_2007_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2007_64bit`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_office_2010_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2010%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%' 
+        AND title NOT LIKE '%Server%' 
+        AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2010_64bit`;
+CREATE TABLE `up_packages_office_2010_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2010_64bit`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_office_2013_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2013%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%' 
+        AND title NOT LIKE '%Server%' 
+        AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2013_64bit`;
+CREATE TABLE `up_packages_office_2013_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2013_64bit`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_office_2016_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2016%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%' 
+        AND title NOT LIKE '%Server%' 
+        AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2016_64bit`;
+CREATE TABLE `up_packages_office_2016_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2016_64bit`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2005`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2005%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2005`;
+CREATE TABLE `up_packages_Vstudio_2005` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2005`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2008`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2008%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2008`;
+CREATE TABLE `up_packages_Vstudio_2008` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2008`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2010`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2010%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2010`;
+CREATE TABLE `up_packages_Vstudio_2010` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2010`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2012`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2012%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2012`;
+CREATE TABLE `up_packages_Vstudio_2012` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2012`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2013`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2013%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2013`;
+CREATE TABLE `up_packages_Vstudio_2013` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2013`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2015`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2015%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2015`;
+CREATE TABLE `up_packages_Vstudio_2015` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2015`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2017`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2017%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2017`;
+CREATE TABLE `up_packages_Vstudio_2017` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2017`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2019`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2019%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2019`;
+CREATE TABLE `up_packages_Vstudio_2019` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2019`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Vstudio_2022`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Visual Studio 2022%';
+        
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2022`;
+CREATE TABLE `up_packages_Vstudio_2022` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Vstudio_2022`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Win10_X64_1903`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+    title LIKE '%Version 1903%' 
+    AND product LIKE '%Windows 10, version 1903 and later%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+drop tables if exists `up_packages_Win10_X64_1903`;
+CREATE TABLE `up_packages_Win10_X64_1903` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Win10_X64_1903`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev; 
+--        AND payloadfiles LIKE @kb
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Win10_X64_21H1`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+    title LIKE '%21H1%' 
+    AND (product LIKE '%Windows 10, version 1903 and later%'
+        OR product LIKE '%Windows 10 and later GDR-DU%')
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+  
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Win10_X64_21H1`;
+CREATE TABLE `up_packages_Win10_X64_21H1` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Win10_X64_21H1`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Win10_X64_21H2`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+    title LIKE '%21H2%' 
+    AND (product LIKE '%Windows 10, version 1903 and later%'
+        OR product LIKE '%Windows 10 and later GDR-DU%')
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+  
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Win10_X64_21H2`;
+CREATE TABLE `up_packages_Win10_X64_21H2` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+-- INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Win10_X64`
+-- SELECT 
+--    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+--    updateid, payloadfiles
+-- FROM
+--    base_wsusscn2.update_data
+-- WHERE
+--    payloadfiles NOT IN ('')
+--        AND payloadfiles LIKE @kb
+--        AND supersededby LIKE @rev;
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Win10_X64_21H2`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Win11_X64`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+    product LIKE '%Windows 11%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%' 
+        AND title not like '%Dynamic%';
+  
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Win11_X64`;
+CREATE TABLE `up_packages_Win11_X64` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Win11_X64`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;  
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packages_Win_Malicious_X64`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR  
+	  SELECT 
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+		title LIKE '%Windows Malicious Software Removal Tool x64%' 
+		and product like '%Windows 1%'
+		ORDER BY revisionid DESC;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+drop tables if exists `up_packages_Win_Malicious_X64`;
+CREATE TABLE `up_packages_Win_Malicious_X64` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+ 
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_Win_Malicious_X64`
+SELECT 
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev; 
+--        AND payloadfiles LIKE @kb
+  END LOOP get_list;
+  
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `_add_new_remplace`(in uuid varchar(48), in c_supersedestxt varchar(2048) )
 BEGIN
 
@@ -597,3 +1929,10 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2022-10-20 17:14:25
