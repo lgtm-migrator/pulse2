@@ -146,7 +146,7 @@ $stats = xmlrpc_get_stats();
 ?>
 <br>
 <br>
-<h2><?php echo _T("Statistics by client", 'urbackup'); ?></h2>
+<h2><?php echo _T("Global statistics", 'urbackup'); ?></h2>
 <?php
 $all_size = 0;
 ?>
