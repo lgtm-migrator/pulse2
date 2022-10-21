@@ -816,8 +816,6 @@ class extract_cab:
                         supersededby,
                         supersedes,
                         payloadfiles,
-
-
                         revisionnumber,
                         bundledby_revision,
                         isleaf,
@@ -837,6 +835,7 @@ class extract_cab:
         cursorproc.execute("call update_update_product();")
         cursorproc.execute("call update_update_remplaces();")
         cursorproc.execute("call update_datetime();")
+        cursorproc.execute("call up_create_product_tables;")
         self.db.commit()
 
 def help():
