@@ -50,7 +50,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_reinit_table_update_data`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_reinit_table_update_data`()
+CREATE  PROCEDURE `up_reinit_table_update_data`()
 begin
         set  @existtable_in_base_wsusscn2 := ( select EXISTS (
             SELECT *
@@ -116,31 +116,33 @@ begin
 
         end if;
             CREATE TABLE  IF NOT EXISTS  `update_data` (
-                `updateid` varchar(38) CHARACTER SET utf8mb4 NOT NULL,
-                `revisionid` varchar(16) CHARACTER SET utf8mb4 NOT NULL,
+                `updateid` varchar(38) NOT NULL,
+                `revisionid` varchar(16) NOT NULL,
                 `creationdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-                `company` varchar(36) CHARACTER SET utf8mb4 DEFAULT '',
-                `product` varchar(1024) CHARACTER SET utf8mb4 DEFAULT '',
-                `productfamily` varchar(52) CHARACTER SET utf8mb4 DEFAULT '',
-                `updateclassification` varchar(36) CHARACTER SET utf8mb4 DEFAULT '',
-                `prerequisite` varchar(4096) CHARACTER SET utf8mb4 DEFAULT '',
-                `title` varchar(1024) CHARACTER SET utf8mb4 DEFAULT '',
-                `description` varchar(4096) CHARACTER SET utf8mb4 DEFAULT '',
-                `msrcseverity` varchar(16) CHARACTER SET utf8mb4 DEFAULT '',
-                `msrcnumber` varchar(16) CHARACTER SET utf8mb4 DEFAULT '',
-                `kb` varchar(16) CHARACTER SET utf8mb4 DEFAULT '',
-                `languages` varchar(16) CHARACTER SET utf8mb4 DEFAULT '',
-                `category` varchar(128) CHARACTER SET utf8mb4 DEFAULT '',
-                `supersededby` varchar(3072) CHARACTER SET utf8mb4 DEFAULT '',
-                `supersedes` text CHARACTER SET utf8mb4 DEFAULT NULL,
-                `payloadfiles` varchar(2048) CHARACTER SET utf8mb4 DEFAULT '',
-                `revisionnumber` varchar(30) CHARACTER SET utf8mb4 DEFAULT '',
-                `bundledby_revision` varchar(30) CHARACTER SET utf8mb4 DEFAULT '',
-                `isleaf` varchar(6) CHARACTER SET utf8mb4 DEFAULT '',
-                `issoftware` varchar(30) CHARACTER SET utf8mb4 DEFAULT '',
-                `deploymentaction` varchar(30) CHARACTER SET utf8mb4 DEFAULT '',
-                    PRIMARY KEY (`updateid`),
+                `compagny` varchar(36) DEFAULT '',
+                `product` varchar(512) DEFAULT '',
+                `productfamily` varchar(100) DEFAULT '',
+                `updateclassification` varchar(36) DEFAULT '',
+                `prerequisite` varchar(2000) DEFAULT '',
+                `title` varchar(500) DEFAULT '',
+                `description` varchar(2048) DEFAULT '',
+                `msrcseverity` varchar(16) DEFAULT '',
+                `msrcnumber` varchar(16) DEFAULT '',
+                `kb` varchar(16) DEFAULT '',
+                `languages` varchar(16) DEFAULT '',
+                `category` varchar(80) DEFAULT '',
+                `supersededby` varchar(2048) DEFAULT '',
+                `supersedes` text DEFAULT NULL,
+                `payloadfiles` varchar(1024) DEFAULT '',
+                `revisionnumber` varchar(30) DEFAULT '',
+                `bundledby_revision` varchar(30) DEFAULT '',
+                `isleaf` varchar(6) DEFAULT '',
+                `issoftware` varchar(30) DEFAULT '',
+                `deploymentaction` varchar(30) DEFAULT '',
+                `title_short` varchar(500) DEFAULT '',
+                PRIMARY KEY (`updateid`),
                     UNIQUE KEY `updateid_UNIQUE` (`updateid`),
+                    UNIQUE KEY `id_UNIQUE1` (`revisionid`),
                     KEY `ind_product` (`product`(768)),
                     KEY `indkb` (`kb`),
                     KEY `ind_update_classification` (`updateclassification`),
@@ -199,7 +201,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_windows`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_search_kb_windows`( in FILTERtable varchar(2048), in KB_LIST varchar(2048))
+CREATE  PROCEDURE `up_search_kb_windows`( in FILTERtable varchar(2048), in KB_LIST varchar(2048))
 BEGIN
 DECLARE _next TEXT DEFAULT NULL;
 DECLARE _nextlen INT DEFAULT NULL;
@@ -369,7 +371,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_windows1`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_search_kb_windows1`( in FILTERtable varchar(2048),
+CREATE  PROCEDURE `up_search_kb_windows1`( in FILTERtable varchar(2048),
                                            in PRODUCTtable varchar(80),
                                            in VERSIONtable varchar(20),
                                            in MSRSEVERITYtable varchar(40),
@@ -754,7 +756,7 @@ DROP procedure IF EXISTS `up_init_table_download_from_kb`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_table_download_from_kb`()
+CREATE  PROCEDURE `up_init_table_download_from_kb`()
 BEGIN
 DROP TABLE IF EXISTS `xmppmaster`.`up_download_from_kb`;
 create table up_download_from_kb as
@@ -808,7 +810,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_windows_malicious_software_tool`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_windows_malicious_software_tool`(in PRODUCTtable varchar(80),
+CREATE  PROCEDURE `up_windows_malicious_software_tool`(in PRODUCTtable varchar(80),
                                                                                  in ARCHItable varchar(20),
                                                                                  in major integer,
                                                                                  in minor integer)
@@ -880,7 +882,6 @@ END$$
 DELIMITER ;
 ;
 
-
 -- -------------------------------------------------------
 -- cette procedure permet de faire le lien entre les update kb et les fichier a recuperer.
 -- actuellement restreint a ("Windows 10", "x64", );
@@ -895,7 +896,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_init_packageid`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packageid`()
+CREATE  PROCEDURE `up_init_packageid`()
 BEGIN
 	DECLARE is_done INTEGER DEFAULT 0;
 
@@ -903,7 +904,6 @@ BEGIN
 	DECLARE c_udapeid varchar(2040)  DEFAULT "";
 	DECLARE c_kb varchar(2040)  DEFAULT "";
 	DECLARE c_revisionid varchar(2040)  DEFAULT "";
-
 
   DECLARE client_cursor CURSOR FOR
 	  SELECT
@@ -946,6 +946,1465 @@ END$$
 
 DELIMITER ;
 ;
+
+-- -------------------------------------------------------
+-- -------------------------------------------------------
+-- GENERATIONS DES TABLES PRODUIT DEPUIS update_data
+-- -------------------------------------------------------
+-- -------------------------------------------------------
+
+-- -------------------------------------------------------
+-- Cette PROCEDURE GENRE TOUTES LES TABLES PRODUITS.
+--
+-- -------------------------------------------------------
+
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_create_product_tables`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE  PROCEDURE `up_create_product_tables`()
+BEGIN
+	-- cette procedure stockee genere les tables pour different produit
+    -- list des procedure a appeler pour generer les tables updates
+	call up_init_packages_Win10_X64_1903();
+	call up_init_packages_Win10_X64_21H2();
+	call up_init_packages_Win10_X64_21H1();
+	call up_init_packages_office_2003_64bit();
+	call up_init_packages_office_2007_64bit();
+	call up_init_packages_office_2010_64bit();
+	call up_init_packages_office_2013_64bit();
+	call up_init_packages_office_2016_64bit();
+	call up_init_packages_Vstudio_2005();
+	call up_init_packages_Vstudio_2008();
+	call up_init_packages_Vstudio_2010();
+	call up_init_packages_Vstudio_2012();
+	call up_init_packages_Vstudio_2013();
+	call up_init_packages_Vstudio_2015();
+	call up_init_packages_Vstudio_2017();
+	call up_init_packages_Vstudio_2019();
+	call up_init_packages_Vstudio_2022();
+	call up_init_packages_Win11_X64();
+	call up_init_packages_Win_Malicious_X64();
+END$$
+
+DELIMITER ;
+;
+
+-- -------------------------------------------------------
+-- cette procedure permet searcher kb en utilisant les tables produit
+-- call up_search_kb_update("up_packages_Win10_X64_21H2",
+--                          "5017022,5003791,5012170,5016616,5006753,5007273");
+-- up_packages_Win10_X64_21H2 et la table produit
+-- "5017022,5003791,5012170,5016616,5006753,5007273" et 1 sting des kb installer sur la machine
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_update`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE OR REPLACE PROCEDURE `up_search_kb_update`(in tablesearch varchar(50), in KB_LIST varchar(2048) )
+BEGIN
+-- on recupere tout les revisions id pour les kb de la machine
+set @rr="";
+SET @query = concat("SELECT group_concat(supersededby) into @rr FROM update_data WHERE kb IN (", KB_LIST, ") and supersededby not in ('');");
+PREPARE stmt FROM @query;
+EXECUTE stmt ;
+-- on conserve seulement les revision id qui sont remplacer
+set @dd="";
+SET @query = concat("SELECT group_concat(supersededby) into @dd FROM update_data WHERE revisionid IN (", @rr, ") and supersededby not like '';");
+PREPARE stmt FROM @query;
+EXECUTE stmt ;
+-- on regarde suivant le produit
+SET @query = concat("SELECT * FROM ", tablesearch, " WHERE revisionid IN (",@dd,");");
+PREPARE stmt FROM @query;
+EXECUTE stmt ;
+END$$
+
+DELIMITER ;
+;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_office_2003_64bit
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_office_2003_64bit`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_office_2003_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2003%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%'
+        AND title NOT LIKE '%Server%'
+        AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2003_64bit`;
+CREATE TABLE `up_packages_office_2003_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2003_64bit`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_office_2007_64bit
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_office_2007_64bit`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_office_2007_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2007%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%'
+        AND title NOT LIKE '%Server%'
+        AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2007_64bit`;
+CREATE TABLE `up_packages_office_2007_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2007_64bit`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_office_2010_64bit
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_office_2010_64bit`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_office_2010_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2010%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%'
+        AND title NOT LIKE '%Server%'
+        AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2010_64bit`;
+CREATE TABLE `up_packages_office_2010_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2010_64bit`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_office_2013_64bit
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_office_2013_64bit`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE  PROCEDURE `up_init_packages_office_2013_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Office 2013%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%'
+        AND title NOT LIKE '%Server%'
+        AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2013_64bit`;
+CREATE TABLE `up_packages_office_2013_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_office_2013_64bit`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_office_2016_64bit
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_office_2016_64bit`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_office_2016_64bit`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		base_wsusscn2.update_data
+	WHERE
+        product LIKE '%Office 2016%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%32-Bit%'
+        AND title NOT LIKE '%Server%'
+        AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_office_2016_64bit`;
+CREATE TABLE `up_packages_office_2016_64bit` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2016_64bit`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    base_wsusscn2.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Vstudio_2005
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2005`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2005`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2005%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2005`;
+CREATE TABLE `up_packages_Vstudio_2005` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2005`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Vstudio_2008
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2008`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2008`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2008%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2008`;
+CREATE TABLE `up_packages_Vstudio_2008` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2008`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Vstudio_2010
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2010`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2010`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2010%';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2010`;
+CREATE TABLE `up_packages_Vstudio_2010` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2010`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Vstudio_2012
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2012`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2012`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2012%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2012`;
+CREATE TABLE `up_packages_Vstudio_2012` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2012`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Vstudio_2013
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2013`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2013`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2013%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2013`;
+CREATE TABLE `up_packages_Vstudio_2013` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2013`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_packages_Vstudio_2015
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_init_packages_Vstudio_2015`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE  PROCEDURE `up_init_packages_Vstudio_2015`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2015%';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2015`;
+CREATE TABLE `up_packages_Vstudio_2015` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2015`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_packages_Vstudio_2017
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2017`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2017`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2017%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2017`;
+CREATE TABLE `up_packages_Vstudio_2017` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2017`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Vstudio_2019
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2019`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2019`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2019%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2019`;
+CREATE TABLE `up_packages_Vstudio_2019` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2019`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Vstudio_2022
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Vstudio_2022`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Vstudio_2022`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+        product LIKE '%Visual Studio 2022%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Vstudio_2022`;
+CREATE TABLE `up_packages_Vstudio_2022` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Vstudio_2022`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Win10_X64_1903
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_init_packages_Win10_X64_1903`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE  PROCEDURE `up_init_packages_Win10_X64_1903`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+    title LIKE '%Version 1903%'
+    AND product LIKE '%Windows 10, version 1903 and later%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+drop tables if exists `up_packages_Win10_X64_1903`;
+CREATE TABLE `up_packages_Win10_X64_1903` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Win10_X64_1903`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+--        AND payloadfiles LIKE @kb
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+;
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Win10_X64_21H1
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Win10_X64_21H1`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Win10_X64_21H1`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+    title LIKE '%21H1%'
+    AND (product LIKE '%Windows 10, version 1903 and later%'
+        OR product LIKE '%Windows 10 and later GDR-DU%')
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Win10_X64_21H1`;
+CREATE TABLE `up_packages_Win10_X64_21H1` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Win10_X64_21H1`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Win10_X64_21H2
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Win10_X64_21H2`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_init_packages_Win10_X64_21H2`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE  PROCEDURE `up_init_packages_Win10_X64_21H2`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+    title LIKE '%21H2%'
+    AND (product LIKE '%Windows 10, version 1903 and later%'
+        OR product LIKE '%Windows 10 and later GDR-DU%')
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+drop tables if exists `up_packages_Win10_X64_21H2`;
+CREATE TABLE `up_packages_Win10_X64_21H2` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+
+-- INSERT IGNORE INTO `xmppmaster`.`up_packages_Win10_X64`
+-- SELECT
+--    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+--    updateid, payloadfiles
+-- FROM
+--    xmppmaster.update_data
+-- WHERE
+--    payloadfiles NOT IN ('')
+--        AND payloadfiles LIKE @kb
+--        AND supersededby LIKE @rev;
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Win10_X64_21H2`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Win11_X64
+-- -------------------------------------------------------
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Win11_X64`;
+
+USE `xmppmaster`;
+DROP procedure IF EXISTS `xmppmaster`.`up_init_packages_Win11_X64`;
+;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE  PROCEDURE `up_init_packages_Win11_X64`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+    product LIKE '%Windows 11%'
+		AND title NOT LIKE '%ARM64%'
+		AND title NOT LIKE '%X86%'
+        AND title not like '%Dynamic%';
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+
+drop tables if exists `up_packages_Win11_X64`;
+CREATE TABLE `up_packages_Win11_X64` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Win11_X64`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
+;
+
+-- -------------------------------------------------------
+-- TABLES PRODUIT up_init_packages_Win_Malicious_X64
+-- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_init_packages_Win_Malicious_X64`;
+
+DELIMITER $$
+USE `xmppmaster`$$
+CREATE PROCEDURE `up_init_packages_Win_Malicious_X64`()
+BEGIN
+	DECLARE is_done INTEGER DEFAULT 0;
+	DECLARE c_title varchar(2040)  DEFAULT "";
+    DECLARE c_description varchar(2040)DEFAULT "";
+	DECLARE c_udapeid varchar(2040)  DEFAULT "";
+	DECLARE c_kb varchar(2040)  DEFAULT "";
+	DECLARE c_revisionid varchar(2040)  DEFAULT "";
+  DECLARE client_cursor CURSOR FOR
+	  SELECT
+		updateid, kb, revisionid, title, description
+	FROM
+		xmppmaster.update_data
+	WHERE
+		title LIKE '%Windows Malicious Software Removal Tool x64%'
+		and product like '%Windows 1%'
+		ORDER BY revisionid DESC;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_done = 1;
+drop tables if exists `up_packages_Win_Malicious_X64`;
+CREATE TABLE `up_packages_Win_Malicious_X64` (
+  `updateid` varchar(36) NOT NULL,
+  `kb` varchar(16) NOT NULL,
+  `revisionid` varchar(16) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `updateid_package` varchar(36) NOT NULL,
+  `payloadfiles` varchar(2048) NOT NULL,
+  `supersededby` varchar(2048),
+  `creationdate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `title_short` varchar(500),
+  PRIMARY KEY (`updateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  OPEN client_cursor;
+
+  get_list: LOOP
+  FETCH client_cursor INTO c_udapeid, c_kb,c_revisionid, c_title, c_description;
+
+  IF is_done = 1 THEN
+  LEAVE get_list;
+  END IF;
+SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
+SELECT CONCAT('%', c_kb, '%') INTO @kb;
+INSERT IGNORE INTO `xmppmaster`.`up_packages_Win_Malicious_X64`
+SELECT
+    c_udapeid, c_kb,c_revisionid, c_title, c_description,
+    updateid, payloadfiles, supersededby,creationdate,title_short
+FROM
+    xmppmaster.update_data
+WHERE
+    payloadfiles NOT IN ('')
+        AND supersededby LIKE @rev;
+--        AND payloadfiles LIKE @kb
+  END LOOP get_list;
+
+        -- AND payloadfiles LIKE @kb
+  CLOSE client_cursor;
+END$$
+
+DELIMITER ;
 
 
 -- ----------------------------------------------------------------------
