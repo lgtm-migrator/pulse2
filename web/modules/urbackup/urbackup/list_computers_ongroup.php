@@ -137,7 +137,7 @@ $clients = $array['navitems']['clients'];
 <div style="display:flex">
     <div>
         <h3>Computer <b>outside</b> the profil</h3>
-        <ul id="outProfil" name="outProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px; margin-right: 30px;">
+        <div style="background-color: #d4d4d4; padding: 5px;">
             <?php
             foreach($clients as $client)
             {
@@ -151,56 +151,24 @@ $clients = $array['navitems']['clients'];
                 }
                 if ($client['group'] != $group_id)
                 {
-                    echo "<li value=".$client['id']." class='ui-draggable ui-draggable-handle ui-sortable-handle' style='width: 250px; height: 14px;'>".$client['name']." ".$groupname_client."</li>";
+                    echo "<p value=".$client['id']." style='margin-left: 20px; font-weight: bold; width: 250px; height: 14px;'>".$client['name']." ".$groupname_client."</p>";
                 }
             }
             ?>
-        </ul>
+        </div>
     </div>
-    <div>
+    <div style="margin-left: 50px; background-color: #d4d4d4; padding: 5px;">
         <h3>Computer <b>inside</b> the profil</h3>
-        <ul id="inProfil" name="inProfil" class="ui-sortable" style="background-color: white; width: 250px; height: 200px; padding-top: 10px;">
+        <div>
             <?php
             foreach($clients as $client)
             {
                 if ($client['group'] == $group_id)
                 {
-                    echo "<li value=".$client['id']." class='ui-draggable ui-draggable-handle ui-sortable-handle' style='width: 250px; height: 14px;'>".$client['name']."</li>";
+                    echo "<p value=".$client['id']." style='margin-left: 20px; font-weight: bold; width: 250px; height: 14px;'>".$client['name']."</p>";
                 }
             }
             ?>
-        </ul>
+        </div>
     </div>
 </div>
-
-<?php
-
-?>
-
-<script>
-jQuery(function(){
-  jQuery("#outProfil li, #inProfil li").draggable({
-    connectToSortable: "#inProfil, #outProfil",
-    stop: function(){
-      profil_list = []
-      profil_id = []
-
-      jQuery("#inProfil li").each(function(id, idgroup){
-            //
-            <?php
-            $url = "main.php?module=urbackup&amp;submod=urbackup&amp;action=add_member_togroup&amp;groupname=".$group_name."&amp;groupid=".$group_id."&amp;clientid=".$clientid;
-            //header("Location: ".$url);
-            ?>
-      })
-
-      jQuery("input[name='relays_id']").val(profil_id.join(','))
-      jQuery("input[name='relays_list']").val(profil_list.join(','))
-    },
-  })
-
-  jQuery( "#outProfil, #inProfil" ).sortable({
-    revert: true
-  });
-  jQuery( "ul, li" ).disableSelection();
-});
-</script>
