@@ -25,6 +25,13 @@
 
 START TRANSACTION;
 USE `xmppmaster`;
+
+-- ----------------------------------------------------------------------
+-- CREATE TABLE update_data
+-- this table permet de retrouver les download complet pour tous les packages
+-- payloadfiles dit ou trouver le package
+-- ----------------------------------------------------------------------
+
 CREATE TABLE IF NOT EXISTS `up_packages` (
   `updateid` varchar(36) NOT NULL,
   `kb` varchar(16) NOT NULL,
@@ -34,7 +41,6 @@ CREATE TABLE IF NOT EXISTS `up_packages` (
   `payloadfiles` varchar(2048) NOT NULL,
   PRIMARY KEY (`updateid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 -- ----------------------------------------------------------------------
 -- CREATE TABLE update_data
@@ -162,8 +168,6 @@ DELIMITER ;
 -- Execute the procedure
 call up_reinit_table_update_data();
 
-
-
 -- ----------------------------------------------------------------------
 -- CREATE TABLE up_machine_windows
 -- this table are the updates machine
@@ -179,6 +183,21 @@ CREATE TABLE `up_machine_windows` (
   CONSTRAINT `fk_up_machine_windows_1` FOREIGN KEY (`id_machine`) REFERENCES `machines` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
+-- ----------------------------------------------------------------------
+-- CREATE TABLE up_black_list
+-- this table exclut ou pas les updates windows
+-- ----------------------------------------------------------------------
+
+CREATE TABLE `up_black_list` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `updateid_or_kb` varchar(38) NOT NULL COMMENT 'updateid_or_kb  \nkb ou update_id  de la mise à jour.\n update or kb exclude  windows exclude si regexp match',
+  `userjid_regexp` varchar(180) NOT NULL COMMENT 'regexp  exclusion sur le user jid :  .* exclude completement cette mise a jour   ^jfk  exclude toute les machine ou le nom commence par jfk ',
+  `enable_rule` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'active ou deactive la regle',
+  `type_rule` varchar(2) NOT NULL DEFAULT 'id' COMMENT 'type_rule = kb updateid_or_kb represente 1 kb   OU   type_rule updateid_or_kb represente 1 update_id.',
+  PRIMARY KEY (`id`),
+  KEY `ind_enable` (`enable_rule`),
+  KEY `ind_type` (`type_rule`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 -- Drop the procedure
 -- drop procedure intit_table_update_data;
@@ -1049,7 +1068,7 @@ BEGIN
 	  SELECT
 		updateid, kb, revisionid, title, description
 	FROM
-		base_wsusscn2.update_data
+		xmppmaster.update_data
 	WHERE
         product LIKE '%Office 2003%'
 		AND title NOT LIKE '%ARM64%'
@@ -1085,12 +1104,12 @@ CREATE TABLE `up_packages_office_2003_64bit` (
 SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
 SELECT CONCAT('%', c_kb, '%') INTO @kb;
 
-INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2003_64bit`
+INSERT IGNORE INTO `xmppmaster`.`up_packages_office_2003_64bit`
 SELECT
     c_udapeid, c_kb,c_revisionid, c_title, c_description,
     updateid, payloadfiles, supersededby,creationdate,title_short
 FROM
-    base_wsusscn2.update_data
+    xmppmaster.update_data
 WHERE
     payloadfiles NOT IN ('')
         AND supersededby LIKE @rev;
@@ -1123,7 +1142,7 @@ BEGIN
 	  SELECT
 		updateid, kb, revisionid, title, description
 	FROM
-		base_wsusscn2.update_data
+		xmppmaster.update_data
 	WHERE
         product LIKE '%Office 2007%'
 		AND title NOT LIKE '%ARM64%'
@@ -1159,12 +1178,12 @@ CREATE TABLE `up_packages_office_2007_64bit` (
 SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
 SELECT CONCAT('%', c_kb, '%') INTO @kb;
 
-INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2007_64bit`
+INSERT IGNORE INTO `xmppmaster`.`up_packages_office_2007_64bit`
 SELECT
     c_udapeid, c_kb,c_revisionid, c_title, c_description,
     updateid, payloadfiles, supersededby,creationdate,title_short
 FROM
-    base_wsusscn2.update_data
+    xmppmaster.update_data
 WHERE
     payloadfiles NOT IN ('')
         AND supersededby LIKE @rev;
@@ -1197,7 +1216,7 @@ BEGIN
 	  SELECT
 		updateid, kb, revisionid, title, description
 	FROM
-		base_wsusscn2.update_data
+		xmppmaster.update_data
 	WHERE
         product LIKE '%Office 2010%'
 		AND title NOT LIKE '%ARM64%'
@@ -1233,12 +1252,12 @@ CREATE TABLE `up_packages_office_2010_64bit` (
 SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
 SELECT CONCAT('%', c_kb, '%') INTO @kb;
 
-INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2010_64bit`
+INSERT IGNORE INTO `xmppmaster`.`up_packages_office_2010_64bit`
 SELECT
     c_udapeid, c_kb,c_revisionid, c_title, c_description,
     updateid, payloadfiles, supersededby,creationdate,title_short
 FROM
-    base_wsusscn2.update_data
+    xmppmaster.update_data
 WHERE
     payloadfiles NOT IN ('')
         AND supersededby LIKE @rev;
@@ -1346,7 +1365,7 @@ BEGIN
 	  SELECT
 		updateid, kb, revisionid, title, description
 	FROM
-		base_wsusscn2.update_data
+		xmppmaster.update_data
 	WHERE
         product LIKE '%Office 2016%'
 		AND title NOT LIKE '%ARM64%'
@@ -1382,12 +1401,12 @@ CREATE TABLE `up_packages_office_2016_64bit` (
 SELECT CONCAT('%', c_revisionid, '%') INTO @rev;
 SELECT CONCAT('%', c_kb, '%') INTO @kb;
 
-INSERT IGNORE INTO `base_wsusscn2`.`up_packages_office_2016_64bit`
+INSERT IGNORE INTO `xmppmaster`.`up_packages_office_2016_64bit`
 SELECT
     c_udapeid, c_kb,c_revisionid, c_title, c_description,
     updateid, payloadfiles, supersededby,creationdate,title_short
 FROM
-    base_wsusscn2.update_data
+    xmppmaster.update_data
 WHERE
     payloadfiles NOT IN ('')
         AND supersededby LIKE @rev;
@@ -2406,7 +2425,42 @@ END$$
 
 DELIMITER ;
 
+-- -------------------------------------------------------
+-- list produits actifs
+-- -------------------------------------------------------
 
+CREATE TABLE `up_list_produit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name_procedure` varchar(80) DEFAULT NULL,
+  `enable` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8
+
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2008');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2010');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2012');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2013');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2015');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2017');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2019');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Vstudio_2022');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Win10_X64_1903');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Win10_X64_21H1');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Win10_X64_21H2');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Win11_X64');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_Win_Malicious_X64');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_office_2003_64bit');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_office_2007_64bit');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_office_2010_64bit');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_office_2013_64bit');
+INSERT INTO `xmppmaster`.`up_list_produit` (`name_procedure`) VALUES ('up_packages_office_2016_64bit');
+UPDATE `xmppmaster`.`up_list_produit`
+SET
+    `enable` = '1'
+WHERE
+    (`name_procedure` IN ('up_packages_Win10_X64_1903' , 'up_packages_Win10_X64_21H1',
+        'up_packages_Win10_X64_21H2',
+        'up_packages_Win_Malicious_X64'));
 -- ----------------------------------------------------------------------
 -- Database version
 -- ----------------------------------------------------------------------
