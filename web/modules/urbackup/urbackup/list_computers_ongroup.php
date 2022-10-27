@@ -135,9 +135,9 @@ $clients = $array['navitems']['clients'];
 <br>
 <br>
 <div style="display:flex">
-    <div>
-        <h3>Computer <b>outside</b> the profil</h3>
-        <div style="background-color: #d4d4d4; padding: 5px;">
+    <div style="background-color: #d4d4d4; padding: 5px;">
+        <h3>Computer <b>outside</b> the profile</h3>
+        <div>
             <?php
             foreach($clients as $client)
             {
@@ -158,7 +158,7 @@ $clients = $array['navitems']['clients'];
         </div>
     </div>
     <div style="margin-left: 50px; background-color: #d4d4d4; padding: 5px;">
-        <h3>Computer <b>inside</b> the profil</h3>
+        <h3>Computer <b>inside</b> the profile</h3>
         <div>
             <?php
             foreach($clients as $client)
