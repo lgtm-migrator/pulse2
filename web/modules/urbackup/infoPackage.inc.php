@@ -47,7 +47,7 @@ $page = new Page("start_backup", _T('Start backup', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/start_backup.php");
 $submod->addPage($page);
 
-$page = new Page("checkMachine", _T('Check machine if exist', 'urbackup'));
+$page = new Page("checkMachine", _T('Assign profile to client', 'urbackup'));
 $page->setFile("modules/urbackup/urbackup/checkMachine.php");
 $submod->addPage($page);
 
