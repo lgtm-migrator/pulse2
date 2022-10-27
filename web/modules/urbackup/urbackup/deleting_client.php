@@ -3,10 +3,10 @@ require("graph/navbar.inc.php");
 require("localSidebar.php");
 require_once("modules/urbackup/includes/xmlrpc.php");
 
-$group_id = htmlspecialchars($_GET["groupid"]);
+$clientname = htmlspecialchars($_GET["clientname"]);
 $jidMachine = htmlspecialchars($_GET["jidmachine"]);
 
-$p = new PageGenerator(_T("Delete group", 'urbackup'));
+$p = new PageGenerator(_T("Delete client", 'urbackup'));
 $p->setSideMenu($sidemenu);
 $p->display();
 
@@ -16,9 +16,6 @@ $client_remove = xmlrpc_remove_client($jidMachine);
 
 ?>
 <br>
-<?php
-
-$url = 'main.php?module=base&submod=computers&action=machinesList';
-
-header("Location: ".$url);
-?>
+<p><?php echo _T("Every backup type has been disable for this client (cannot be removed from interface).","urbackup"); ?></p>
+<br>
+<a class='btn btn-small btn-primary' title=<?php echo _T("Back to computer view", 'urbackup'); ?> href="main.php?module=base&amp;submod=computers&amp;action=machinesList"><?php echo _T("Back to computer view", 'urbackup'); ?></a>
