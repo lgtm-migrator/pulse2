@@ -99,7 +99,7 @@ def test_executable():
     return ""
 
 class extract_cab:
-    CONF_FILE="/etc/mmc/plugins/pulse2-create-base_wsusscn2.init"
+    CONF_FILE="/etc/pulse2-create-base_wsusscn2/pulse2-create-base_wsusscn2.init"
     def __init__(self):
         self.insertion_in_base=0
         self.exist_in_base=0
@@ -170,7 +170,6 @@ class extract_cab:
 
             if Config.has_option('main', 'directory_output'):
                 self.directory_output = Config.get('main', 'directory_output')
-
             if Config.has_option('main', 'NAME_BASE'):
                 self.NAME_BASE = Config.get('main', 'NAME_BASE')
 
@@ -875,8 +874,8 @@ if __name__ == "__main__":
     executable = test_executable()
     if len(executable) != 2:
         print(
-            "7z or cabextract file not found.\n\nCUW cannot function without these dependencies.\n\nPlease install cabextract and 7z [%s]"
-            % executable
+            "7z or cabextract file not found.\n\n%s cannot function without these dependencies.\n\nPlease install cabextract and 7z [%s]"
+            % (sys.argv[1],executable)
         )
         sys.exit(1)
 
