@@ -2424,6 +2424,35 @@ WHERE
 END$$
 
 DELIMITER ;
+-- -------------------------------------------------------
+-- cette procedure diminue la taille de la table update
+-- -------------------------------------------------------
+USE `base_wsusscn2`;
+DROP procedure IF EXISTS `reduction_base`;
+
+USE `base_wsusscn2`;
+DROP procedure IF EXISTS `base_wsusscn2`.`reduction_base`;
+;
+
+DELIMITER $$
+USE `base_wsusscn2`$$
+CREATE DEFINER=`jfk`@`localhost` PROCEDURE `reduction_base`()
+BEGIN
+
+DELETE FROM `base_wsusscn2`.`update_data`
+WHERE
+    (`product` IN (' ; Windows XP x64 Edition' , ' ; Windows XP Embedded',
+    ' ; Windows XP',
+    ' ; Windows Vista',
+    ' ; Windows Embedded Standard 7',
+    ' ; Windows 7 ; Windows Embedded Standard 7',
+    ' ; Windows 7'));
+END$$
+
+DELIMITER ;
+;
+
+
 
 -- -------------------------------------------------------
 -- list produits actifs
