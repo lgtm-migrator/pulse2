@@ -1029,23 +1029,32 @@ USE `xmppmaster`$$
 CREATE OR REPLACE PROCEDURE `up_search_kb_update`(in tablesearch varchar(50), in KB_LIST varchar(2048) )
 BEGIN
 -- on recupere tout les revisions id pour les kb de la machine
-set @rr="";
+proc_label:BEGIN
+    set @rr="";
 SET @query = concat("SELECT group_concat(supersededby) into @rr FROM update_data WHERE kb IN (", KB_LIST, ") and supersededby not in ('');");
 PREPARE stmt FROM @query;
 EXECUTE stmt ;
+ IF @rr IS NULL THEN
+          LEAVE proc_label;
+     END IF;
 -- on conserve seulement les revision id qui sont remplacer
 set @dd="";
 SET @query = concat("SELECT group_concat(supersededby) into @dd FROM update_data WHERE revisionid IN (", @rr, ") and supersededby not like '';");
 PREPARE stmt FROM @query;
 EXECUTE stmt ;
+ IF @dd IS NULL THEN
+          LEAVE proc_label;
+     END IF;
 -- on regarde suivant le produit
 SET @query = concat("SELECT * FROM ", tablesearch, " WHERE revisionid IN (",@dd,");");
 PREPARE stmt FROM @query;
 EXECUTE stmt ;
+END;
 END$$
 
 DELIMITER ;
 ;
+
 
 -- -------------------------------------------------------
 -- TABLES PRODUIT up_init_packages_office_2003_64bit
