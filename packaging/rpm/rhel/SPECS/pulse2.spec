@@ -267,6 +267,9 @@ Requires:   python3-pulse2-common-database-imaging = %version-%release
 # Needed for ImportError: No module named tasks
 Requires:   python3-mmc-core >= 3.1.1
 
+# Remove when possible we need to use python network APIs
+Requires:   python3-ipaddr
+
 Obsoletes:  python-mmc-imaging < 4.7.0
 Provides:   python-mmc-imaging = %version-%release
 
@@ -876,8 +879,8 @@ Requires:   python3-OpenSSL
 Requires:   python3-gobject
 %else
 Requires:   python3
-Requires:   pyOpenSSL
-Requires:   pygobject2
+Requires:   python3-pyOpenSSL
+Requires:   python3-gi
 %endif
 Requires:   python3-mmc-base
 Requires:   logrotate
