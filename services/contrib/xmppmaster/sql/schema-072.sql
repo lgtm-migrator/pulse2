@@ -1019,6 +1019,8 @@ DELIMITER ;
 -- up_packages_Win10_X64_21H2 et la table produit
 -- "5017022,5003791,5012170,5016616,5006753,5007273" et 1 sting des kb installer sur la machine
 -- -------------------------------------------------------
+USE `xmppmaster`;
+DROP procedure IF EXISTS `up_search_kb_update`;
 
 USE `xmppmaster`;
 DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_update`;
@@ -1026,34 +1028,44 @@ DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_update`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE OR REPLACE PROCEDURE `up_search_kb_update`(in tablesearch varchar(50), in KB_LIST varchar(2048) )
+CREATE  PROCEDURE `up_search_kb_update`(in tablesearch varchar(1024), in KB_LIST varchar(2048) )
 BEGIN
 -- on recupere tout les revisions id pour les kb de la machine
-proc_label:BEGIN
-    set @rr="";
-SET @query = concat("SELECT group_concat(supersededby) into @rr FROM update_data WHERE kb IN (", KB_LIST, ") and supersededby not in ('');");
-PREPARE stmt FROM @query;
-EXECUTE stmt ;
- IF @rr IS NULL THEN
-          LEAVE proc_label;
-     END IF;
--- on conserve seulement les revision id qui sont remplacer
 set @dd="";
-SET @query = concat("SELECT group_concat(supersededby) into @dd FROM update_data WHERE revisionid IN (", @rr, ") and supersededby not like '';");
+set @rr="";
+proc_label:BEGIN
+ SET @query = concat("SELECT group_concat(supersededby) into @rr FROM update_data WHERE cast(kb as double) IN (", KB_LIST, ") and supersededby not in ('');");
 PREPARE stmt FROM @query;
 EXECUTE stmt ;
- IF @dd IS NULL THEN
-          LEAVE proc_label;
+
+ IF @rr IS NULL or @rr = "" THEN
+      LEAVE proc_label;
+  END IF;
+-- on conserve seulement les revision id qui sont remplacer
+
+ SET @query = concat("SELECT group_concat(supersededby) into @dd FROM update_data WHERE revisionid IN (", @rr, ") and supersededby not like '';");
+ PREPARE stmt FROM @query;
+ EXECUTE stmt ;
+ IF @dd IS NULL  or @dd = "" THEN
+            LEAVE proc_label;
      END IF;
--- on regarde suivant le produit
-SET @query = concat("SELECT * FROM ", tablesearch, " WHERE revisionid IN (",@dd,");");
-PREPARE stmt FROM @query;
-EXECUTE stmt ;
 END;
+
+-- on regarde suivant le produit
+IF @dd IS NULL  or @dd = "" THEN
+         SET @query = concat("SELECT * FROM ", tablesearch, " WHERE 0;");
+	else
+         SET @query = concat("SELECT * FROM ", tablesearch, " WHERE revisionid IN (",@dd,");");
+     END IF;
+ -- SET @query = concat("SELECT * FROM ", tablesearch, " WHERE revisionid IN (",@dd,");");
+ PREPARE stmt FROM @query;
+ EXECUTE stmt ;
+
 END$$
 
 DELIMITER ;
 ;
+
 
 
 -- -------------------------------------------------------
