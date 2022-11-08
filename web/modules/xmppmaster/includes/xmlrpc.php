@@ -755,4 +755,9 @@ function xmlrpc_get_conformity_update_by_entity(){
     return xmlCall("xmppmaster.get_conformity_update_by_entity");
 }
 
+function xmlrpc_get_conformity_update_by_entity_in_gray_list(){
+    return xmlCall("xmppmaster.get_conformity_update_by_entity_in_gray_list");
+}
+
+get_conformity_update_by_entity_in_gray_list
 ?>
