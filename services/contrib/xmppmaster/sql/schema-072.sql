@@ -186,6 +186,26 @@ CREATE TABLE `up_gray_list` (
   KEY `daye_calidity` (`validity_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+-- ----------------------------------------------------------------------
+-- CREATE TABLE up_black_list
+-- this table permet de definir des regle pour exclure completement des mise a jour.
+-- ----------------------------------------------------------------------
+
+
+CREATE TABLE `up_black_list` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `updateid_or_kb` varchar(38) NOT NULL COMMENT 'updateid_or_kb  \nkb ou update_id  de la mise à jour.\n update or kb exclude  windows exclude si regexp match',
+  `userjid_regexp` varchar(180) NOT NULL COMMENT 'regexp  exclusion sur le user jid :  .* exclude completement cette mise a jour   ^jfk  exclude toute les machine ou le nom commence par jfk ',
+  `enable_rule` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'active ou deactive la regle',
+  `type_rule` varchar(2) NOT NULL DEFAULT 'id' COMMENT 'type_rule = kb updateid_or_kb represente 1 kb   OU   type_rule updateid_or_kb represente 1 update_id.',
+  `order` int(11) DEFAULT 10,
+  PRIMARY KEY (`id`),
+  KEY `ind_enable` (`enable_rule`),
+  KEY `ind_type` (`type_rule`),
+  KEY `updatekb` (`updateid_or_kb`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8
+
 -- ----------------------------------------------------------------------
 -- CREATE TABLE up_machine_windows
 -- this table are the updates machine
