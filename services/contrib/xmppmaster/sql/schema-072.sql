@@ -50,7 +50,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_reinit_table_update_data`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_reinit_table_update_data`()
+CREATE  PROCEDURE `up_reinit_table_update_data`()
 begin
         set  @existtable_in_base_wsusscn2 := ( select EXISTS (
             SELECT *
@@ -165,7 +165,7 @@ call up_reinit_table_update_data();
 -- this table are the updates machine applicable
 -- ----------------------------------------------------------------------
 
-CREATE TABLE `up_gray_list` (
+CREATE TABLE IF NOT EXISTS  `up_gray_list` (
   `updateid` varchar(36) NOT NULL,
   `kb` varchar(16) NOT NULL,
   `revisionid` varchar(16) NOT NULL,
@@ -193,7 +193,7 @@ CREATE TABLE `up_gray_list` (
 -- ----------------------------------------------------------------------
 
 
-CREATE TABLE `up_black_list` (
+CREATE TABLE IF NOT EXISTS  `up_black_list` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `updateid_or_kb` varchar(38) NOT NULL COMMENT 'updateid_or_kb  \nkb ou update_id  de la mise à jour.\n update or kb exclude  windows exclude si regexp match',
   `userjid_regexp` varchar(180) NOT NULL COMMENT 'regexp  exclusion sur le user jid :  .* exclude completement cette mise a jour   ^jfk  exclude toute les machine ou le nom commence par jfk ',
@@ -212,7 +212,7 @@ CREATE TABLE `up_black_list` (
 -- this table contient les updates des machines possible
 -- ----------------------------------------------------------------------
 
-CREATE TABLE `up_machine_windows` (
+CREATE TABLE IF NOT EXISTS  `up_machine_windows` (
   `id_machine` int(11) NOT NULL,
   `update_id` varchar(38) NOT NULL,
   `kb` varchar(45) DEFAULT NULL,
@@ -243,7 +243,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_windows`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_search_kb_windows`( in FILTERtable varchar(2048), in KB_LIST varchar(2048))
+CREATE  PROCEDURE `up_search_kb_windows`( in FILTERtable varchar(2048), in KB_LIST varchar(2048))
 BEGIN
 DECLARE _next TEXT DEFAULT NULL;
 DECLARE _nextlen INT DEFAULT NULL;
@@ -413,7 +413,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_search_kb_windows1`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_search_kb_windows1`( in FILTERtable varchar(2048),
+CREATE  PROCEDURE `up_search_kb_windows1`( in FILTERtable varchar(2048),
                                            in PRODUCTtable varchar(80),
                                            in VERSIONtable varchar(20),
                                            in MSRSEVERITYtable varchar(40),
@@ -798,7 +798,7 @@ DROP procedure IF EXISTS `up_init_table_download_from_kb`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_table_download_from_kb`()
+CREATE  PROCEDURE `up_init_table_download_from_kb`()
 BEGIN
 DROP TABLE IF EXISTS `xmppmaster`.`up_download_from_kb`;
 create table up_download_from_kb as
@@ -852,7 +852,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_windows_malicious_software_tool`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_windows_malicious_software_tool`(in PRODUCTtable varchar(80),
+CREATE  PROCEDURE `up_windows_malicious_software_tool`(in PRODUCTtable varchar(80),
                                                                                  in ARCHItable varchar(20),
                                                                                  in major integer,
                                                                                  in minor integer)
@@ -939,7 +939,7 @@ DROP procedure IF EXISTS `xmppmaster`.`up_init_packageid`;
 
 DELIMITER $$
 USE `xmppmaster`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `up_init_packageid`()
+CREATE  PROCEDURE `up_init_packageid`()
 BEGIN
 	DECLARE is_done INTEGER DEFAULT 0;
 
